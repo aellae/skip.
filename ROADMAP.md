@@ -8,8 +8,8 @@ A privacy-first, 100% offline mobile app built with Flutter and SQLite. SKIP all
 > **Goal:** Establish baseline Flutter project structure, local database, offline image handling, and dynamic theme engine.
 
 - [x] **Project Scaffolding**
-  - Initialize Flutter project with standard clean directory architecture (`core/`, `features/`, `data/`, `presentation/`).
-  - Configure `pubspec.yaml` with essential dependencies (`sqflite`, `path`, `image_picker`, `provider`, `google_fonts`, `flutter_staggered_grid_view`).
+  - Initialize Flutter project with standard clean directory architecture (`core/`, `features/`, `data/`).
+  - Configure `pubspec.yaml` with essential dependencies (`sqflite`, `path`, `image_picker`, `provider`, `google_fonts`, `flutter_staggered_grid_view`, plus the full Phase 2-5 dependency set added up front per the build prompt).
 - [x] **Offline Database Layer (`sqflite`)**
   - Design SQLite schema:
     ```sql
@@ -22,15 +22,17 @@ A privacy-first, 100% offline mobile app built with Flutter and SQLite. SKIP all
       category TEXT,
       created_at TEXT NOT NULL
     );
+    CREATE INDEX idx_items_created_at ON items(created_at);
+    CREATE INDEX idx_items_is_saved ON items(is_saved);
     ```
-  - Implement CRUD repository for local item storage.
+  - Implement CRUD repository for local item storage (`DatabaseHelper`: insert/update/delete/query/aggregate totals), with `deleteItem` also removing the backing image file.
 - [x] **Local Storage & Image Pipeline**
-  - Integrate native image picker (`image_picker`) for Camera & Gallery access.
-  - Implement file persistence utility to copy picked images into the app's local application documents directory (`path_provider`).
+  - `FileHelper` copies files into the app's local application documents directory (`path_provider`) under a `skip_images/` subdir and stores a *relative* path (not absolute — iOS sandbox container paths aren't stable across reinstalls).
+  - `image_picker` wiring for Camera & Gallery access lands in Phase 2 alongside the quick-add UI that actually calls it.
 - [x] **Dual-Theme Engine**
-  - Create `ThemeProvider` managing dynamic toggle between **Minimal Luxury (`skip.`)** and **Bratz Y2K (`SKIP!`)**.
-  - Configure typographic sets (Playfair Display + Inter vs. Titan One + Fredoka).
-  - Configure dynamic palette tokens (Antracite/Silk/Beige vs. Hot Magenta/Electric Purple/Glitter Pink).
+  - `ThemeProvider` managing dynamic toggle between **Minimal Luxury (`skip.`)** and **Bratz Y2K (`SKIP!`)**.
+  - Typographic sets (Playfair Display + Inter vs. Titan One + Fredoka), bundled as local variable-font assets — zero runtime network fetches (`GoogleFonts.config.allowRuntimeFetching = false`).
+  - Dynamic palette tokens (Charcoal/Silk Beige/Champagne/Soft White vs. Hot Magenta/Electric Violet/Metallic Silver) exposed via `SkipThemeExtension`.
 
 ---
 
