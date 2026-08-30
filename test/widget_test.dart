@@ -1,25 +1,30 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'package:skip/core/theme/theme_provider.dart';
 import 'package:skip/main.dart';
 
+import 'test_helpers/widget_test_env.dart';
+
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
+  setUpAll(() => setUpWidgetTestEnvironment());
 
   testWidgets(
     'SkipApp shows the minimal logo by default and switches to SKIP! on toggle',
     (tester) async {
-      await tester.pumpWidget(const SkipApp());
+      final themeProvider = ThemeProvider();
+      final itemsProvider = buildTestItemsProvider();
+
+      await tester.pumpWidget(
+        SkipApp(
+          themeProviderOverride: themeProvider,
+          itemsProviderOverride: itemsProvider,
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('skip.'), findsOneWidget);
       expect(find.text('SKIP!'), findsNothing);
 
-      final context = tester.element(find.text('skip.'));
-      context.read<ThemeProvider>().toggle();
+      themeProvider.toggle();
       await tester.pumpAndSettle();
 
       expect(find.text('SKIP!'), findsOneWidget);

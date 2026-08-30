@@ -35,7 +35,16 @@ class DatabaseHelper {
 
   Future<Database> _initDatabase() async {
     final dbPath = testDbPath ?? p.join(await getDatabasesPath(), dbName);
-    return openDatabase(dbPath, version: dbVersion, onCreate: _onCreate);
+    return openDatabase(
+      dbPath,
+      version: dbVersion,
+      onCreate: _onCreate,
+      // sqflite caches open connections by path and reuses them, which is
+      // exactly wrong for tests: every test passes the same literal
+      // ':memory:' path, so without this every DatabaseHelper in a test run
+      // would silently share one database instead of getting its own.
+      singleInstance: testDbPath == null,
+    );
   }
 
   Future<void> _onCreate(Database db, int version) async {

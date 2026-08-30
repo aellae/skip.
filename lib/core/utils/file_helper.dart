@@ -17,11 +17,31 @@ final Random _random = Random();
 class FileHelper {
   static const String imagesSubdir = 'skip_images';
 
+  Future<String>? _docsPathFuture;
+
+  /// The app documents directory path, resolved once and cached — a grid of
+  /// items resolves many image paths and the platform channel round trip
+  /// isn't free.
+  Future<String> _documentsPath() {
+    return _docsPathFuture ??= getApplicationDocumentsDirectory().then(
+      (dir) => dir.path,
+    );
+  }
+
+  // Deliberately synchronous dart:io calls below (existsSync/createSync/
+  // copySync/deleteSync), not their async counterparts. Real async dart:io
+  // I/O depends on the actual OS event loop, which Flutter widget tests
+  // don't pump (they run on a fake clock) — an awaited File.copy()/delete()
+  // triggered from a widget's event handler simply never completes inside
+  // `testWidgets`. Sync calls resolve via the current call stack instead,
+  // so they work the same in the app and in tests; a picked photo is small
+  // enough that blocking briefly is not a real UX cost.
+
   Future<Directory> imagesDirectory() async {
-    final docsDir = await getApplicationDocumentsDirectory();
-    final dir = Directory(p.join(docsDir.path, imagesSubdir));
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
+    final docsPath = await _documentsPath();
+    final dir = Directory(p.join(docsPath, imagesSubdir));
+    if (!dir.existsSync()) {
+      dir.createSync(recursive: true);
     }
     return dir;
   }
@@ -35,23 +55,23 @@ class FileHelper {
         '${DateTime.now().microsecondsSinceEpoch}_${_random.nextInt(1 << 32)}';
     final fileName = '$unique$ext';
     final destPath = p.join(dir.path, fileName);
-    await sourceFile.copy(destPath);
+    sourceFile.copySync(destPath);
     return p.join(imagesSubdir, fileName);
   }
 
   /// Resolves a relative path (as stored in the database) to an absolute
   /// [File] for the current install, suitable for `Image.file()`.
   Future<File> resolveImageFile(String relativePath) async {
-    final docsDir = await getApplicationDocumentsDirectory();
-    return File(p.join(docsDir.path, relativePath));
+    final docsPath = await _documentsPath();
+    return File(p.join(docsPath, relativePath));
   }
 
   /// Deletes the image at [relativePath] if it exists. A no-op if the file
   /// is already gone, so callers never need to check existence first.
   Future<void> deleteImage(String relativePath) async {
     final file = await resolveImageFile(relativePath);
-    if (await file.exists()) {
-      await file.delete();
+    if (file.existsSync()) {
+      file.deleteSync();
     }
   }
 }

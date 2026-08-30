@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'core/theme/theme_provider.dart';
+import 'data/items_provider.dart';
+import 'features/home/home_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,60 +17,37 @@ void main() {
 }
 
 class SkipApp extends StatelessWidget {
-  const SkipApp({super.key});
+  /// Overridable only by tests, so a widget test can supply a ThemeProvider
+  /// / ItemsProvider backed by fakes instead of the real platform channels.
+  final ThemeProvider? themeProviderOverride;
+  final ItemsProvider? itemsProviderOverride;
+
+  const SkipApp({
+    super.key,
+    this.themeProviderOverride,
+    this.itemsProviderOverride,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => themeProviderOverride ?? ThemeProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => itemsProviderOverride ?? ItemsProvider(),
+        ),
+      ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
           return MaterialApp(
             title: 'SKIP',
             debugShowCheckedModeBanner: false,
             theme: themeProvider.themeData,
-            home: const _Phase1PreviewScreen(),
+            home: const HomeScreen(),
           );
         },
-      ),
-    );
-  }
-}
-
-/// Temporary Phase 1 verification screen.
-///
-/// Exists only to prove the theme engine, typography, and font bundling
-/// work end-to-end (including live theme switching) before Phase 2 replaces
-/// this with the real home dashboard.
-class _Phase1PreviewScreen extends StatelessWidget {
-  const _Phase1PreviewScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                context.watch<ThemeProvider>().isY2K ? 'SKIP!' : 'skip.',
-                style: theme.textTheme.displayMedium,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Phase 1 architecture preview',
-                style: theme.textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: () => context.read<ThemeProvider>().toggle(),
-                child: const Text('Switch aesthetic'),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -39,19 +39,19 @@ A privacy-first, 100% offline mobile app built with Flutter and SQLite. SKIP all
 ## 📌 Phase 2: Core User Workflows & UI
 > **Goal:** Deliver smooth visual logging of wishlist/resisted items and clear financial impact counters.
 
-- [ ] **Home Dashboard & Counters**
+- [x] **Home Dashboard & Counters**
   - Header with dynamic logo rendering based on active theme (`skip.` vs `SKIP!`).
   - Dual prominent financial status cards:
     - **Total Saved** (Money retained by resisting purchases).
     - **Total Spent** (Money spent on executed purchases).
-  - Moodboard / Gallery Feed using staggered grid view displaying product cards.
-- [ ] **Item Creation Workflow (Quick-Add)**
+  - Moodboard / Gallery Feed using `flutter_staggered_grid_view`'s masonry grid displaying product cards (`Image.file` with `cacheWidth` per CLAUDE.md).
+- [x] **Item Creation Workflow (Quick-Add)**
   - Floating Action Button to initiate rapid photo log.
-  - Photo preview modal with quick price input field and optional title.
+  - Photo preview modal (camera/gallery action sheet) with quick price input field and optional title.
   - Decision toggle: **"Resisted! / Skip"** vs. **"Bought It / Spent"**.
-- [ ] **Interactive Card Management**
+- [x] **Interactive Card Management**
   - Tap card to view detail modal (full image, date, status change).
-  - Swipe-to-delete or toggle status retroactively (e.g., changed mind and bought later).
+  - Toggle status retroactively (e.g., changed mind and bought later). Delete is a button + confirmation dialog on the detail screen rather than swipe-to-delete on the grid — a deliberate, minimal choice: destructive delete behind a confirmation is safer than an easily-mis-triggered swipe gesture, and the roadmap phrased these as alternatives ("swipe-to-delete *or* toggle status"). Deleting always cleans up the backing image file (CLAUDE.md orphan-file rule).
 
 ---
 
