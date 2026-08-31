@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_themes.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/file_helper.dart';
+import '../../../core/widgets/tap_scale.dart';
 import '../../../data/models/item_model.dart';
 
 /// A single card in the home dashboard's moodboard grid.
@@ -35,7 +36,7 @@ class ItemGridCard extends StatelessWidget {
         ? skipTheme.savedColor
         : skipTheme.spentColor;
 
-    return GestureDetector(
+    return TapScale(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(

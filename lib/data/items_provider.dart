@@ -25,6 +25,11 @@ class ItemsProvider extends ChangeNotifier {
   double get totalSpent => _totalSpent;
   bool get isLoading => _isLoading;
 
+  int get resistedCount => _items.where((item) => item.isSaved).length;
+
+  double get averageSavedPerItem =>
+      resistedCount == 0 ? 0 : _totalSaved / resistedCount;
+
   Future<void> load() async {
     _isLoading = true;
     notifyListeners();

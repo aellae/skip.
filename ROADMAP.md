@@ -58,17 +58,17 @@ A privacy-first, 100% offline mobile app built with Flutter and SQLite. SKIP all
 ## 📌 Phase 3: Y2K Polish & Micro-Interactions
 > **Goal:** Elevate user delight with distinctive tactile feedback, sound effects, and celebratory visuals.
 
-- [ ] **Theme-Specific Micro-Interactions**
+- [x] **Theme-Specific Micro-Interactions**
   - **Bratz / Y2K Mode:**
-    - Confetti explosion & floating spark/heart animations when tapping "Resisted!".
-    - Retro glossy buttons with metallic silver outlines.
-    - Sassy audio feedback / sound effects on saving money (haptic + sound).
+    - Confetti explosion when tapping "Resisted!" (`confetti` package via `DecisionToggle`) — the explosive burst itself is the floating-particle celebration; no separate heart/spark animation layer was added on top of it (reasonable minimal choice, not a data/offline/schema question).
+    - Retro glossy buttons with metallic silver outlines: gradient sheen + metallic-silver border on the selected Y2K toggle option.
+    - Sassy audio feedback / sound effects on saving money (haptic + sound): `SkipSfxPlayer` wraps `audioplayers` and is wired into the "Resisted!" tap alongside a `HapticFeedback.mediumImpact()`. No real SFX asset is bundled yet — user chose a no-op stub for now (BUILD_PROMPT.md §9: can't fabricate real audio); playback fails silently until a real file lands at `assets/sfx/resisted.mp3`.
   - **Minimal Mode:**
-    - Subtle smooth scale animations and haptic ticks on interactions.
-    - Monochrome clean layout with elegant typography.
-- [ ] **Theme Switcher & Settings Drawer**
-  - Smooth theme switcher toggle in settings.
-  - Quick summary stats (Total items resisted count, average savings per item).
+    - Subtle smooth scale animations and haptic ticks on interactions: shared `TapScale` widget (press-down scale + `HapticFeedback.selectionClick()`), used by grid cards and all toggle/option buttons in both aesthetics.
+    - Monochrome clean layout with elegant typography (already in place since Phase 1's theme engine).
+- [x] **Theme Switcher & Settings Drawer**
+  - Smooth theme switcher toggle in settings (`SettingsScreen`, pushed from a new gear icon in the home AppBar — a screen rather than a literal `Drawer` widget, consistent with the rest of the app's push-based navigation; cosmetic choice, not a schema/offline one).
+  - Quick summary stats: Total items resisted count, average saved per item (`ItemsProvider.resistedCount` / `.averageSavedPerItem`).
 
 ---
 

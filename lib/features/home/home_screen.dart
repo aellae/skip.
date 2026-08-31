@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_themes.dart';
 import '../../data/items_provider.dart';
 import '../item_entry/item_entry_screen.dart';
+import '../settings/settings_screen.dart';
 import 'item_detail_screen.dart';
 import 'widgets/item_grid_card.dart';
 import 'widgets/summary_cards.dart';
@@ -32,7 +33,20 @@ class _HomeScreenState extends State<HomeScreen> {
     final itemsProvider = context.watch<ItemsProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: Text(skipTheme.logoText)),
+      appBar: AppBar(
+        title: Text(skipTheme.logoText),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
+            },
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Settings',
+          ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: () => itemsProvider.load(),
         child: itemsProvider.isLoading && itemsProvider.items.isEmpty

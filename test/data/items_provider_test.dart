@@ -32,7 +32,21 @@ void main() {
     expect(provider.totalSaved, 0);
     expect(provider.totalSpent, 0);
     expect(provider.isLoading, isFalse);
+    expect(provider.resistedCount, 0);
+    expect(provider.averageSavedPerItem, 0);
   });
+
+  test(
+    'resistedCount and averageSavedPerItem derive from resisted items',
+    () async {
+      await provider.addItem(price: 30, imagePath: 'a.jpg', isSaved: true);
+      await provider.addItem(price: 10, imagePath: 'b.jpg', isSaved: true);
+      await provider.addItem(price: 999, imagePath: 'c.jpg', isSaved: false);
+
+      expect(provider.resistedCount, 2);
+      expect(provider.averageSavedPerItem, 20);
+    },
+  );
 
   test('load populates items and totals from the database', () async {
     await provider.addItem(price: 10, imagePath: 'a.jpg', isSaved: true);
