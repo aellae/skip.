@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
 
+import 'backup_service.dart';
 import 'database_helper.dart';
 import 'models/item_model.dart';
+import 'models/monthly_total.dart';
+import 'monthly_totals.dart';
 
 /// Single reactive source of truth for items, shared across the home
 /// dashboard, item entry, and item detail screens via [Provider].
@@ -11,6 +14,7 @@ import 'models/item_model.dart';
 /// and only re-fetches from SQLite when something actually changed.
 class ItemsProvider extends ChangeNotifier {
   final DatabaseHelper _db;
+  late final BackupService _backupService = BackupService(databaseHelper: _db);
 
   ItemsProvider({DatabaseHelper? databaseHelper})
     : _db = databaseHelper ?? DatabaseHelper.instance;
@@ -73,4 +77,27 @@ class ItemsProvider extends ChangeNotifier {
     await _db.deleteItem(id);
     await load();
   }
+
+  Future<String> buildJsonBackup() => _backupService.buildJsonBackup();
+
+  Future<String> buildCsvBackup() => _backupService.buildCsvBackup();
+
+  /// Parses [jsonContent] as a SKIP backup and imports its items (additive
+  /// — existing data is kept), then refreshes state. Throws
+  /// [BackupFormatException] if [jsonContent] isn't a valid backup; the
+  /// caller should show that message to the user rather than swallow it.
+  Future<int> importJsonBackup(String jsonContent) async {
+    final items = _backupService.parseJsonBackup(jsonContent);
+    final count = await _backupService.importItems(items);
+    await load();
+    return count;
+  }
+
+  /// Monthly saved/spent totals for the Insights bar chart, oldest first.
+  List<MonthlyTotal> monthlyTotals({int monthsBack = 6}) =>
+      computeMonthlyTotals(_items, now: DateTime.now(), monthsBack: monthsBack);
+
+  double get totalSavedThisMonth => monthlyTotals(monthsBack: 1).single.saved;
+
+  double get totalSpentThisMonth => monthlyTotals(monthsBack: 1).single.spent;
 }

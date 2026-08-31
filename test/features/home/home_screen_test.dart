@@ -81,4 +81,19 @@ void main() {
 
     expect(find.text('SKIP!'), findsOneWidget);
   });
+
+  testWidgets('tapping the insights icon opens the Insights screen', (
+    tester,
+  ) async {
+    final itemsProvider = buildTestItemsProvider();
+
+    await tester.pumpWidget(_buildApp(itemsProvider));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Insights'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Insights'), findsOneWidget);
+    expect(find.text('Last 6 Months'), findsOneWidget);
+  });
 }

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/app_themes.dart';
 import '../../data/items_provider.dart';
+import '../insights/insights_screen.dart';
 import '../item_entry/item_entry_screen.dart';
 import '../settings/settings_screen.dart';
 import 'item_detail_screen.dart';
@@ -36,6 +37,15 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(skipTheme.logoText),
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const InsightsScreen()));
+            },
+            icon: const Icon(Icons.insights_outlined),
+            tooltip: 'Insights',
+          ),
           IconButton(
             onPressed: () {
               Navigator.of(

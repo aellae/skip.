@@ -82,4 +82,18 @@ void main() {
 
     expect(themeProvider.isY2K, isFalse);
   });
+
+  testWidgets('shows the Data section with export/import backup actions', (
+    tester,
+  ) async {
+    await pumpSettings(
+      tester,
+      themeProvider: ThemeProvider(),
+      itemsProvider: buildTestItemsProvider(),
+    );
+
+    expect(find.text('Data'), findsOneWidget);
+    expect(find.text('Export backup'), findsOneWidget);
+    expect(find.text('Import backup'), findsOneWidget);
+  });
 }

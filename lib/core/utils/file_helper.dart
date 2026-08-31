@@ -16,6 +16,7 @@ final Random _random = Random();
 /// stored today can silently point nowhere after an update.
 class FileHelper {
   static const String imagesSubdir = 'skip_images';
+  static const String exportsSubdir = 'skip_exports';
 
   Future<String>? _docsPathFuture;
 
@@ -73,5 +74,24 @@ class FileHelper {
     if (file.existsSync()) {
       file.deleteSync();
     }
+  }
+
+  Future<Directory> exportsDirectory() async {
+    final docsPath = await _documentsPath();
+    final dir = Directory(p.join(docsPath, exportsSubdir));
+    if (!dir.existsSync()) {
+      dir.createSync(recursive: true);
+    }
+    return dir;
+  }
+
+  /// Writes [content] to [fileName] inside the exports directory
+  /// (overwriting any existing file with that name) and returns the
+  /// resulting file, ready to hand to the system share sheet.
+  Future<File> writeExportFile(String fileName, String content) async {
+    final dir = await exportsDirectory();
+    final file = File(p.join(dir.path, fileName));
+    file.writeAsStringSync(content);
+    return file;
   }
 }

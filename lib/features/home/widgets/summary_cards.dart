@@ -7,11 +7,15 @@ import '../../../core/utils/currency_formatter.dart';
 class SummaryCards extends StatelessWidget {
   final double totalSaved;
   final double totalSpent;
+  final String savedLabel;
+  final String spentLabel;
 
   const SummaryCards({
     super.key,
     required this.totalSaved,
     required this.totalSpent,
+    this.savedLabel = 'Total Saved',
+    this.spentLabel = 'Total Spent',
   });
 
   @override
@@ -21,7 +25,7 @@ class SummaryCards extends StatelessWidget {
       children: [
         Expanded(
           child: _SummaryCard(
-            label: 'Total Saved',
+            label: savedLabel,
             amount: totalSaved,
             color: skipTheme.savedColor,
           ),
@@ -29,7 +33,7 @@ class SummaryCards extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _SummaryCard(
-            label: 'Total Spent',
+            label: spentLabel,
             amount: totalSpent,
             color: skipTheme.spentColor,
           ),

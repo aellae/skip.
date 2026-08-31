@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:skip/core/utils/file_helper.dart';
+import 'package:skip/data/backup_service.dart';
 import 'package:skip/data/database_helper.dart';
 import 'package:skip/data/items_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -124,5 +127,100 @@ void main() {
       notifications,
       greaterThanOrEqualTo(2),
     ); // isLoading=true, then false
+  });
+
+  group('backups', () {
+    test(
+      'buildJsonBackup / importJsonBackup round-trips into a fresh provider',
+      () async {
+        await provider.addItem(
+          title: 'Jacket',
+          price: 120,
+          imagePath: 'a.jpg',
+          isSaved: true,
+        );
+
+        final json = await provider.buildJsonBackup();
+
+        final fresh = ItemsProvider(
+          databaseHelper: DatabaseHelper(
+            fileHelper: mockFileHelper,
+            testDbPath: inMemoryDatabasePath,
+          ),
+        );
+        final count = await fresh.importJsonBackup(json);
+
+        expect(count, 1);
+        expect(fresh.items.single.title, 'Jacket');
+        expect(fresh.totalSaved, 120);
+      },
+    );
+
+    test('importJsonBackup is additive and refreshes state', () async {
+      await provider.addItem(price: 10, imagePath: 'a.jpg', isSaved: true);
+
+      await provider.importJsonBackup(
+        jsonEncode({
+          'items': [
+            {
+              'price': 5,
+              'image_path': 'b.jpg',
+              'is_saved': 0,
+              'created_at': DateTime.utc(2026, 1, 1).toIso8601String(),
+            },
+          ],
+        }),
+      );
+
+      expect(provider.items, hasLength(2));
+      expect(provider.totalSaved, 10);
+      expect(provider.totalSpent, 5);
+    });
+
+    test(
+      'importJsonBackup throws BackupFormatException for malformed content',
+      () {
+        expect(
+          () => provider.importJsonBackup('not json'),
+          throwsA(isA<BackupFormatException>()),
+        );
+      },
+    );
+
+    test('buildCsvBackup includes a header and item rows', () async {
+      await provider.addItem(price: 10, imagePath: 'a.jpg', isSaved: true);
+
+      final csv = await provider.buildCsvBackup();
+
+      expect(csv, contains('price'));
+      expect(csv, contains('10.0'));
+    });
+  });
+
+  group('monthly insights', () {
+    test('monthlyTotals buckets items by calendar month', () async {
+      final now = DateTime.now();
+      await provider.addItem(price: 20, imagePath: 'a.jpg', isSaved: true);
+      await provider.addItem(price: 5, imagePath: 'b.jpg', isSaved: false);
+
+      final totals = provider.monthlyTotals(monthsBack: 3);
+
+      expect(totals, hasLength(3));
+      expect(totals.last.year, now.year);
+      expect(totals.last.month, now.month);
+      expect(totals.last.saved, 20);
+      expect(totals.last.spent, 5);
+    });
+
+    test(
+      'totalSavedThisMonth / totalSpentThisMonth reflect the current month',
+      () async {
+        await provider.addItem(price: 20, imagePath: 'a.jpg', isSaved: true);
+        await provider.addItem(price: 5, imagePath: 'b.jpg', isSaved: false);
+
+        expect(provider.totalSavedThisMonth, 20);
+        expect(provider.totalSpentThisMonth, 5);
+      },
+    );
   });
 }

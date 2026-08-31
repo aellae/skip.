@@ -91,5 +91,22 @@ void main() {
 
       expect(first, isNot(equals(second)));
     });
+
+    test('writeExportFile writes content into the exports subdir', () async {
+      final file = await fileHelper.writeExportFile('backup.json', '{"a":1}');
+
+      expect(
+        file.path,
+        p.join(tempDocsDir.path, FileHelper.exportsSubdir, 'backup.json'),
+      );
+      expect(await file.readAsString(), '{"a":1}');
+    });
+
+    test('writeExportFile overwrites a file with the same name', () async {
+      await fileHelper.writeExportFile('backup.json', 'first');
+      final file = await fileHelper.writeExportFile('backup.json', 'second');
+
+      expect(await file.readAsString(), 'second');
+    });
   });
 }

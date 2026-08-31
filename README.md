@@ -81,6 +81,15 @@ lib/
    ```bash
    flutter run
    ```
+4. Run on a specific physical device (real iPhone/Android):
+   ```bash
+   # List connected/paired devices (USB or wireless) and copy the device id
+   flutter devices
+
+   # Launch on that device
+   flutter run -d <device-id>
+   ```
+   For iOS, prefer a USB connection over wireless debugging — wireless links can drop mid-session and end the run.
 
 ---
 

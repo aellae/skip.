@@ -6,6 +6,7 @@ import '../../core/theme/theme_provider.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../core/widgets/tap_scale.dart';
 import '../../data/items_provider.dart';
+import 'widgets/backup_section.dart';
 
 /// Aesthetic switcher + quick summary stats.
 class SettingsScreen extends StatelessWidget {
@@ -44,6 +45,10 @@ class SettingsScreen extends StatelessWidget {
               value: formatCurrency(itemsProvider.averageSavedPerItem),
               color: skipTheme.savedColor,
             ),
+            const SizedBox(height: 32),
+            Text('Data', style: theme.textTheme.labelLarge),
+            const SizedBox(height: 12),
+            const BackupSection(),
           ],
         ),
       ),

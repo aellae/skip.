@@ -18,3 +18,6 @@ const List<String> _monthNames = [
 String formatDate(DateTime date) {
   return '${_monthNames[date.month - 1]} ${date.day}, ${date.year}';
 }
+
+/// Three-letter month abbreviation for [month] (1-12), e.g. `Jan`.
+String monthAbbreviation(int month) => _monthNames[month - 1];
