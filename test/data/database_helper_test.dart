@@ -204,4 +204,44 @@ void main() {
       );
     });
   });
+
+  // Phase 5 hardening: an index existing (see "onCreate defines indexes..."
+  // above) doesn't guarantee the query planner actually uses it — confirmed
+  // here via EXPLAIN QUERY PLAN against the exact SQL shapes the app's real
+  // methods issue, per BUILD_PROMPT.md §5, before ticking that roadmap box.
+  group('Query plan uses the declared indexes', () {
+    Future<String> queryPlan(String sql, [List<Object?>? args]) async {
+      final rawDb = await db.database;
+      final rows = await rawDb.rawQuery('EXPLAIN QUERY PLAN $sql', args);
+      return rows.map((r) => r['detail']).join(' | ');
+    }
+
+    test('getAllItems(isSaved: ...) uses idx_items_is_saved', () async {
+      // Matches DatabaseHelper.getAllItems's compiled SQL when a filter is
+      // passed. SQLite picks the is_saved index for the search and sorts
+      // the (small, already-filtered) remainder in a temp b-tree rather
+      // than also using idx_items_created_at — expected and fine at this
+      // app's scale, not a missing-index problem.
+      final plan = await queryPlan(
+        'SELECT * FROM items WHERE is_saved = ? ORDER BY created_at DESC',
+        [1],
+      );
+      expect(plan, contains('USING INDEX idx_items_is_saved'));
+    });
+
+    test('getAllItems() unfiltered uses idx_items_created_at', () async {
+      final plan = await queryPlan(
+        'SELECT * FROM items ORDER BY created_at DESC',
+      );
+      expect(plan, contains('USING INDEX idx_items_created_at'));
+    });
+
+    test('_sumPrice (Total Saved/Spent) uses idx_items_is_saved', () async {
+      final plan = await queryPlan(
+        'SELECT SUM(price) as total FROM items WHERE is_saved = ?',
+        [1],
+      );
+      expect(plan, contains('USING INDEX idx_items_is_saved'));
+    });
+  });
 }

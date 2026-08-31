@@ -119,3 +119,15 @@ flutter:
     - family: Fredoka
       fonts:
         - asset: assets/fonts/Fredoka-Variable.ttf
+
+# PLACEHOLDER app icon, not final store-ready artwork (BUILD_PROMPT.md §9) —
+# a simple wordmark-on-solid-background treatment in each aesthetic's real
+# brand font/colors. Ships with the Minimal ("skip.") variant since that's
+# ThemeProvider's default aesthetic; assets/icon/icon_y2k.png is the
+# alternate design, swap image_path + rerun `dart run flutter_launcher_icons`
+# to switch. Confirm final art with the user before a real store submission.
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon_minimal.png"
+  remove_alpha_ios: true

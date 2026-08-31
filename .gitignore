@@ -43,3 +43,15 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Release signing secrets — never commit a real keystore or its passwords.
+# See android/key.properties.example for the template.
+/android/key.properties
+/android/*.jks
+/android/*.keystore
+/android/app/*.jks
+/android/app/*.keystore
+
+# iOS export options generated for a specific local release build/signing
+# identity — machine-specific, not something to check in.
+/ios/ExportOptions.plist

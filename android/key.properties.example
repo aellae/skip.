@@ -1,0 +1,12 @@
+# Template for the release signing config — copy to `key.properties` in this
+# same directory and fill in real values. `key.properties` itself is
+# gitignored and must never be committed.
+#
+# Generate a keystore (do this once, then back it up somewhere safe — losing
+# it means you can never publish an update to the same Play Store listing):
+#   keytool -genkey -v -keystore ~/skip-release.jks -keyalg RSA -keysize 2048 \
+#     -validity 10000 -alias skip
+storePassword=
+keyPassword=
+keyAlias=skip
+storeFile=/absolute/path/to/skip-release.jks

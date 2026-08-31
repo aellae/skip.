@@ -45,7 +45,17 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     Navigator.of(context).pop(); // close the source picker sheet
     setState(() => _isPickingImage = true);
     try {
-      final picked = await _picker.pickImage(source: source, imageQuality: 85);
+      // Cap the stored resolution (not just the display-time decode bound
+      // already applied via Image.file's cacheWidth/cacheHeight elsewhere)
+      // so a full-res camera photo never lands on disk uncompressed —
+      // 2000px on the long edge comfortably covers the largest cacheWidth
+      // used anywhere in the app (item_detail_screen's 1200) with headroom.
+      final picked = await _picker.pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 2000,
+        maxHeight: 2000,
+      );
       if (picked == null) return;
 
       // Copy into app documents immediately; never keep the picker's temp

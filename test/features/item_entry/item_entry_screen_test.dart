@@ -15,6 +15,13 @@ import '../../test_helpers/widget_test_env.dart';
 class _FakeImagePicker extends ImagePicker {
   final File file;
 
+  /// Records the constraints passed on the most recent [pickImage] call so
+  /// tests can assert the app requests a capped, compressed image rather
+  /// than the raw camera/gallery original.
+  double? lastMaxWidth;
+  double? lastMaxHeight;
+  int? lastImageQuality;
+
   _FakeImagePicker(this.file);
 
   @override
@@ -26,6 +33,9 @@ class _FakeImagePicker extends ImagePicker {
     CameraDevice preferredCameraDevice = CameraDevice.rear,
     bool requestFullMetadata = true,
   }) async {
+    lastMaxWidth = maxWidth;
+    lastMaxHeight = maxHeight;
+    lastImageQuality = imageQuality;
     return XFile(file.path);
   }
 }
@@ -42,6 +52,7 @@ const _onePixelPng = [
 void main() {
   late Directory sourceDir;
   late File sourceImage;
+  late _FakeImagePicker fakePicker;
 
   setUpAll(() => setUpWidgetTestEnvironment());
 
@@ -59,12 +70,13 @@ void main() {
     WidgetTester tester,
     ItemsProvider itemsProvider,
   ) async {
+    fakePicker = _FakeImagePicker(sourceImage);
     await tester.pumpWidget(
       ChangeNotifierProvider.value(
         value: itemsProvider,
         child: MaterialApp(
           theme: AppThemes.minimal,
-          home: ItemEntryScreen(imagePicker: _FakeImagePicker(sourceImage)),
+          home: ItemEntryScreen(imagePicker: fakePicker),
         ),
       ),
     );
@@ -86,6 +98,23 @@ void main() {
     await tester.tap(find.text(text));
     await tester.pumpAndSettle();
   }
+
+  testWidgets(
+    'requests a resolution-capped, compressed image from the picker',
+    (tester) async {
+      final itemsProvider = buildTestItemsProvider();
+      await pumpEntryScreen(tester, itemsProvider);
+      await pickAPhoto(tester);
+
+      // Guards against a full-res camera photo landing on disk uncompressed
+      // (Phase 5 hardening) — Image.file's cacheWidth elsewhere only bounds
+      // the display-time decode, not what actually gets stored in
+      // skip_images/.
+      expect(fakePicker.lastMaxWidth, 2000);
+      expect(fakePicker.lastMaxHeight, 2000);
+      expect(fakePicker.lastImageQuality, 85);
+    },
+  );
 
   testWidgets('rejects a non-numeric price', (tester) async {
     final itemsProvider = buildTestItemsProvider();
@@ -169,9 +198,7 @@ void main() {
     expect(itemsProvider.items.single.isSaved, isTrue);
   });
 
-  testWidgets('tapping Bought It saves immediately as Bought', (
-    tester,
-  ) async {
+  testWidgets('tapping Bought It saves immediately as Bought', (tester) async {
     final itemsProvider = buildTestItemsProvider();
     await pumpEntryScreen(tester, itemsProvider);
     await pickAPhoto(tester);
