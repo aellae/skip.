@@ -75,7 +75,9 @@ void main() {
     expect(sharedPath, isNotNull);
     expect(sharedPath, endsWith('.json'));
     expect(sharedSubject, 'SKIP backup');
-    final content = await File(sharedPath!).readAsString();
+    // Sync read — see the comment on BackupSection._import for why real
+    // async dart:io calls don't resolve inside testWidgets.
+    final content = File(sharedPath!).readAsStringSync();
     expect(jsonDecode(content)['items'], hasLength(1));
   });
 

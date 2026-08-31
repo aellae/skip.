@@ -86,7 +86,11 @@ class _BackupSectionState extends State<BackupSection> {
 
       final String content;
       try {
-        content = await File(path).readAsString();
+        // Sync read, not File.readAsString() — awaited real dart:io I/O
+        // triggered from a widget's event handler never completes inside
+        // testWidgets (fake clock never pumps the real OS event loop), the
+        // same reason FileHelper uses sync calls internally.
+        content = File(path).readAsStringSync();
       } catch (_) {
         throw const BackupFormatException("Couldn't read that file.");
       }

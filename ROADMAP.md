@@ -75,21 +75,21 @@ A privacy-first, 100% offline mobile app built with Flutter and SQLite. SKIP all
 ## 📌 Phase 4: Offline Data Management & Analytics
 > **Goal:** Ensure data durability and offer privacy-respecting financial insights.
 
-- [ ] **Local Data Backup & Export**
-  - Export database to JSON / CSV file (saved locally to device downloads or shared via system sheet).
-  - Import JSON backup file to restore data across devices.
-- [ ] **Visual Insights & Monthly Breakdowns**
-  - Monthly savings filter (e.g., "This Month's Savings").
-  - Simple chart visualizer using offline Flutter charts (Bar chart of monthly savings vs. spend).
+- [x] **Local Data Backup & Export**
+  - Export database to JSON / CSV file (saved locally to device downloads or shared via system sheet): `BackupSection` builds a JSON or CSV backup via `ItemsProvider.buildJsonBackup`/`buildCsvBackup`, writes it via `FileHelper.writeExportFile`, and hands it to the system share sheet (`share_plus`).
+  - Import JSON backup file to restore data across devices: `file_picker` → `ItemsProvider.importJsonBackup`, additive (doesn't wipe existing items) and throws a typed `BackupFormatException` surfaced as a clear on-screen error for malformed files rather than silently accepting them.
+- [x] **Visual Insights & Monthly Breakdowns**
+  - Monthly savings filter (e.g., "This Month's Savings"): `ItemsProvider.totalSavedThisMonth` / `.totalSpentThisMonth`.
+  - Simple chart visualizer using offline Flutter charts (Bar chart of monthly savings vs. spend): `InsightsScreen` + `MonthlyBarChart` (`fl_chart`), fed by `computeMonthlyTotals`.
 
 ---
 
 ## 📌 Phase 5: Testing, Hardening & Launch
 > **Goal:** Polish performance, ensure zero data leakage, prepare store builds.
 
-- [ ] **Offline Performance Optimization**
-  - Image compression & thumbnail generation to prevent memory spikes on large visual feeds.
-  - Database indexing on `created_at` and `is_saved` columns.
-- [ ] **App Store & Play Store Preparation**
-  - Generate app icon variants (Minimal monochrome vs. Y2K neon pink).
-  - Automated release builds for iOS (IPA) and Android (APK/AAB).
+- [x] **Offline Performance Optimization**
+  - Image compression & thumbnail generation to prevent memory spikes on large visual feeds: `ItemEntryScreen` now caps picked photos to 2000×2000 at capture time (`image_picker`'s `maxWidth`/`maxHeight`, alongside the existing `imageQuality: 85`) so a full-res camera photo never lands in `skip_images/` uncompressed — on top of the per-context `Image.file` `cacheWidth`/`cacheHeight` bounds already in place since Phase 1/2, which only capped the display-time decode, not what's actually stored on disk. A separate physical thumbnail file was deliberately not added — the resolution cap plus existing decode-time bounds cover the memory-spike risk without the extra disk footprint of duplicate thumbnail files.
+  - Database indexing on `created_at` and `is_saved` columns: indexes existed since Phase 1; now *confirmed* via `EXPLAIN QUERY PLAN` (not just existence) that the app's real queries actually use them — `getAllItems`/`_sumPrice`'s `is_saved` filter uses `idx_items_is_saved`, unfiltered `getAllItems` uses `idx_items_created_at` for the scan+sort.
+- [x] **App Store & Play Store Preparation**
+  - Generate app icon variants (Minimal monochrome vs. Y2K neon pink): placeholder wordmark icons for both aesthetics at `assets/icon/icon_minimal.png` / `icon_y2k.png` (real bundled fonts/brand colors, not final store-ready art — confirm with the user before real submission), wired via `flutter_launcher_icons`; ships with the Minimal variant since that's `ThemeProvider`'s default aesthetic.
+  - Automated release builds for iOS (IPA) and Android (APK/AAB): local release builds now succeed — `flutter build apk --release` (debug-signed pending a real keystore at `android/key.properties`, see `key.properties.example`) and `flutter build ios --release --no-codesign` (needs a real Apple signing identity to produce a signed IPA). Per BUILD_PROMPT.md §7's Phase 5 scope boundary, actual App/Play Store submission is out of scope here — needs the user's developer account credentials and a real keystore/signing identity.
