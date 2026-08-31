@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>SKIP needs camera access so you can snap a photo of something you're tempted to buy.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>SKIP needs photo library access so you can pick a photo of something you're tempted to buy.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

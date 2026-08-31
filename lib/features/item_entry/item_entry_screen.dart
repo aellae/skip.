@@ -31,7 +31,6 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
 
   String? _relativeImagePath;
   File? _previewFile;
-  bool _isSaved = true;
   bool _isPickingImage = false;
   bool _isSaving = false;
 
@@ -86,7 +85,8 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     );
   }
 
-  Future<void> _save() async {
+  Future<void> _saveWithDecision(bool isSaved) async {
+    if (_isSaving) return;
     if (_relativeImagePath == null) {
       ScaffoldMessenger.of(
         context,
@@ -102,7 +102,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
       title: title.isEmpty ? null : title,
       price: price,
       imagePath: _relativeImagePath!,
-      isSaved: _isSaved,
+      isSaved: isSaved,
     );
     if (!mounted) return;
     Navigator.of(context).pop();
@@ -193,21 +193,32 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                   textCapitalization: TextCapitalization.sentences,
                 ),
                 const SizedBox(height: 20),
-                DecisionToggle(
-                  isSaved: _isSaved,
-                  onChanged: (value) => setState(() => _isSaved = value),
+                Text(
+                  'Tap one to log it',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.labelLarge,
                 ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _isSaving ? null : _save,
-                  child: _isSaving
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Save'),
+                const SizedBox(height: 8),
+                IgnorePointer(
+                  ignoring: _isSaving,
+                  child: Opacity(
+                    opacity: _isSaving ? 0.5 : 1,
+                    child: DecisionToggle(
+                      isSaved: true,
+                      onChanged: _saveWithDecision,
+                    ),
+                  ),
                 ),
+                if (_isSaving) ...[
+                  const SizedBox(height: 16),
+                  const Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

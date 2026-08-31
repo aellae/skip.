@@ -99,7 +99,7 @@ void main() {
       find.widgetWithText(TextFormField, 'Price'),
     );
     field.controller!.text = 'abc';
-    await tapText(tester, 'Save');
+    await tapText(tester, 'Resisted!');
 
     expect(find.text('Enter a valid number.'), findsOneWidget);
     expect(itemsProvider.items, isEmpty);
@@ -118,7 +118,7 @@ void main() {
       find.widgetWithText(TextFormField, 'Price'),
     );
     field.controller!.text = '-5';
-    await tapText(tester, 'Save');
+    await tapText(tester, 'Resisted!');
 
     expect(find.text('Price must be greater than zero.'), findsOneWidget);
     expect(itemsProvider.items, isEmpty);
@@ -129,7 +129,7 @@ void main() {
     await pumpEntryScreen(tester, itemsProvider);
     await pickAPhoto(tester);
 
-    await tapText(tester, 'Save');
+    await tapText(tester, 'Resisted!');
 
     expect(find.text('Enter a price.'), findsOneWidget);
     expect(itemsProvider.items, isEmpty);
@@ -145,13 +145,15 @@ void main() {
       find.widgetWithText(TextFormField, 'Price'),
       '12.50',
     );
-    await tapText(tester, 'Save');
+    await tapText(tester, 'Resisted!');
 
     expect(find.text('Add a photo first.'), findsOneWidget);
     expect(itemsProvider.items, isEmpty);
   });
 
-  testWidgets('saves a valid item as Resisted by default', (tester) async {
+  testWidgets('tapping Resisted! saves immediately as Resisted', (
+    tester,
+  ) async {
     final itemsProvider = buildTestItemsProvider();
     await pumpEntryScreen(tester, itemsProvider);
     await pickAPhoto(tester);
@@ -160,14 +162,14 @@ void main() {
       find.widgetWithText(TextFormField, 'Price'),
       '19.99',
     );
-    await tapText(tester, 'Save');
+    await tapText(tester, 'Resisted!');
 
     expect(itemsProvider.items, hasLength(1));
     expect(itemsProvider.items.single.price, 19.99);
     expect(itemsProvider.items.single.isSaved, isTrue);
   });
 
-  testWidgets('saves as Bought It when that toggle is selected', (
+  testWidgets('tapping Bought It saves immediately as Bought', (
     tester,
   ) async {
     final itemsProvider = buildTestItemsProvider();
@@ -176,8 +178,8 @@ void main() {
 
     await tester.enterText(find.widgetWithText(TextFormField, 'Price'), '4.50');
     await tapText(tester, 'Bought It');
-    await tapText(tester, 'Save');
 
+    expect(itemsProvider.items, hasLength(1));
     expect(itemsProvider.items.single.isSaved, isFalse);
   });
 }
