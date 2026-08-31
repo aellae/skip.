@@ -103,6 +103,9 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 
+  assets:
+    - assets/sfx/resisted.m4a
+
   fonts:
     - family: Playfair Display
       fonts:
