@@ -95,3 +95,4 @@ lib/
 
 ## 📄 License
 MIT License. Created for mindful spenders and dopamine shoppers worldwide.
+

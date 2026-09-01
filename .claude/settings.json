@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze *)",
+      "Bash(xargs -I{} echo {})",
+      "Bash(flutter test *)",
+      "Bash(flutter pub *)",
+      "Bash(xargs -I{} sed -n '1,80p' {})",
+      "Read(//Users/elle/.pub-cache/hosted/pub.dev/shimmer-4.0.0/lib/**)",
+      "Bash(xargs -I{} grep -n \"color ==\\\\|assert\\(\\\\|_color\\\\|this.color\" {})",
+      "Bash(xargs -I{} grep -n \"class BarTouchTooltipData\" -A 40 {})",
+      "Bash(xargs -I{} grep -n \"typedef GetBarTooltipItem\\\\|typedef GetBarTooltipColor\\\\|BarTooltipItem\\(\" {})",
+      "Bash(xargs -I{} sed -n '854,930p' {})",
+      "Bash(xargs -I{} grep -n \"swapAnimationDuration\\\\|swapAnimationCurve\\\\|class BarChart\" {})",
+      "Bash(xargs -I{} sed -n '1,50p' {})",
+      "Bash(dart format *)",
+      "Bash(flutter devices *)",
+      "Bash(flutter emulators *)"
+    ]
+  }
+}

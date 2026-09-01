@@ -14,11 +14,24 @@ void main() {
         isSaved: true,
         category: 'Clothing',
         createdAt: createdAt,
+        purchaseUrl: 'https://example.com/jacket',
       );
 
       final restored = ItemModel.fromMap(item.toMap());
 
       expect(restored, item);
+    });
+
+    test('purchaseUrl defaults to and round-trips as null', () {
+      final item = ItemModel(
+        price: 10,
+        imagePath: 'x.jpg',
+        isSaved: true,
+        createdAt: createdAt,
+      );
+
+      expect(item.purchaseUrl, isNull);
+      expect(ItemModel.fromMap(item.toMap()).purchaseUrl, isNull);
     });
 
     test('toMap encodes isSaved as 1/0', () {
@@ -96,6 +109,19 @@ void main() {
       expect(updated.isSaved, isFalse);
       expect(updated.title, 'Original');
       expect(updated.id, 1);
+    });
+
+    test('copyWith can set purchaseUrl on an item that lacked one', () {
+      final item = ItemModel(
+        price: 10,
+        imagePath: 'a.jpg',
+        isSaved: true,
+        createdAt: createdAt,
+      );
+
+      final updated = item.copyWith(purchaseUrl: 'https://example.com/product');
+
+      expect(updated.purchaseUrl, 'https://example.com/product');
     });
   });
 }

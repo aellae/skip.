@@ -93,3 +93,10 @@ A privacy-first, 100% offline mobile app built with Flutter and SQLite. SKIP all
 - [x] **App Store & Play Store Preparation**
   - Generate app icon variants (Minimal monochrome vs. Y2K neon pink): placeholder wordmark icons for both aesthetics at `assets/icon/icon_minimal.png` / `icon_y2k.png` (real bundled fonts/brand colors, not final store-ready art — confirm with the user before real submission), wired via `flutter_launcher_icons`; ships with the Minimal variant since that's `ThemeProvider`'s default aesthetic.
   - Automated release builds for iOS (IPA) and Android (APK/AAB): local release builds now succeed — `flutter build apk --release` (debug-signed pending a real keystore at `android/key.properties`, see `key.properties.example`) and `flutter build ios --release --no-codesign` (needs a real Apple signing identity to produce a signed IPA). Per BUILD_PROMPT.md §7's Phase 5 scope boundary, actual App/Play Store submission is out of scope here — needs the user's developer account credentials and a real keystore/signing identity.
+
+---
+
+## 💡 Future Ideas / Backlog
+> Not scheduled into a phase yet — captured here for later triage.
+
+- [x] **Purchase Link on Items:** Let an item optionally store a URL for where to buy it, so a "Bought It" (or still-tempted "Resisted!") entry can link back to the product page. `items.purchase_url TEXT` migration lands via `DatabaseHelper`'s `onUpgrade` (v1→v2, additive `ALTER TABLE`) so existing installs keep their data; `ItemModel`/`ItemsProvider` (`addItem`'s optional `purchaseUrl`, plus a dedicated `setPurchaseUrl` for retroactive edits) and the JSON/CSV backup formats carry it through. Entered as an optional field on the quick-add form and add/edit/remove-able from the item detail screen, both validated by a small `parseHttpUrl` helper (`lib/core/utils/url_validator.dart`) that only accepts well-formed `http(s)` links. Opening it uses the new `url_launcher` dependency (`LaunchMode.externalApplication`, injectable for tests) — still 100% offline, since SKIP never fetches or previews the link's content itself, only stores and hands it to the OS.

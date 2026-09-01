@@ -7,6 +7,9 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/app_themes.dart';
 import '../../core/utils/file_helper.dart';
+import '../../core/utils/url_validator.dart';
+import '../../core/widgets/skip_app_bar.dart';
+import '../../core/widgets/tap_scale.dart';
 import '../../data/items_provider.dart';
 import 'widgets/decision_toggle.dart';
 
@@ -28,6 +31,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _priceController = TextEditingController();
   final _titleController = TextEditingController();
+  final _purchaseUrlController = TextEditingController();
 
   String? _relativeImagePath;
   File? _previewFile;
@@ -38,6 +42,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
   void dispose() {
     _priceController.dispose();
     _titleController.dispose();
+    _purchaseUrlController.dispose();
     super.dispose();
   }
 
@@ -79,15 +84,19 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Camera'),
+            TapScale(
               onTap: () => _pickImage(ImageSource.camera),
+              child: ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Camera'),
+              ),
             ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
+            TapScale(
               onTap: () => _pickImage(ImageSource.gallery),
+              child: ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Gallery'),
+              ),
             ),
           ],
         ),
@@ -108,11 +117,13 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     setState(() => _isSaving = true);
     final price = double.parse(_priceController.text);
     final title = _titleController.text.trim();
+    final purchaseUrl = parseHttpUrl(_purchaseUrlController.text)?.toString();
     await context.read<ItemsProvider>().addItem(
       title: title.isEmpty ? null : title,
       price: price,
       imagePath: _relativeImagePath!,
       isSaved: isSaved,
+      purchaseUrl: purchaseUrl,
     );
     if (!mounted) return;
     Navigator.of(context).pop();
@@ -126,13 +137,19 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     return null;
   }
 
+  String? _validatePurchaseUrl(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    if (parseHttpUrl(value) == null) return 'Enter a valid link (https://…).';
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final skipTheme = theme.extension<SkipThemeExtension>()!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Log an item')),
+      appBar: SkipAppBar(title: const Text('Log an item')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -149,8 +166,14 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                       decoration: BoxDecoration(
                         color: skipTheme.cardBackground,
                         borderRadius: BorderRadius.circular(
-                          skipTheme.isY2K ? 20 : 4,
+                          skipTheme.cardRadius,
                         ),
+                        border: skipTheme.isY2K
+                            ? Border.all(
+                                color: theme.colorScheme.onSurface,
+                                width: 1.5,
+                              )
+                            : null,
                       ),
                       clipBehavior: Clip.antiAlias,
                       child: _isPickingImage
@@ -201,6 +224,16 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                     labelText: 'Title (optional)',
                   ),
                   textCapitalization: TextCapitalization.sentences,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _purchaseUrlController,
+                  decoration: const InputDecoration(
+                    labelText: 'Product link (optional)',
+                  ),
+                  keyboardType: TextInputType.url,
+                  autocorrect: false,
+                  validator: _validatePurchaseUrl,
                 ),
                 const SizedBox(height: 20),
                 Text(

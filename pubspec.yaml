@@ -47,6 +47,8 @@ dependencies:
   csv: ^8.0.0
   share_plus: ^13.3.0
   file_picker: ^12.1.2
+  url_launcher: ^6.3.2
+  shimmer: ^4.0.0
 
 dev_dependencies:
   flutter_test:
@@ -120,14 +122,11 @@ flutter:
       fonts:
         - asset: assets/fonts/Fredoka-Variable.ttf
 
-# PLACEHOLDER app icon, not final store-ready artwork (BUILD_PROMPT.md §9) —
-# a simple wordmark-on-solid-background treatment in each aesthetic's real
-# brand font/colors. Ships with the Minimal ("skip.") variant since that's
-# ThemeProvider's default aesthetic; assets/icon/icon_y2k.png is the
-# alternate design, swap image_path + rerun `dart run flutter_launcher_icons`
-# to switch. Confirm final art with the user before a real store submission.
+# App icon: brand wordmark lockup. Supersedes the earlier icon_minimal.png /
+# icon_y2k.png placeholders (BUILD_PROMPT.md §9); rerun
+# `dart run flutter_launcher_icons` after swapping image_path.
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icon/icon_minimal.png"
+  image_path: "assets/icon/Skip!-Logo.png"
   remove_alpha_ios: true

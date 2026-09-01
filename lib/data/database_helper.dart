@@ -12,7 +12,7 @@ import 'models/item_model.dart';
 /// files when an item record is deleted from SQLite").
 class DatabaseHelper {
   static const String dbName = 'skip.db';
-  static const int dbVersion = 1;
+  static const int dbVersion = 2;
   static const String tableItems = 'items';
 
   static final DatabaseHelper instance = DatabaseHelper();
@@ -39,6 +39,7 @@ class DatabaseHelper {
       dbPath,
       version: dbVersion,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
       // sqflite caches open connections by path and reuses them, which is
       // exactly wrong for tests: every test passes the same literal
       // ':memory:' path, so without this every DatabaseHelper in a test run
@@ -56,7 +57,8 @@ class DatabaseHelper {
         image_path TEXT NOT NULL,
         is_saved INTEGER NOT NULL,
         category TEXT,
-        created_at TEXT NOT NULL
+        created_at TEXT NOT NULL,
+        purchase_url TEXT
       )
     ''');
     await db.execute(
@@ -65,6 +67,12 @@ class DatabaseHelper {
     await db.execute(
       'CREATE INDEX idx_items_is_saved ON $tableItems(is_saved)',
     );
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE $tableItems ADD COLUMN purchase_url TEXT');
+    }
   }
 
   Future<int> insertItem(ItemModel item) async {

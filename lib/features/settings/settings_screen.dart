@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../core/utils/currency_formatter.dart';
+import '../../core/widgets/skip_app_bar.dart';
+import '../../core/widgets/skip_card.dart';
 import '../../core/widgets/tap_scale.dart';
 import '../../data/items_provider.dart';
 import 'widgets/backup_section.dart';
@@ -20,7 +22,7 @@ class SettingsScreen extends StatelessWidget {
     final itemsProvider = context.watch<ItemsProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: SkipAppBar(title: const Text('Settings')),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -68,6 +70,7 @@ class _AestheticSwitcher extends StatelessWidget {
       children: [
         Expanded(
           child: _AestheticOption(
+            previewTheme: AppThemes.minimal,
             label: 'skip.',
             description: 'Quiet Luxury',
             selected: aesthetic == SkipAesthetic.minimal,
@@ -77,6 +80,7 @@ class _AestheticSwitcher extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _AestheticOption(
+            previewTheme: AppThemes.y2k,
             label: 'SKIP!',
             description: 'Bratz Y2K',
             selected: aesthetic == SkipAesthetic.y2k,
@@ -88,13 +92,20 @@ class _AestheticSwitcher extends StatelessWidget {
   }
 }
 
+/// Each option always previews its *own* theme's font/colors/gradient,
+/// regardless of which aesthetic is currently active app-wide — so picking
+/// "SKIP!" is an informed choice, not a guess. The "selected" ring reads
+/// off the *ambient* theme (via [Theme.of], outside the nested [Theme]
+/// scope below) so the pick signal itself stays legible in both states.
 class _AestheticOption extends StatelessWidget {
+  final ThemeData previewTheme;
   final String label;
   final String description;
   final bool selected;
   final VoidCallback onTap;
 
   const _AestheticOption({
+    required this.previewTheme,
     required this.label,
     required this.description,
     required this.selected,
@@ -103,46 +114,71 @@ class _AestheticOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final skipTheme = theme.extension<SkipThemeExtension>()!;
+    final ambientTheme = Theme.of(context);
+    final ambientSkip = ambientTheme.extension<SkipThemeExtension>()!;
 
     return TapScale(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
-          color: selected
-              ? theme.colorScheme.primary
-              : skipTheme.cardBackground,
-          borderRadius: BorderRadius.circular(skipTheme.isY2K ? 20 : 2),
+          borderRadius: BorderRadius.circular(ambientSkip.cardRadius + 3),
           border: Border.all(
             color: selected
-                ? theme.colorScheme.primary
-                : theme.colorScheme.onSurface.withValues(alpha: 0.2),
-            width: 1.5,
+                ? ambientTheme.colorScheme.primary
+                : Colors.transparent,
+            width: 2,
           ),
+          boxShadow: selected ? ambientSkip.glowShadow : null,
         ),
-        child: Column(
-          children: [
-            Text(
-              label,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: selected
-                    ? theme.colorScheme.onPrimary
-                    : theme.colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              description,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: selected
-                    ? theme.colorScheme.onPrimary
-                    : theme.colorScheme.onSurface,
-              ),
-            ),
-          ],
+        child: Theme(
+          data: previewTheme,
+          child: Builder(
+            builder: (previewContext) {
+              final theme = Theme.of(previewContext);
+              final skipTheme = theme.extension<SkipThemeExtension>()!;
+              final textColor = skipTheme.isY2K
+                  ? Colors.white
+                  : theme.colorScheme.onSurface;
+
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: skipTheme.isY2K ? null : skipTheme.cardBackground,
+                  gradient: skipTheme.isY2K ? skipTheme.accentGradient : null,
+                  borderRadius: BorderRadius.circular(skipTheme.cardRadius),
+                  border: skipTheme.isY2K
+                      ? Border.all(
+                          color: theme.colorScheme.onSurface,
+                          width: 1.5,
+                        )
+                      : null,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      label,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      description,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: textColor,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -163,16 +199,8 @@ class _StatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final skipTheme = theme.extension<SkipThemeExtension>()!;
-    return Container(
+    return SkipCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      decoration: BoxDecoration(
-        color: skipTheme.cardBackground,
-        borderRadius: BorderRadius.circular(skipTheme.isY2K ? 20 : 4),
-        border: skipTheme.isY2K
-            ? Border.all(color: theme.colorScheme.onSurface, width: 1.5)
-            : null,
-      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

@@ -3,6 +3,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_themes.dart';
+import '../../core/widgets/skip_app_bar.dart';
 import '../../data/items_provider.dart';
 import '../insights/insights_screen.dart';
 import '../item_entry/item_entry_screen.dart';
@@ -34,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final itemsProvider = context.watch<ItemsProvider>();
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: SkipAppBar(
         title: Text(skipTheme.logoText),
         actions: [
           IconButton(
@@ -69,6 +70,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: SummaryCards(
                         totalSaved: itemsProvider.totalSaved,
                         totalSpent: itemsProvider.totalSpent,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const InsightsScreen(),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),

@@ -9,19 +9,20 @@ class AppColors {
   AppColors._();
 
   // Quiet Luxury ("skip.")
-  static const minimalCharcoal = Color(0xFF2B2925);
+  static const minimalCharcoal = Color(0xFF2C302E);
   static const minimalSilkBeige = Color(0xFFE7DFD3);
-  static const minimalChampagne = Color(0xFFD4C2A5);
-  static const minimalSoftWhite = Color(0xFFFAF8F5);
-  static const minimalSaved = Color(0xFF3F6B4F);
-  static const minimalSpent = Color(0xFFA34C3F);
+  static const minimalChampagne = Color(0xFFE9D5A5);
+  static const minimalSoftWhite = Color(0xFFFDFBF7);
+  static const minimalSaved = Color(0xFFA8BBA2);
+  static const minimalSpent = Color(0xFFE7BEBE);
 
   // Bratz Y2K ("SKIP!")
-  static const y2kHotMagenta = Color(0xFFFF2E9A);
-  static const y2kElectricViolet = Color(0xFF8A2BE2);
-  static const y2kMetallicSilver = Color(0xFFC9CDD6);
+  static const y2kHotMagenta = Color(0xFFFF007F);
+  static const y2kElectricViolet = Color(0xFFB026FF);
+  static const y2kMetallicSilver = Color(0xFFE0E0E0);
   static const y2kGlitterPink = Color(0xFFFFD1EC);
   static const y2kBlack = Color(0xFF181022);
   static const y2kSaved = Color(0xFF00E5A0);
-  static const y2kSpent = Color(0xFFFF4D6D);
+  static const y2kSpent = Color(0xFF6B003B);
+  static const y2kDeepSurface = Color(0xFF241A33);
 }

@@ -47,7 +47,15 @@ class BackupService {
   Future<String> buildCsvBackup() async {
     final items = await _db.getAllItems();
     final rows = <List<dynamic>>[
-      ['title', 'price', 'image_path', 'is_saved', 'category', 'created_at'],
+      [
+        'title',
+        'price',
+        'image_path',
+        'is_saved',
+        'category',
+        'created_at',
+        'purchase_url',
+      ],
       for (final item in items)
         [
           item.title ?? '',
@@ -56,6 +64,7 @@ class BackupService {
           item.isSaved ? 1 : 0,
           item.category ?? '',
           item.createdAt.toIso8601String(),
+          item.purchaseUrl ?? '',
         ],
     ];
     return Csv().encode(rows);

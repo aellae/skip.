@@ -44,6 +44,7 @@ void main() {
           isSaved: true,
           category: 'Clothes',
           createdAt: DateTime.utc(2026, 1, 1),
+          purchaseUrl: 'https://example.com/jacket',
         ),
       );
 
@@ -55,6 +56,7 @@ void main() {
       expect(parsed.single.price, 120);
       expect(parsed.single.isSaved, isTrue);
       expect(parsed.single.category, 'Clothes');
+      expect(parsed.single.purchaseUrl, 'https://example.com/jacket');
     });
 
     test('builds an empty items list when there are no items', () async {
@@ -168,6 +170,7 @@ void main() {
           imagePath: 'shoes.jpg',
           isSaved: true,
           createdAt: DateTime.utc(2026, 1, 1),
+          purchaseUrl: 'https://example.com/shoes',
         ),
       );
 
@@ -177,8 +180,10 @@ void main() {
       expect(lines, hasLength(2));
       expect(lines.first, contains('title'));
       expect(lines.first, contains('price'));
+      expect(lines.first, contains('purchase_url'));
       expect(lines[1], contains('Shoes'));
       expect(lines[1], contains('50'));
+      expect(lines[1], contains('https://example.com/shoes'));
     });
   });
 }

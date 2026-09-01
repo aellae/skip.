@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../core/theme/app_themes.dart';
 import '../../../core/utils/file_helper.dart';
+import '../../../core/widgets/skip_card.dart';
 import '../../../data/backup_service.dart';
 import '../../../data/items_provider.dart';
 
@@ -147,17 +147,8 @@ class _BackupSectionState extends State<BackupSection> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final skipTheme = theme.extension<SkipThemeExtension>()!;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: skipTheme.cardBackground,
-        borderRadius: BorderRadius.circular(skipTheme.isY2K ? 20 : 4),
-        border: skipTheme.isY2K
-            ? Border.all(color: theme.colorScheme.onSurface, width: 1.5)
-            : null,
-      ),
+    return SkipCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

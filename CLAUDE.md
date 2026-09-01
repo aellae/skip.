@@ -70,6 +70,7 @@ Table Name: `items`
 | `image_path` | `TEXT` | `NOT NULL` | Local device absolute file path |
 | `is_saved` | `INTEGER` | `NOT NULL` | `1` = Resisted/Saved, `0` = Bought/Spent |
 | `created_at` | `TEXT` | `NOT NULL` | ISO8601 Timestamp string |
+| `purchase_url` | `TEXT` | `NULLABLE` | Optional link to the product's page, opened via the OS |
 
 ---
 

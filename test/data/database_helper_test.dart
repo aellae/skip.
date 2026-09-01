@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:skip/core/utils/file_helper.dart';
 import 'package:skip/data/database_helper.dart';
@@ -155,6 +158,85 @@ void main() {
 
       expect(fetched!.category, 'Shoes');
     });
+
+    test('purchase_url persists round-trip through insert/read', () async {
+      final id = await db.insertItem(
+        ItemModel(
+          price: 10,
+          imagePath: 'a.jpg',
+          isSaved: true,
+          createdAt: DateTime.utc(2026, 1, 1),
+          purchaseUrl: 'https://example.com/product',
+        ),
+      );
+
+      final fetched = await db.getItemById(id);
+
+      expect(fetched!.purchaseUrl, 'https://example.com/product');
+    });
+
+    test('purchase_url defaults to null when not provided', () async {
+      final id = await db.insertItem(makeItem());
+
+      final fetched = await db.getItemById(id);
+
+      expect(fetched!.purchaseUrl, isNull);
+    });
+  });
+
+  group('DatabaseHelper migration', () {
+    test(
+      'upgrading a v1 database adds purchase_url and keeps existing rows',
+      () async {
+        final tempDir = await Directory.systemTemp.createTemp(
+          'skip_migration_test_',
+        );
+        final dbPath = p.join(tempDir.path, 'migration.db');
+        try {
+          final v1Db = await databaseFactory.openDatabase(
+            dbPath,
+            options: OpenDatabaseOptions(
+              version: 1,
+              onCreate: (rawDb, version) async {
+                await rawDb.execute('''
+                  CREATE TABLE items (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    title TEXT,
+                    price REAL NOT NULL,
+                    image_path TEXT NOT NULL,
+                    is_saved INTEGER NOT NULL,
+                    category TEXT,
+                    created_at TEXT NOT NULL
+                  )
+                ''');
+              },
+            ),
+          );
+          final id = await v1Db.insert('items', {
+            'title': 'Pre-migration item',
+            'price': 42.0,
+            'image_path': 'a.jpg',
+            'is_saved': 1,
+            'created_at': DateTime.utc(2026, 1, 1).toIso8601String(),
+          });
+          await v1Db.close();
+
+          final upgraded = DatabaseHelper(
+            fileHelper: mockFileHelper,
+            testDbPath: dbPath,
+          );
+          final item = await upgraded.getItemById(id);
+
+          expect(item, isNotNull);
+          expect(item!.title, 'Pre-migration item');
+          expect(item.purchaseUrl, isNull);
+
+          await upgraded.close();
+        } finally {
+          await tempDir.delete(recursive: true);
+        }
+      },
+    );
   });
 
   group('DatabaseHelper schema', () {
@@ -173,6 +255,7 @@ void main() {
           'is_saved',
           'category',
           'created_at',
+          'purchase_url',
         });
       },
     );

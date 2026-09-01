@@ -209,4 +209,61 @@ void main() {
     expect(itemsProvider.items, hasLength(1));
     expect(itemsProvider.items.single.isSaved, isFalse);
   });
+
+  testWidgets('saves a valid product link alongside the item', (tester) async {
+    final itemsProvider = buildTestItemsProvider();
+    await pumpEntryScreen(tester, itemsProvider);
+    await pickAPhoto(tester);
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Price'),
+      '19.99',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Product link (optional)'),
+      'https://example.com/product',
+    );
+    await tapText(tester, 'Resisted!');
+
+    expect(itemsProvider.items, hasLength(1));
+    expect(
+      itemsProvider.items.single.purchaseUrl,
+      'https://example.com/product',
+    );
+  });
+
+  testWidgets('leaving the product link blank saves it as null', (
+    tester,
+  ) async {
+    final itemsProvider = buildTestItemsProvider();
+    await pumpEntryScreen(tester, itemsProvider);
+    await pickAPhoto(tester);
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Price'),
+      '19.99',
+    );
+    await tapText(tester, 'Resisted!');
+
+    expect(itemsProvider.items.single.purchaseUrl, isNull);
+  });
+
+  testWidgets('rejects an invalid product link', (tester) async {
+    final itemsProvider = buildTestItemsProvider();
+    await pumpEntryScreen(tester, itemsProvider);
+    await pickAPhoto(tester);
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Price'),
+      '19.99',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Product link (optional)'),
+      'not-a-link',
+    );
+    await tapText(tester, 'Resisted!');
+
+    expect(find.text('Enter a valid link (https://…).'), findsOneWidget);
+    expect(itemsProvider.items, isEmpty);
+  });
 }

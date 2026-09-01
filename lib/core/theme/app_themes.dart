@@ -1,3 +1,5 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -17,12 +19,37 @@ class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
   final String logoText;
   final bool isY2K;
 
+  /// Corner radius for passive surfaces (cards, images, media containers).
+  final double cardRadius;
+
+  /// Corner radius for interactive surfaces (buttons, toggles).
+  final double buttonRadius;
+
+  /// Ambient, at-rest depth for [SkipCard] and similar passive surfaces.
+  final List<BoxShadow> cardShadow;
+
+  /// Stronger depth for selected/emphasized/lifted states.
+  final List<BoxShadow> glowShadow;
+
+  /// Brand/CTA accent gradient (badges, stickers, app bar chrome). Never
+  /// used to encode saved/spent financial semantics.
+  final Gradient? accentGradient;
+
+  /// Shimmer highlight / confetti extra / Minimal confirmation-motion tint.
+  final Color accentHighlight;
+
   const SkipThemeExtension({
     required this.savedColor,
     required this.spentColor,
     required this.cardBackground,
     required this.logoText,
     required this.isY2K,
+    required this.cardRadius,
+    required this.buttonRadius,
+    required this.cardShadow,
+    required this.glowShadow,
+    required this.accentGradient,
+    required this.accentHighlight,
   });
 
   @override
@@ -32,6 +59,12 @@ class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
     Color? cardBackground,
     String? logoText,
     bool? isY2K,
+    double? cardRadius,
+    double? buttonRadius,
+    List<BoxShadow>? cardShadow,
+    List<BoxShadow>? glowShadow,
+    Gradient? accentGradient,
+    Color? accentHighlight,
   }) {
     return SkipThemeExtension(
       savedColor: savedColor ?? this.savedColor,
@@ -39,6 +72,12 @@ class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
       cardBackground: cardBackground ?? this.cardBackground,
       logoText: logoText ?? this.logoText,
       isY2K: isY2K ?? this.isY2K,
+      cardRadius: cardRadius ?? this.cardRadius,
+      buttonRadius: buttonRadius ?? this.buttonRadius,
+      cardShadow: cardShadow ?? this.cardShadow,
+      glowShadow: glowShadow ?? this.glowShadow,
+      accentGradient: accentGradient ?? this.accentGradient,
+      accentHighlight: accentHighlight ?? this.accentHighlight,
     );
   }
 
@@ -51,6 +90,14 @@ class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
       cardBackground: Color.lerp(cardBackground, other.cardBackground, t)!,
       logoText: t < 0.5 ? logoText : other.logoText,
       isY2K: t < 0.5 ? isY2K : other.isY2K,
+      cardRadius: lerpDouble(cardRadius, other.cardRadius, t)!,
+      buttonRadius: lerpDouble(buttonRadius, other.buttonRadius, t)!,
+      cardShadow:
+          BoxShadow.lerpList(cardShadow, other.cardShadow, t) ?? cardShadow,
+      glowShadow:
+          BoxShadow.lerpList(glowShadow, other.glowShadow, t) ?? glowShadow,
+      accentGradient: Gradient.lerp(accentGradient, other.accentGradient, t),
+      accentHighlight: Color.lerp(accentHighlight, other.accentHighlight, t)!,
     );
   }
 }
@@ -180,16 +227,29 @@ class AppThemes {
     cardTheme: CardThemeData(
       color: AppColors.minimalSilkBeige,
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.minimalCharcoal,
         foregroundColor: AppColors.minimalSoftWhite,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
       ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.minimalCharcoal,
+        side: BorderSide(
+          color: AppColors.minimalCharcoal.withValues(alpha: 0.3),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(foregroundColor: AppColors.minimalCharcoal),
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: AppColors.minimalCharcoal,
@@ -203,13 +263,66 @@ class AppThemes {
         borderSide: BorderSide.none,
       ),
     ),
-    extensions: const [
+    dialogTheme: DialogThemeData(
+      backgroundColor: AppColors.minimalSoftWhite,
+      elevation: 3,
+      shadowColor: AppColors.minimalCharcoal.withValues(alpha: 0.12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      titleTextStyle: _minimalTextTheme.headlineSmall,
+      contentTextStyle: _minimalTextTheme.bodyMedium,
+    ),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: AppColors.minimalSoftWhite,
+      modalBackgroundColor: AppColors.minimalSoftWhite,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      showDragHandle: true,
+      dragHandleColor: AppColors.minimalCharcoal.withValues(alpha: 0.3),
+      elevation: 4,
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: AppColors.minimalCharcoal,
+      contentTextStyle: _minimalTextTheme.bodyMedium?.copyWith(
+        color: AppColors.minimalSoftWhite,
+      ),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      actionTextColor: AppColors.minimalChampagne,
+    ),
+    dividerTheme: DividerThemeData(
+      color: AppColors.minimalCharcoal.withValues(alpha: 0.08),
+      thickness: 1,
+      space: 32,
+    ),
+    iconTheme: const IconThemeData(color: AppColors.minimalCharcoal, size: 22),
+    extensions: [
       SkipThemeExtension(
         savedColor: AppColors.minimalSaved,
         spentColor: AppColors.minimalSpent,
         cardBackground: AppColors.minimalSilkBeige,
         logoText: 'skip.',
         isY2K: false,
+        cardRadius: 10,
+        buttonRadius: 8,
+        cardShadow: [
+          BoxShadow(
+            color: AppColors.minimalCharcoal.withValues(alpha: 0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+            spreadRadius: -4,
+          ),
+        ],
+        glowShadow: [
+          BoxShadow(
+            color: AppColors.minimalCharcoal.withValues(alpha: 0.14),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+            spreadRadius: -2,
+          ),
+        ],
+        accentGradient: null,
+        accentHighlight: AppColors.minimalChampagne,
       ),
     ],
   );
@@ -236,7 +349,7 @@ class AppThemes {
       titleTextStyle: _y2kTextTheme.headlineSmall,
     ),
     cardTheme: CardThemeData(
-      color: const Color(0xFF241A33),
+      color: AppColors.y2kDeepSurface,
       elevation: 4,
       shadowColor: AppColors.y2kHotMagenta.withValues(alpha: 0.4),
       shape: RoundedRectangleBorder(
@@ -249,7 +362,7 @@ class AppThemes {
         backgroundColor: AppColors.y2kHotMagenta,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(28),
           side: const BorderSide(
             color: AppColors.y2kMetallicSilver,
             width: 1.5,
@@ -259,25 +372,105 @@ class AppThemes {
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
       ),
     ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.white,
+        side: const BorderSide(color: AppColors.y2kMetallicSilver, width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(foregroundColor: AppColors.y2kHotMagenta),
+    ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: AppColors.y2kHotMagenta,
       foregroundColor: Colors.white,
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0xFF241A33),
+      fillColor: AppColors.y2kDeepSurface,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: AppColors.y2kMetallicSilver),
       ),
     ),
-    extensions: const [
+    dialogTheme: DialogThemeData(
+      backgroundColor: AppColors.y2kDeepSurface,
+      elevation: 8,
+      shadowColor: AppColors.y2kHotMagenta.withValues(alpha: 0.4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: AppColors.y2kMetallicSilver, width: 1.5),
+      ),
+      titleTextStyle: _y2kTextTheme.headlineSmall,
+      contentTextStyle: _y2kTextTheme.bodyMedium,
+    ),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: AppColors.y2kDeepSurface,
+      modalBackgroundColor: AppColors.y2kDeepSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      showDragHandle: true,
+      dragHandleColor: AppColors.y2kMetallicSilver,
+      elevation: 12,
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: AppColors.y2kDeepSurface,
+      contentTextStyle: _y2kTextTheme.bodyMedium?.copyWith(color: Colors.white),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: AppColors.y2kMetallicSilver, width: 1.5),
+      ),
+      actionTextColor: AppColors.y2kHotMagenta,
+    ),
+    dividerTheme: DividerThemeData(
+      color: AppColors.y2kMetallicSilver.withValues(alpha: 0.3),
+      thickness: 1.5,
+      space: 32,
+    ),
+    iconTheme: const IconThemeData(color: Colors.white, size: 24),
+    extensions: [
       SkipThemeExtension(
         savedColor: AppColors.y2kSaved,
         spentColor: AppColors.y2kSpent,
-        cardBackground: Color(0xFF241A33),
+        cardBackground: AppColors.y2kDeepSurface,
         logoText: 'SKIP!',
         isY2K: true,
+        cardRadius: 20,
+        buttonRadius: 28,
+        cardShadow: [
+          BoxShadow(
+            color: AppColors.y2kHotMagenta.withValues(alpha: 0.30),
+            blurRadius: 18,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: AppColors.y2kElectricViolet.withValues(alpha: 0.20),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+        ],
+        glowShadow: [
+          BoxShadow(
+            color: AppColors.y2kHotMagenta.withValues(alpha: 0.55),
+            blurRadius: 24,
+            spreadRadius: 1,
+          ),
+          BoxShadow(
+            color: AppColors.y2kElectricViolet.withValues(alpha: 0.35),
+            blurRadius: 40,
+            offset: const Offset(0, 12),
+          ),
+        ],
+        accentGradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.y2kHotMagenta, AppColors.y2kElectricViolet],
+        ),
+        accentHighlight: AppColors.y2kGlitterPink,
       ),
     ],
   );

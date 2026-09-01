@@ -94,6 +94,48 @@ void main() {
     expect(provider.items.single.isSaved, isTrue);
   });
 
+  test('addItem stores an optional purchaseUrl', () async {
+    await provider.addItem(
+      price: 30,
+      imagePath: 'a.jpg',
+      isSaved: true,
+      purchaseUrl: 'https://example.com/product',
+    );
+
+    expect(provider.items.single.purchaseUrl, 'https://example.com/product');
+  });
+
+  test('setPurchaseUrl sets a link on an existing item', () async {
+    await provider.addItem(price: 30, imagePath: 'a.jpg', isSaved: true);
+    final id = provider.items.single.id!;
+
+    await provider.setPurchaseUrl(id, 'https://example.com/product');
+
+    expect(provider.items.single.purchaseUrl, 'https://example.com/product');
+  });
+
+  test('setPurchaseUrl(null) clears an existing link', () async {
+    await provider.addItem(
+      price: 30,
+      imagePath: 'a.jpg',
+      isSaved: true,
+      purchaseUrl: 'https://example.com/product',
+    );
+    final id = provider.items.single.id!;
+
+    await provider.setPurchaseUrl(id, null);
+
+    expect(provider.items.single.purchaseUrl, isNull);
+  });
+
+  test('setPurchaseUrl is a no-op for an unknown id', () async {
+    await provider.addItem(price: 30, imagePath: 'a.jpg', isSaved: true);
+
+    await provider.setPurchaseUrl(999, 'https://example.com/product');
+
+    expect(provider.items.single.purchaseUrl, isNull);
+  });
+
   test('deleteItem removes it from state and deletes its image file', () async {
     await provider.addItem(
       price: 50,

@@ -30,12 +30,17 @@ void main() {
     );
   });
 
-  Future<void> pumpDetail(WidgetTester tester) async {
+  Future<void> pumpDetail(
+    WidgetTester tester, {
+    String? purchaseUrl,
+    Future<bool> Function(Uri url)? launchUrlOverride,
+  }) async {
     await itemsProvider.addItem(
       title: 'Jacket',
       price: 120,
       imagePath: 'skip_images/to_delete.jpg',
       isSaved: true,
+      purchaseUrl: purchaseUrl,
     );
     final item = itemsProvider.items.single;
 
@@ -44,7 +49,10 @@ void main() {
         value: itemsProvider,
         child: MaterialApp(
           theme: AppThemes.minimal,
-          home: ItemDetailScreen(item: item),
+          home: ItemDetailScreen(
+            item: item,
+            launchUrlOverride: launchUrlOverride,
+          ),
         ),
       ),
     );
@@ -92,5 +100,97 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(itemsProvider.items.single.isSaved, isFalse);
+  });
+
+  testWidgets('shows "Add product link" when no link is set', (tester) async {
+    await pumpDetail(tester);
+
+    expect(find.text('Add product link'), findsOneWidget);
+    expect(find.text('Visit product page'), findsNothing);
+  });
+
+  testWidgets('adding a valid product link persists it', (tester) async {
+    await pumpDetail(tester);
+
+    await tester.ensureVisible(find.text('Add product link'));
+    await tester.tap(find.text('Add product link'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byType(TextFormField),
+      'https://example.com/product',
+    );
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(
+      itemsProvider.items.single.purchaseUrl,
+      'https://example.com/product',
+    );
+    expect(find.text('Visit product page'), findsOneWidget);
+  });
+
+  testWidgets('an invalid product link is rejected in the dialog', (
+    tester,
+  ) async {
+    await pumpDetail(tester);
+
+    await tester.ensureVisible(find.text('Add product link'));
+    await tester.tap(find.text('Add product link'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField), 'not-a-link');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Enter a valid link (https://…).'), findsOneWidget);
+    expect(itemsProvider.items.single.purchaseUrl, isNull);
+  });
+
+  testWidgets('tapping Visit product page launches the stored link', (
+    tester,
+  ) async {
+    Uri? launchedUri;
+    await pumpDetail(
+      tester,
+      purchaseUrl: 'https://example.com/product',
+      launchUrlOverride: (uri) async {
+        launchedUri = uri;
+        return true;
+      },
+    );
+
+    await tester.ensureVisible(find.text('Visit product page'));
+    await tester.tap(find.text('Visit product page'));
+    await tester.pumpAndSettle();
+
+    expect(launchedUri, Uri.parse('https://example.com/product'));
+  });
+
+  testWidgets('shows an error snackbar when the link fails to launch', (
+    tester,
+  ) async {
+    await pumpDetail(
+      tester,
+      purchaseUrl: 'https://example.com/product',
+      launchUrlOverride: (uri) async => false,
+    );
+
+    await tester.ensureVisible(find.text('Visit product page'));
+    await tester.tap(find.text('Visit product page'));
+    await tester.pumpAndSettle();
+
+    expect(find.text("Couldn't open that link."), findsOneWidget);
+  });
+
+  testWidgets('removing an existing product link clears it', (tester) async {
+    await pumpDetail(tester, purchaseUrl: 'https://example.com/product');
+
+    await tester.ensureVisible(find.byIcon(Icons.edit_outlined));
+    await tester.tap(find.byIcon(Icons.edit_outlined));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Remove'));
+    await tester.pumpAndSettle();
+
+    expect(itemsProvider.items.single.purchaseUrl, isNull);
+    expect(find.text('Add product link'), findsOneWidget);
   });
 }

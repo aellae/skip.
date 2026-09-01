@@ -8,6 +8,7 @@ class ItemModel {
   final bool isSaved;
   final String? category;
   final DateTime createdAt;
+  final String? purchaseUrl;
 
   const ItemModel({
     this.id,
@@ -17,6 +18,7 @@ class ItemModel {
     required this.isSaved,
     this.category,
     required this.createdAt,
+    this.purchaseUrl,
   });
 
   ItemModel copyWith({
@@ -27,6 +29,7 @@ class ItemModel {
     bool? isSaved,
     String? category,
     DateTime? createdAt,
+    String? purchaseUrl,
   }) {
     return ItemModel(
       id: id ?? this.id,
@@ -36,6 +39,7 @@ class ItemModel {
       isSaved: isSaved ?? this.isSaved,
       category: category ?? this.category,
       createdAt: createdAt ?? this.createdAt,
+      purchaseUrl: purchaseUrl ?? this.purchaseUrl,
     );
   }
 
@@ -48,6 +52,7 @@ class ItemModel {
       'is_saved': isSaved ? 1 : 0,
       'category': category,
       'created_at': createdAt.toIso8601String(),
+      'purchase_url': purchaseUrl,
     };
   }
 
@@ -60,6 +65,7 @@ class ItemModel {
       isSaved: (map['is_saved'] as int) == 1,
       category: map['category'] as String?,
       createdAt: DateTime.parse(map['created_at'] as String),
+      purchaseUrl: map['purchase_url'] as String?,
     );
   }
 
@@ -73,12 +79,21 @@ class ItemModel {
         other.imagePath == imagePath &&
         other.isSaved == isSaved &&
         other.category == category &&
-        other.createdAt == createdAt;
+        other.createdAt == createdAt &&
+        other.purchaseUrl == purchaseUrl;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, title, price, imagePath, isSaved, category, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    title,
+    price,
+    imagePath,
+    isSaved,
+    category,
+    createdAt,
+    purchaseUrl,
+  );
 
   @override
   String toString() =>

@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_themes.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../data/models/monthly_total.dart';
 
@@ -16,7 +17,9 @@ class MonthlyBarChart extends StatelessWidget {
     final theme = Theme.of(context);
     final skipTheme = theme.extension<SkipThemeExtension>()!;
     final axisStyle = theme.textTheme.labelSmall;
-    final barRadius = BorderRadius.circular(skipTheme.isY2K ? 4 : 2);
+    final barRadius = BorderRadius.vertical(
+      top: Radius.circular(skipTheme.isY2K ? 8 : 3),
+    );
 
     final maxValue = monthlyTotals.fold<double>(0, (max, m) {
       final localMax = m.saved > m.spent ? m.saved : m.spent;
@@ -24,13 +27,51 @@ class MonthlyBarChart extends StatelessWidget {
     });
     final maxY = maxValue <= 0 ? 10.0 : maxValue * 1.2;
 
+    BarChartRodData rod(double value, Color statusColor) {
+      return BarChartRodData(
+        toY: value,
+        // Y2K bars get a per-status gradient (never the shared brand
+        // accentGradient, which would erase the saved/spent distinction);
+        // Minimal stays flat.
+        color: skipTheme.isY2K ? null : statusColor,
+        gradient: skipTheme.isY2K
+            ? LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                colors: [statusColor, Colors.white.withValues(alpha: 0.85)],
+              )
+            : null,
+        width: 8,
+        borderRadius: barRadius,
+      );
+    }
+
     return BarChart(
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutCubic,
       BarChartData(
         maxY: maxY,
         alignment: BarChartAlignment.spaceAround,
         gridData: const FlGridData(show: false),
         borderData: FlBorderData(show: false),
-        barTouchData: BarTouchData(enabled: false),
+        barTouchData: BarTouchData(
+          enabled: true,
+          touchTooltipData: BarTouchTooltipData(
+            getTooltipColor: (_) => skipTheme.cardBackground,
+            getTooltipItem: (group, groupIndex, rod, rodIndex) {
+              final statusColor = rodIndex == 0
+                  ? skipTheme.savedColor
+                  : skipTheme.spentColor;
+              return BarTooltipItem(
+                formatCurrencyCompact(rod.toY),
+                (axisStyle ?? const TextStyle()).copyWith(
+                  color: statusColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              );
+            },
+          ),
+        ),
         titlesData: FlTitlesData(
           show: true,
           rightTitles: const AxisTitles(
@@ -39,8 +80,13 @@ class MonthlyBarChart extends StatelessWidget {
           topTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
           ),
-          leftTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 40,
+              getTitlesWidget: (value, meta) =>
+                  Text(formatCurrencyCompact(value), style: axisStyle),
+            ),
           ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -69,18 +115,8 @@ class MonthlyBarChart extends StatelessWidget {
               x: i,
               barsSpace: 4,
               barRods: [
-                BarChartRodData(
-                  toY: monthlyTotals[i].saved,
-                  color: skipTheme.savedColor,
-                  width: 8,
-                  borderRadius: barRadius,
-                ),
-                BarChartRodData(
-                  toY: monthlyTotals[i].spent,
-                  color: skipTheme.spentColor,
-                  width: 8,
-                  borderRadius: barRadius,
-                ),
+                rod(monthlyTotals[i].saved, skipTheme.savedColor),
+                rod(monthlyTotals[i].spent, skipTheme.spentColor),
               ],
             ),
         ],

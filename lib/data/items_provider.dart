@@ -52,6 +52,7 @@ class ItemsProvider extends ChangeNotifier {
     required String imagePath,
     required bool isSaved,
     String? category,
+    String? purchaseUrl,
   }) async {
     await _db.insertItem(
       ItemModel(
@@ -61,6 +62,7 @@ class ItemsProvider extends ChangeNotifier {
         isSaved: isSaved,
         category: category,
         createdAt: DateTime.now(),
+        purchaseUrl: purchaseUrl,
       ),
     );
     await load();
@@ -70,6 +72,28 @@ class ItemsProvider extends ChangeNotifier {
     final index = _items.indexWhere((item) => item.id == id);
     if (index == -1) return;
     await _db.updateItem(_items[index].copyWith(isSaved: isSaved));
+    await load();
+  }
+
+  /// Sets or clears (pass `null`) the retroactive purchase link on an
+  /// existing item. Uses a fresh [ItemModel] rather than [ItemModel.copyWith]
+  /// because `copyWith`'s `??` pattern can't express "clear this field".
+  Future<void> setPurchaseUrl(int id, String? purchaseUrl) async {
+    final index = _items.indexWhere((item) => item.id == id);
+    if (index == -1) return;
+    final current = _items[index];
+    await _db.updateItem(
+      ItemModel(
+        id: current.id,
+        title: current.title,
+        price: current.price,
+        imagePath: current.imagePath,
+        isSaved: current.isSaved,
+        category: current.category,
+        createdAt: current.createdAt,
+        purchaseUrl: purchaseUrl,
+      ),
+    );
     await load();
   }
 
