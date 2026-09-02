@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/constants/app_spacing.dart';
+import '../../core/localization/app_strings.dart';
+import '../../core/localization/locale_provider.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../core/utils/date_formatter.dart';
@@ -56,20 +58,21 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   }
 
   Future<void> _confirmDelete() async {
+    final strings = context.read<LocaleProvider>().strings;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete this item?'),
-        content: const Text('This removes it and its photo permanently.'),
+        title: Text(strings.deleteItemTitle),
+        content: Text(strings.deleteItemContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(strings.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(
-              'Delete',
+              strings.delete,
               style: Theme.of(dialogContext).textTheme.labelLarge?.copyWith(
                 color: Theme.of(dialogContext).colorScheme.error,
               ),
@@ -92,15 +95,19 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     if (uri == null) return;
     final launched = await _launchUrl(uri);
     if (!mounted || launched) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Couldn't open that link.")));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.read<LocaleProvider>().strings.couldntOpenLink),
+      ),
+    );
   }
 
   Future<void> _editPurchaseLink(String? currentUrl) async {
+    final strings = context.read<LocaleProvider>().strings;
     final result = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => _PurchaseLinkDialog(currentUrl: currentUrl),
+      builder: (dialogContext) =>
+          _PurchaseLinkDialog(currentUrl: currentUrl, strings: strings),
     );
     if (!mounted) return;
     if (result == null || widget.item.id == null) return;
@@ -118,6 +125,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final skipTheme = theme.extension<SkipThemeExtension>()!;
+    final strings = context.watch<LocaleProvider>().strings;
     final item = context.select<ItemsProvider, ItemModel>(
       (provider) => provider.items.firstWhere(
         (i) => i.id == widget.item.id,
@@ -134,7 +142,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           IconButton(
             onPressed: _isBusy ? null : _confirmDelete,
             icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
-            tooltip: 'Delete',
+            tooltip: strings.delete,
           ),
         ],
       ),
@@ -195,7 +203,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: AppSpacing.sectionGap),
-              Text('Status', style: theme.textTheme.labelLarge),
+              Text(strings.status, style: theme.textTheme.labelLarge),
               const SizedBox(height: 8),
               DecisionToggle(
                 isSaved: item.isSaved,
@@ -204,7 +212,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                     : (newValue) => _changeStatus(newValue, item.isSaved),
               ),
               const SizedBox(height: AppSpacing.sectionGap),
-              Text('Product Link', style: theme.textTheme.labelLarge),
+              Text(strings.productLink, style: theme.textTheme.labelLarge),
               const SizedBox(height: 8),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 220),
@@ -218,7 +226,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                   ? null
                                   : () => _openPurchaseUrl(item.purchaseUrl!),
                               icon: const Icon(Icons.open_in_new),
-                              label: const Text('Visit product page'),
+                              label: Text(strings.visitProductPage),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -227,7 +235,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                 ? null
                                 : () => _editPurchaseLink(item.purchaseUrl),
                             icon: const Icon(Icons.edit_outlined),
-                            tooltip: 'Edit link',
+                            tooltip: strings.editLinkTooltip,
                           ),
                         ],
                       )
@@ -237,7 +245,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                             ? null
                             : () => _editPurchaseLink(null),
                         icon: const Icon(Icons.add_link),
-                        label: const Text('Add product link'),
+                        label: Text(strings.addProductLink),
                       ),
               ),
               if (_isBusy) ...[
@@ -266,8 +274,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 /// dialog route and crashes with "used after being disposed".
 class _PurchaseLinkDialog extends StatefulWidget {
   final String? currentUrl;
+  final AppStrings strings;
 
-  const _PurchaseLinkDialog({this.currentUrl});
+  const _PurchaseLinkDialog({this.currentUrl, required this.strings});
 
   @override
   State<_PurchaseLinkDialog> createState() => _PurchaseLinkDialogState();
@@ -285,15 +294,17 @@ class _PurchaseLinkDialogState extends State<_PurchaseLinkDialog> {
 
   String? _validate(String? value) {
     if (value == null || value.trim().isEmpty) return null;
-    return parseHttpUrl(value) == null
-        ? 'Enter a valid link (https://…).'
-        : null;
+    return parseHttpUrl(value) == null ? widget.strings.invalidLinkError : null;
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.currentUrl == null ? 'Add product link' : 'Edit link'),
+      title: Text(
+        widget.currentUrl == null
+            ? widget.strings.addProductLink
+            : widget.strings.editLinkDialogTitle,
+      ),
       content: Form(
         key: _formKey,
         child: TextFormField(
@@ -301,7 +312,7 @@ class _PurchaseLinkDialogState extends State<_PurchaseLinkDialog> {
           autofocus: true,
           keyboardType: TextInputType.url,
           autocorrect: false,
-          decoration: const InputDecoration(hintText: 'https://…'),
+          decoration: InputDecoration(hintText: widget.strings.linkHint),
           validator: _validate,
         ),
       ),
@@ -309,18 +320,18 @@ class _PurchaseLinkDialogState extends State<_PurchaseLinkDialog> {
         if (widget.currentUrl != null)
           TextButton(
             onPressed: () => Navigator.of(context).pop(''),
-            child: const Text('Remove'),
+            child: Text(widget.strings.remove),
           ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(widget.strings.cancel),
         ),
         TextButton(
           onPressed: () {
             if (!(_formKey.currentState?.validate() ?? false)) return;
             Navigator.of(context).pop(_controller.text.trim());
           },
-          child: const Text('Save'),
+          child: Text(widget.strings.save),
         ),
       ],
     );

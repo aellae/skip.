@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/localization/app_strings.dart';
+import '../../core/localization/locale_provider.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/utils/file_helper.dart';
 import '../../core/utils/url_validator.dart';
@@ -79,6 +81,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
 
   void _showImageSourceSheet() {
     final accent = Theme.of(context).colorScheme.primary;
+    final strings = context.read<LocaleProvider>().strings;
     showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) => SafeArea(
@@ -89,14 +92,14 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
               onTap: () => _pickImage(ImageSource.camera),
               child: ListTile(
                 leading: Icon(Icons.camera_alt, color: accent),
-                title: const Text('Camera'),
+                title: Text(strings.camera),
               ),
             ),
             TapScale(
               onTap: () => _pickImage(ImageSource.gallery),
               child: ListTile(
                 leading: Icon(Icons.photo_library, color: accent),
-                title: const Text('Gallery'),
+                title: Text(strings.gallery),
               ),
             ),
           ],
@@ -108,9 +111,11 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
   Future<void> _saveWithDecision(bool isSaved) async {
     if (_isSaving) return;
     if (_relativeImagePath == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Add a photo first.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.read<LocaleProvider>().strings.addPhotoFirst),
+        ),
+      );
       return;
     }
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -130,17 +135,17 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     Navigator.of(context).pop();
   }
 
-  String? _validatePrice(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Enter a price.';
+  String? _validatePrice(String? value, AppStrings strings) {
+    if (value == null || value.trim().isEmpty) return strings.enterPrice;
     final parsed = double.tryParse(value);
-    if (parsed == null) return 'Enter a valid number.';
-    if (parsed <= 0) return 'Price must be greater than zero.';
+    if (parsed == null) return strings.enterValidNumber;
+    if (parsed <= 0) return strings.priceGreaterThanZero;
     return null;
   }
 
-  String? _validatePurchaseUrl(String? value) {
+  String? _validatePurchaseUrl(String? value, AppStrings strings) {
     if (value == null || value.trim().isEmpty) return null;
-    if (parseHttpUrl(value) == null) return 'Enter a valid link (https://…).';
+    if (parseHttpUrl(value) == null) return strings.invalidLinkError;
     return null;
   }
 
@@ -148,9 +153,10 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final skipTheme = theme.extension<SkipThemeExtension>()!;
+    final strings = context.watch<LocaleProvider>().strings;
 
     return Scaffold(
-      appBar: SkipAppBar(title: const Text('Log an item')),
+      appBar: SkipAppBar(title: Text(strings.logAnItem)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -199,7 +205,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                                     const Icon(Icons.add_a_photo, size: 40),
                                     const SizedBox(height: 8),
                                     Text(
-                                      'Tap to add a photo',
+                                      strings.tapToAddPhoto,
                                       style: theme.textTheme.bodyMedium,
                                     ),
                                   ],
@@ -220,33 +226,33 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                       RegExp(r'^\d*\.?\d{0,2}'),
                     ),
                   ],
-                  decoration: const InputDecoration(
-                    labelText: 'Price',
+                  decoration: InputDecoration(
+                    labelText: strings.priceLabel,
                     prefixText: '\$ ',
                   ),
-                  validator: _validatePrice,
+                  validator: (value) => _validatePrice(value, strings),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Title (optional)',
+                  decoration: InputDecoration(
+                    labelText: strings.titleOptionalLabel,
                   ),
                   textCapitalization: TextCapitalization.sentences,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _purchaseUrlController,
-                  decoration: const InputDecoration(
-                    labelText: 'Product link (optional)',
+                  decoration: InputDecoration(
+                    labelText: strings.productLinkOptionalLabel,
                   ),
                   keyboardType: TextInputType.url,
                   autocorrect: false,
-                  validator: _validatePurchaseUrl,
+                  validator: (value) => _validatePurchaseUrl(value, strings),
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Tap one to log it',
+                  strings.tapOneToLogIt,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.labelLarge,
                 ),

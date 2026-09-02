@@ -1,5 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skip/core/localization/app_locale.dart';
+import 'package:skip/core/localization/locale_provider.dart';
 import 'package:skip/core/theme/theme_provider.dart';
 import 'package:skip/core/utils/currency_formatter.dart';
 import 'package:skip/data/items_provider.dart';
@@ -10,17 +13,22 @@ import '../../test_helpers/widget_test_env.dart';
 
 void main() {
   setUpAll(() => setUpWidgetTestEnvironment());
+  setUp(() => SharedPreferences.setMockInitialValues({}));
 
   Future<void> pumpSettings(
     WidgetTester tester, {
     required ThemeProvider themeProvider,
     required ItemsProvider itemsProvider,
+    LocaleProvider? localeProvider,
   }) async {
     await tester.pumpWidget(
       MultiProvider(
         providers: [
           ChangeNotifierProvider.value(value: themeProvider),
           ChangeNotifierProvider.value(value: itemsProvider),
+          ChangeNotifierProvider.value(
+            value: localeProvider ?? LocaleProvider(),
+          ),
         ],
         child: Consumer<ThemeProvider>(
           builder: (context, provider, _) => MaterialApp(
@@ -95,5 +103,42 @@ void main() {
     expect(find.text('Data'), findsOneWidget);
     expect(find.text('Export backup'), findsOneWidget);
     expect(find.text('Import backup'), findsOneWidget);
+  });
+
+  testWidgets('tapping Italiano switches the app to Italian', (tester) async {
+    final localeProvider = LocaleProvider();
+    await pumpSettings(
+      tester,
+      themeProvider: ThemeProvider(),
+      itemsProvider: buildTestItemsProvider(),
+      localeProvider: localeProvider,
+    );
+
+    expect(localeProvider.isItalian, isFalse);
+    expect(find.text('Settings'), findsOneWidget);
+
+    await tester.tap(find.text('Italiano'));
+    await tester.pumpAndSettle();
+
+    expect(localeProvider.isItalian, isTrue);
+    expect(find.text('Impostazioni'), findsOneWidget);
+    expect(find.text('Aesthetic'), findsNothing);
+    expect(find.text('Estetica'), findsOneWidget);
+  });
+
+  testWidgets('tapping English switches back to English', (tester) async {
+    final localeProvider = LocaleProvider(initial: AppLocale.it);
+    await pumpSettings(
+      tester,
+      themeProvider: ThemeProvider(),
+      itemsProvider: buildTestItemsProvider(),
+      localeProvider: localeProvider,
+    );
+
+    await tester.tap(find.text('English'));
+    await tester.pumpAndSettle();
+
+    expect(localeProvider.isItalian, isFalse);
+    expect(find.text('Settings'), findsOneWidget);
   });
 }

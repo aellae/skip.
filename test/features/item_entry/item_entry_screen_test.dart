@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:skip/core/localization/locale_provider.dart';
 import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/data/items_provider.dart';
 import 'package:skip/features/item_entry/item_entry_screen.dart';
@@ -72,8 +73,11 @@ void main() {
   ) async {
     fakePicker = _FakeImagePicker(sourceImage);
     await tester.pumpWidget(
-      ChangeNotifierProvider.value(
-        value: itemsProvider,
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: itemsProvider),
+          ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ],
         child: MaterialApp(
           theme: AppThemes.minimal,
           home: ItemEntryScreen(imagePicker: fakePicker),

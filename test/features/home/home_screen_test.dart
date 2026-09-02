@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:skip/core/localization/locale_provider.dart';
 import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/data/items_provider.dart';
 import 'package:skip/features/home/home_screen.dart';
 
 import '../../test_helpers/widget_test_env.dart';
 
-Widget _buildApp(ItemsProvider provider) {
-  return ChangeNotifierProvider.value(
-    value: provider,
-    child: MaterialApp(theme: AppThemes.minimal, home: const HomeScreen()),
+Widget _buildApp(ItemsProvider provider, {ThemeData? theme}) {
+  return MultiProvider(
+    providers: [
+      ChangeNotifierProvider.value(value: provider),
+      ChangeNotifierProvider(create: (_) => LocaleProvider()),
+    ],
+    child: MaterialApp(
+      theme: theme ?? AppThemes.minimal,
+      home: const HomeScreen(),
+    ),
   );
 }
 
@@ -71,12 +78,7 @@ void main() {
   ) async {
     final itemsProvider = buildTestItemsProvider();
 
-    await tester.pumpWidget(
-      ChangeNotifierProvider.value(
-        value: itemsProvider,
-        child: MaterialApp(theme: AppThemes.y2k, home: const HomeScreen()),
-      ),
-    );
+    await tester.pumpWidget(_buildApp(itemsProvider, theme: AppThemes.y2k));
     await tester.pumpAndSettle();
 
     expect(find.text('SKIP!'), findsOneWidget);

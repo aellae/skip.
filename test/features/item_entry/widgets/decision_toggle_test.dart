@@ -2,7 +2,9 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:provider/provider.dart';
 import 'package:skip/core/audio/sfx_player.dart';
+import 'package:skip/core/localization/locale_provider.dart';
 import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/features/item_entry/widgets/decision_toggle.dart';
 
@@ -24,13 +26,16 @@ void main() {
     required ValueChanged<bool> onChanged,
   }) {
     return tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: Scaffold(
-          body: DecisionToggle(
-            isSaved: isSaved,
-            onChanged: onChanged,
-            sfxPlayer: mockSfx,
+      ChangeNotifierProvider(
+        create: (_) => LocaleProvider(),
+        child: MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            body: DecisionToggle(
+              isSaved: isSaved,
+              onChanged: onChanged,
+              sfxPlayer: mockSfx,
+            ),
           ),
         ),
       ),

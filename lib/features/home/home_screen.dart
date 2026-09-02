@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/localization/locale_provider.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/widgets/skip_app_bar.dart';
 import '../../data/items_provider.dart';
@@ -33,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
     final skipTheme = theme.extension<SkipThemeExtension>()!;
     final itemsProvider = context.watch<ItemsProvider>();
+    final strings = context.watch<LocaleProvider>().strings;
 
     return Scaffold(
       appBar: SkipAppBar(
@@ -45,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ).push(MaterialPageRoute(builder: (_) => const InsightsScreen()));
             },
             icon: const Icon(Icons.insights_outlined),
-            tooltip: 'Insights',
+            tooltip: strings.insightsTooltip,
           ),
           IconButton(
             onPressed: () {
@@ -54,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
             },
             icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Settings',
+            tooltip: strings.settingsTooltip,
           ),
         ],
       ),
@@ -87,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Padding(
                           padding: const EdgeInsets.all(32),
                           child: Text(
-                            'Nothing logged yet.\nTap + to snap something you\'re tempted to buy.',
+                            strings.emptyHomeMessage,
                             textAlign: TextAlign.center,
                             style: theme.textTheme.bodyLarge,
                           ),

@@ -39,7 +39,20 @@
       "Bash(pkill -9 -f \"qemu-system\")",
       "Bash(pkill -9 -f \"emulator64\")",
       "Bash(pkill -9 -f \"Android Emulator\")",
-      "Bash(idevicecrashreport -k /private/tmp/claude-501/-Users-elle-Desktop-Progetti-Personali-skip-/1a8d15d1-f414-4584-8733-49e37f9c0007/scratchpad/crashlogs6)"
+      "Bash(idevicecrashreport -k /private/tmp/claude-501/-Users-elle-Desktop-Progetti-Personali-skip-/1a8d15d1-f414-4584-8733-49e37f9c0007/scratchpad/crashlogs6)",
+      "Bash(flutter --version)",
+      "Bash(grep -v \"^00:.*\\\\[E\\\\]$\")",
+      "Bash(awk '/^Failing tests:/{flag=1} flag')",
+      "Bash(mkdir -p \"/Users/elle/Desktop/Progetti Personali/skip./test/core/localization\")",
+      "Bash(grep -n \"setMockInitialValues\\\\|class SharedPreferences\" \"/Users/elle/.pub-cache/hosted/pub.dev/shared_preferences-2.5.5/lib/shared_preferences.dart\" | head -20)",
+      "Read(//Users/elle/.pub-cache/hosted/pub.dev/shared_preferences-2.5.5/lib/**)",
+      "Bash(sed -i '' \"s#import 'package:skip/core/theme/theme_provider.dart';#import 'package:skip/core/theme/app_themes.dart';\\\\nimport 'package:skip/core/theme/theme_provider.dart';#\" test/probe_test.dart)",
+      "Bash(sed -i '' \"s#const MaterialApp\\(home: SettingsScreen\\(\\)\\),#MaterialApp\\(theme: AppThemes.minimal, home: const SettingsScreen\\(\\)\\),#\" test/probe_test.dart)",
+      "Bash(rm -f \"/Users/elle/Desktop/Progetti Personali/skip./test/probe_test.dart\" /tmp/probe_test.dart)"
+    ],
+    "additionalDirectories": [
+      "/Users/elle/Desktop/Progetti Personali/skip./test/core",
+      "/Users/elle/Desktop/Progetti Personali/skip./test"
     ]
   }
 }

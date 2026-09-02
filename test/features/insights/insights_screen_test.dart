@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:skip/core/localization/locale_provider.dart';
 import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/data/items_provider.dart';
 import 'package:skip/features/insights/insights_screen.dart';
@@ -16,8 +17,11 @@ void main() {
     ThemeData? theme,
   }) async {
     await tester.pumpWidget(
-      ChangeNotifierProvider.value(
-        value: itemsProvider,
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: itemsProvider),
+          ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ],
         child: MaterialApp(
           theme: theme ?? AppThemes.minimal,
           home: const InsightsScreen(),

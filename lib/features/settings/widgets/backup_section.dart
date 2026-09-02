@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../core/localization/locale_provider.dart';
 import '../../../core/utils/file_helper.dart';
 import '../../../core/widgets/skip_card.dart';
 import '../../../data/backup_service.dart';
@@ -70,9 +71,13 @@ class _BackupSectionState extends State<BackupSection> {
       await _shareFile(file.path, 'SKIP backup');
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Couldn't export backup.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.read<LocaleProvider>().strings.couldntExportBackup,
+          ),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _isBusy = false);
     }
@@ -80,6 +85,7 @@ class _BackupSectionState extends State<BackupSection> {
 
   Future<void> _import() async {
     setState(() => _isBusy = true);
+    final strings = context.read<LocaleProvider>().strings;
     try {
       final path = await _pickJsonFile();
       if (!mounted || path == null) return;
@@ -92,7 +98,10 @@ class _BackupSectionState extends State<BackupSection> {
         // same reason FileHelper uses sync calls internally.
         content = File(path).readAsStringSync();
       } catch (_) {
-        throw const BackupFormatException("Couldn't read that file.");
+        throw BackupFormatException(
+          BackupFormatError.fileReadError,
+          "Couldn't read that file.",
+        );
       }
       if (!mounted) return;
 
@@ -100,16 +109,14 @@ class _BackupSectionState extends State<BackupSection> {
         content,
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Imported $count item${count == 1 ? '' : 's'}.'),
-        ),
-      );
-    } on BackupFormatException catch (e) {
-      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(e.message)));
+      ).showSnackBar(SnackBar(content: Text(strings.importedItems(count))));
+    } on BackupFormatException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(strings.backupErrorMessage(e.code))),
+      );
     } finally {
       if (mounted) setState(() => _isBusy = false);
     }
@@ -117,6 +124,7 @@ class _BackupSectionState extends State<BackupSection> {
 
   void _showExportSheet() {
     final accent = Theme.of(context).colorScheme.primary;
+    final strings = context.read<LocaleProvider>().strings;
     showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) => SafeArea(
@@ -125,7 +133,7 @@ class _BackupSectionState extends State<BackupSection> {
           children: [
             ListTile(
               leading: Icon(Icons.data_object, color: accent),
-              title: const Text('Export as JSON'),
+              title: Text(strings.exportAsJson),
               onTap: () {
                 Navigator.of(sheetContext).pop();
                 _export('json');
@@ -133,7 +141,7 @@ class _BackupSectionState extends State<BackupSection> {
             ),
             ListTile(
               leading: Icon(Icons.table_chart_outlined, color: accent),
-              title: const Text('Export as CSV'),
+              title: Text(strings.exportAsCsv),
               onTap: () {
                 Navigator.of(sheetContext).pop();
                 _export('csv');
@@ -148,26 +156,24 @@ class _BackupSectionState extends State<BackupSection> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final strings = context.watch<LocaleProvider>().strings;
 
     return SkipCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            "Photos stay on this device — backups cover item records only.",
-            style: theme.textTheme.bodySmall,
-          ),
+          Text(strings.photosStayOnDevice, style: theme.textTheme.bodySmall),
           const SizedBox(height: 12),
           OutlinedButton.icon(
             onPressed: _isBusy ? null : _showExportSheet,
             icon: const Icon(Icons.ios_share),
-            label: const Text('Export backup'),
+            label: Text(strings.exportBackup),
           ),
           const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: _isBusy ? null : _import,
             icon: const Icon(Icons.file_upload_outlined),
-            label: const Text('Import backup'),
+            label: Text(strings.importBackup),
           ),
           if (_isBusy) ...[
             const SizedBox(height: 12),

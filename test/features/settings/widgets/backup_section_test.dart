@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:skip/core/localization/locale_provider.dart';
 import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/data/items_provider.dart';
 import 'package:skip/features/settings/widgets/backup_section.dart';
@@ -30,8 +31,11 @@ void main() {
     Future<void> Function(String path, String subject)? shareFile,
   }) async {
     await tester.pumpWidget(
-      ChangeNotifierProvider.value(
-        value: itemsProvider,
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: itemsProvider),
+          ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ],
         child: MaterialApp(
           theme: AppThemes.minimal,
           home: Scaffold(

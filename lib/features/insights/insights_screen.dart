@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_spacing.dart';
+import '../../core/localization/locale_provider.dart';
 import '../../core/widgets/skip_app_bar.dart';
 import '../../core/widgets/status_indicator.dart';
 import '../../data/items_provider.dart';
@@ -17,10 +18,11 @@ class InsightsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final itemsProvider = context.watch<ItemsProvider>();
+    final strings = context.watch<LocaleProvider>().strings;
     final monthlyTotals = itemsProvider.monthlyTotals();
 
     return Scaffold(
-      appBar: SkipAppBar(title: const Text('Insights')),
+      appBar: SkipAppBar(title: Text(strings.insightsTitle)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -28,23 +30,23 @@ class InsightsScreen extends StatelessWidget {
             SummaryCards(
               totalSaved: itemsProvider.totalSavedThisMonth,
               totalSpent: itemsProvider.totalSpentThisMonth,
-              savedLabel: "This Month's Savings",
-              spentLabel: "This Month's Spent",
+              savedLabel: strings.thisMonthsSavings,
+              spentLabel: strings.thisMonthsSpent,
             ),
             const SizedBox(height: AppSpacing.sectionGap),
-            Text('Last 6 Months', style: theme.textTheme.labelLarge),
+            Text(strings.last6Months, style: theme.textTheme.labelLarge),
             const SizedBox(height: 8),
             Row(
               children: [
                 StatusIndicator(
                   isSaved: true,
-                  label: 'Saved',
+                  label: strings.saved,
                   labelStyle: theme.textTheme.bodySmall,
                 ),
                 const SizedBox(width: 16),
                 StatusIndicator(
                   isSaved: false,
-                  label: 'Spent',
+                  label: strings.spent,
                   labelStyle: theme.textTheme.bodySmall,
                 ),
               ],

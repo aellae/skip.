@@ -5,14 +5,27 @@ import 'package:csv/csv.dart';
 import 'database_helper.dart';
 import 'models/item_model.dart';
 
+/// Identifies *why* a backup failed to parse, independent of any display
+/// language — the UI layer maps this to a localized string, since this data
+/// layer has no access to the active [AppLocale].
+enum BackupFormatError {
+  invalidJson,
+  notASkipBackup,
+  invalidItemEntry,
+  invalidItemFields,
+  fileReadError,
+}
+
 /// Thrown by [BackupService.parseJsonBackup] when the given content isn't a
-/// well-formed SKIP backup. Carries a user-facing [message] so callers can
-/// surface a clear error instead of silently accepting malformed data or
-/// crashing on a raw parse exception (BUILD_PROMPT.md §7-8).
+/// well-formed SKIP backup. Carries a [code] so callers can look up a
+/// localized message, plus an English [message] fallback (used by
+/// [toString] for logs/debugging) instead of silently accepting malformed
+/// data or crashing on a raw parse exception (BUILD_PROMPT.md §7-8).
 class BackupFormatException implements Exception {
+  final BackupFormatError code;
   final String message;
 
-  const BackupFormatException(this.message);
+  const BackupFormatException(this.code, this.message);
 
   @override
   String toString() => message;
@@ -79,11 +92,15 @@ class BackupService {
     try {
       decoded = jsonDecode(content);
     } on FormatException {
-      throw const BackupFormatException("That file isn't valid JSON.");
+      throw const BackupFormatException(
+        BackupFormatError.invalidJson,
+        "That file isn't valid JSON.",
+      );
     }
 
     if (decoded is! Map || decoded['items'] is! List) {
       throw const BackupFormatException(
+        BackupFormatError.notASkipBackup,
         "That file doesn't look like a SKIP backup.",
       );
     }
@@ -92,6 +109,7 @@ class BackupService {
     return itemsRaw.map((raw) {
       if (raw is! Map) {
         throw const BackupFormatException(
+          BackupFormatError.invalidItemEntry,
           'The backup contains an invalid item entry.',
         );
       }
@@ -99,6 +117,7 @@ class BackupService {
         return ItemModel.fromMap(Map<String, Object?>.from(raw));
       } catch (_) {
         throw const BackupFormatException(
+          BackupFormatError.invalidItemFields,
           'The backup contains an item with missing or invalid fields.',
         );
       }

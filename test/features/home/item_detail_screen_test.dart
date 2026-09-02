@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
+import 'package:skip/core/localization/locale_provider.dart';
 import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/core/utils/file_helper.dart';
 import 'package:skip/data/database_helper.dart';
@@ -45,8 +46,11 @@ void main() {
     final item = itemsProvider.items.single;
 
     await tester.pumpWidget(
-      ChangeNotifierProvider.value(
-        value: itemsProvider,
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: itemsProvider),
+          ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ],
         child: MaterialApp(
           theme: AppThemes.minimal,
           home: ItemDetailScreen(

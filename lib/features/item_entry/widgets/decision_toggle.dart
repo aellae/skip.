@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/audio/sfx_player.dart';
+import '../../../core/localization/locale_provider.dart';
 import '../../../core/theme/app_themes.dart';
 import '../../../core/theme/contrast.dart';
 import '../../../core/widgets/tap_scale.dart';
@@ -86,6 +88,7 @@ class _DecisionToggleState extends State<DecisionToggle> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final skipTheme = theme.extension<SkipThemeExtension>()!;
+    final strings = context.watch<LocaleProvider>().strings;
 
     return Stack(
       clipBehavior: Clip.none,
@@ -95,7 +98,7 @@ class _DecisionToggleState extends State<DecisionToggle> {
           children: [
             Expanded(
               child: _ToggleOption(
-                label: 'Resisted!',
+                label: strings.resisted,
                 selected: widget.isSaved,
                 color: skipTheme.savedColor,
                 onTap: () => _selectResisted(skipTheme.isY2K),
@@ -109,7 +112,7 @@ class _DecisionToggleState extends State<DecisionToggle> {
             const SizedBox(width: 12),
             Expanded(
               child: _ToggleOption(
-                label: 'Bought It',
+                label: strings.boughtIt,
                 selected: !widget.isSaved,
                 color: skipTheme.spentColor,
                 onTap: _selectBought,
