@@ -48,7 +48,15 @@
       "Read(//Users/elle/.pub-cache/hosted/pub.dev/shared_preferences-2.5.5/lib/**)",
       "Bash(sed -i '' \"s#import 'package:skip/core/theme/theme_provider.dart';#import 'package:skip/core/theme/app_themes.dart';\\\\nimport 'package:skip/core/theme/theme_provider.dart';#\" test/probe_test.dart)",
       "Bash(sed -i '' \"s#const MaterialApp\\(home: SettingsScreen\\(\\)\\),#MaterialApp\\(theme: AppThemes.minimal, home: const SettingsScreen\\(\\)\\),#\" test/probe_test.dart)",
-      "Bash(rm -f \"/Users/elle/Desktop/Progetti Personali/skip./test/probe_test.dart\" /tmp/probe_test.dart)"
+      "Bash(rm -f \"/Users/elle/Desktop/Progetti Personali/skip./test/probe_test.dart\" /tmp/probe_test.dart)",
+      "Bash(tee /private/tmp/claude-501/-Users-elle-Desktop-Progetti-Personali-skip-/88aaf6d4-cbdf-4ba2-8ded-b0fd1f26cd60/scratchpad/flutter_run.log)",
+      "Bash(echo \"Launched with PID $!\")",
+      "Bash(tee /private/tmp/claude-501/-Users-elle-Desktop-Progetti-Personali-skip-/88aaf6d4-cbdf-4ba2-8ded-b0fd1f26cd60/scratchpad/flutter_run2.log)",
+      "Bash(nohup flutter run -d 07BCD71A-99C7-40B6-A158-13C960B9F00C)",
+      "Bash(disown)",
+      "Bash(echo \"PID: $!\")",
+      "Bash(ps -p 75801 -o pid,etime,command)",
+      "Bash(kill 75801)"
     ],
     "additionalDirectories": [
       "/Users/elle/Desktop/Progetti Personali/skip./test/core",
