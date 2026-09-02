@@ -93,6 +93,9 @@ dart format .
 flutter test
 ```
 
+> **⚠️ Do not run the Android emulator unless explicitly requested.**
+> Default to iOS Simulator (or static analysis / `flutter test`) for verifying changes. The Android emulator (`Medium_Phone.avd`) consumes several GB of RAM and continuously rewrites a multi-GB disk image while running, which has driven this machine to zero free disk space before. Only launch it when the user specifically asks to test on Android, and prefer `flutter run -d ios` / a booted iOS simulator for routine checks.
+
 ---
 
 ## 🎨 Design Rules for New Features
