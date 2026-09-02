@@ -162,7 +162,8 @@ class _ToggleOption extends StatelessWidget {
     final glossy = selected && skipTheme.isY2K;
 
     Widget fill = AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
       padding: const EdgeInsets.symmetric(vertical: 16),
       alignment: Alignment.center,
       decoration: BoxDecoration(

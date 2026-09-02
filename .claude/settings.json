@@ -15,7 +15,11 @@
       "Bash(xargs -I{} sed -n '1,50p' {})",
       "Bash(dart format *)",
       "Bash(flutter devices *)",
-      "Bash(flutter emulators *)"
+      "Bash(flutter emulators *)",
+      "Bash(grep -rn \"is_saved\\\\|isSaved\\\\|Resisted\\\\|Bought\" \"/Users/elle/Desktop/Progetti Personali/skip/lib\" --include=\"*.dart\" -l)",
+      "Read(//Users/elle/Desktop/Progetti Personali/skip/**)",
+      "Bash(find \"/Users/elle/Desktop/Progetti Personali/skip/lib\" -iname \"*.dart\" | xargs grep -ln \"AnimatedContainer\\\\|AnimationController\\\\|TabBar\\\\|Switcher\" )",
+      "Bash(git stash *)"
     ]
   }
 }

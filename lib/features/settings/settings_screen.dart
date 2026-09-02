@@ -120,7 +120,8 @@ class _AestheticOption extends StatelessWidget {
     return TapScale(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(ambientSkip.cardRadius + 3),

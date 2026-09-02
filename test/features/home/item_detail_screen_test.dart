@@ -102,6 +102,26 @@ void main() {
     expect(itemsProvider.items.single.isSaved, isFalse);
   });
 
+  testWidgets('status can be switched back and forth repeatedly', (
+    tester,
+  ) async {
+    await pumpDetail(tester);
+    expect(itemsProvider.items.single.isSaved, isTrue);
+
+    await tester.ensureVisible(find.text('Bought It'));
+    await tester.tap(find.text('Bought It'));
+    await tester.pumpAndSettle();
+    expect(itemsProvider.items.single.isSaved, isFalse);
+
+    await tester.tap(find.text('Resisted!'));
+    await tester.pumpAndSettle();
+    expect(itemsProvider.items.single.isSaved, isTrue);
+
+    await tester.tap(find.text('Bought It'));
+    await tester.pumpAndSettle();
+    expect(itemsProvider.items.single.isSaved, isFalse);
+  });
+
   testWidgets('shows "Add product link" when no link is set', (tester) async {
     await pumpDetail(tester);
 

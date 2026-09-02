@@ -43,8 +43,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       (uri) => launchUrl(uri, mode: LaunchMode.externalApplication);
   bool _isBusy = false;
 
-  Future<void> _changeStatus(bool isSaved) async {
-    if (widget.item.id == null || isSaved == widget.item.isSaved) return;
+  Future<void> _changeStatus(bool isSaved, bool currentIsSaved) async {
+    if (widget.item.id == null || isSaved == currentIsSaved) return;
     setState(() => _isBusy = true);
     await context.read<ItemsProvider>().setSavedStatus(
       widget.item.id!,
@@ -194,7 +194,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               const SizedBox(height: 8),
               DecisionToggle(
                 isSaved: item.isSaved,
-                onChanged: _isBusy ? (_) {} : _changeStatus,
+                onChanged: _isBusy
+                    ? (_) {}
+                    : (newValue) => _changeStatus(newValue, item.isSaved),
               ),
               const SizedBox(height: 24),
               Text('Product Link', style: theme.textTheme.labelLarge),
