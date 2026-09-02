@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/constants/app_spacing.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../core/utils/currency_formatter.dart';
@@ -33,7 +34,7 @@ class SettingsScreen extends StatelessWidget {
               aesthetic: themeProvider.aesthetic,
               onChanged: themeProvider.setAesthetic,
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.sectionGap),
             Text('Summary', style: theme.textTheme.labelLarge),
             const SizedBox(height: 12),
             _StatTile(
@@ -47,7 +48,7 @@ class SettingsScreen extends StatelessWidget {
               value: formatCurrency(itemsProvider.averageSavedPerItem),
               color: skipTheme.savedColor,
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.sectionGap),
             Text('Data', style: theme.textTheme.labelLarge),
             const SizedBox(height: 12),
             const BackupSection(),

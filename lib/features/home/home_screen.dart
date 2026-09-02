@@ -104,16 +104,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         childCount: itemsProvider.items.length,
                         itemBuilder: (context, index) {
                           final item = itemsProvider.items[index];
-                          return ItemGridCard(
-                            item: item,
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  fullscreenDialog: true,
-                                  builder: (_) => ItemDetailScreen(item: item),
-                                ),
-                              );
-                            },
+                          return _GridEntranceFade(
+                            key: ValueKey(item.id ?? item.imagePath),
+                            child: ItemGridCard(
+                              item: item,
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    fullscreenDialog: true,
+                                    builder: (_) =>
+                                        ItemDetailScreen(item: item),
+                                  ),
+                                );
+                              },
+                            ),
                           );
                         },
                       ),
@@ -131,6 +135,50 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
         child: const Icon(Icons.add_a_photo),
+      ),
+    );
+  }
+}
+
+/// Fades and scales a freshly-mounted grid card in, once, on first build.
+///
+/// Relies on the caller giving each card a stable [Key] (the item's id/image
+/// path) — without one, Flutter would reuse Elements by list position and
+/// this animation could replay on an unrelated reorder, or skip a genuine
+/// insert.
+class _GridEntranceFade extends StatefulWidget {
+  final Widget child;
+
+  const _GridEntranceFade({super.key, required this.child});
+
+  @override
+  State<_GridEntranceFade> createState() => _GridEntranceFadeState();
+}
+
+class _GridEntranceFadeState extends State<_GridEntranceFade>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 260),
+  )..forward();
+  late final Animation<double> _curve = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutCubic,
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _curve,
+      child: ScaleTransition(
+        scale: Tween(begin: 0.92, end: 1.0).animate(_curve),
+        child: widget.child,
       ),
     );
   }

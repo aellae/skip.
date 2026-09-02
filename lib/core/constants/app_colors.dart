@@ -13,8 +13,8 @@ class AppColors {
   static const minimalSilkBeige = Color(0xFFE7DFD3);
   static const minimalChampagne = Color(0xFFE9D5A5);
   static const minimalSoftWhite = Color(0xFFFDFBF7);
-  static const minimalSaved = Color(0xFFA8BBA2);
-  static const minimalSpent = Color(0xFFE7BEBE);
+  static const minimalSaved = Color(0xFF5C7A5A);
+  static const minimalSpent = Color(0xFFA35656);
 
   // Bratz Y2K ("SKIP!")
   static const y2kHotMagenta = Color(0xFFFF007F);
@@ -23,6 +23,6 @@ class AppColors {
   static const y2kGlitterPink = Color(0xFFFFD1EC);
   static const y2kBlack = Color(0xFF181022);
   static const y2kSaved = Color(0xFF00E5A0);
-  static const y2kSpent = Color(0xFF6B003B);
+  static const y2kSpent = Color(0xFFFF6B4A);
   static const y2kDeepSurface = Color(0xFF241A33);
 }

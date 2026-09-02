@@ -78,6 +78,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
   }
 
   void _showImageSourceSheet() {
+    final accent = Theme.of(context).colorScheme.primary;
     showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) => SafeArea(
@@ -87,14 +88,14 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
             TapScale(
               onTap: () => _pickImage(ImageSource.camera),
               child: ListTile(
-                leading: const Icon(Icons.camera_alt),
+                leading: Icon(Icons.camera_alt, color: accent),
                 title: const Text('Camera'),
               ),
             ),
             TapScale(
               onTap: () => _pickImage(ImageSource.gallery),
               child: ListTile(
-                leading: const Icon(Icons.photo_library),
+                leading: Icon(Icons.photo_library, color: accent),
                 title: const Text('Gallery'),
               ),
             ),
@@ -158,7 +159,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                GestureDetector(
+                TapScale(
                   onTap: _isPickingImage ? null : _showImageSourceSheet,
                   child: AspectRatio(
                     aspectRatio: 1,
@@ -176,27 +177,35 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                             : null,
                       ),
                       clipBehavior: Clip.antiAlias,
-                      child: _isPickingImage
-                          ? const Center(child: CircularProgressIndicator())
-                          : _previewFile != null
-                          ? Image.file(
-                              _previewFile!,
-                              fit: BoxFit.cover,
-                              cacheWidth: 800,
-                            )
-                          : Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.add_a_photo, size: 40),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Tap to add a photo',
-                                    style: theme.textTheme.bodyMedium,
-                                  ),
-                                ],
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 220),
+                        child: _isPickingImage
+                            ? const Center(
+                                key: ValueKey('loading'),
+                                child: CircularProgressIndicator(),
+                              )
+                            : _previewFile != null
+                            ? Image.file(
+                                _previewFile!,
+                                key: ValueKey(_previewFile!.path),
+                                fit: BoxFit.cover,
+                                cacheWidth: 800,
+                              )
+                            : Center(
+                                key: const ValueKey('placeholder'),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.add_a_photo, size: 40),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Tap to add a photo',
+                                      style: theme.textTheme.bodyMedium,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
+                      ),
                     ),
                   ),
                 ),

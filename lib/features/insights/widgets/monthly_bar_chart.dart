@@ -64,10 +64,7 @@ class MonthlyBarChart extends StatelessWidget {
                   : skipTheme.spentColor;
               return BarTooltipItem(
                 formatCurrencyCompact(rod.toY),
-                (axisStyle ?? const TextStyle()).copyWith(
-                  color: statusColor,
-                  fontWeight: FontWeight.w600,
-                ),
+                (axisStyle ?? const TextStyle()).copyWith(color: statusColor),
               );
             },
           ),

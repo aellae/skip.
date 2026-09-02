@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/constants/app_spacing.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../core/utils/date_formatter.dart';
@@ -69,7 +70,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(
               'Delete',
-              style: TextStyle(
+              style: Theme.of(dialogContext).textTheme.labelLarge?.copyWith(
                 color: Theme.of(dialogContext).colorScheme.error,
               ),
             ),
@@ -143,33 +144,37 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(skipTheme.cardRadius),
-                  child: FutureBuilder<File>(
-                    future: _fileHelper.resolveImageFile(item.imagePath),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return Container(color: theme.colorScheme.surface);
-                      }
-                      return Image.file(
-                        snapshot.data!,
-                        fit: BoxFit.cover,
-                        cacheWidth: 1200,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: theme.colorScheme.surface,
-                          alignment: Alignment.center,
-                          child: Icon(
-                            Icons.broken_image_outlined,
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.4,
-                            ),
-                            size: 48,
-                          ),
-                        ),
-                      );
-                    },
+              Hero(
+                tag: 'item-image-${item.imagePath}',
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(skipTheme.cardRadius),
+                    child: FutureBuilder<File>(
+                      future: _fileHelper.resolveImageFile(item.imagePath),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return Container(color: theme.colorScheme.surface);
+                        }
+                        return Image.file(
+                          snapshot.data!,
+                          fit: BoxFit.cover,
+                          cacheWidth: 1200,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                color: theme.colorScheme.surface,
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  Icons.broken_image_outlined,
+                                  color: theme.colorScheme.onSurface.withValues(
+                                    alpha: 0.4,
+                                  ),
+                                  size: 48,
+                                ),
+                              ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -189,7 +194,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 formatDate(item.createdAt),
                 style: theme.textTheme.bodyMedium,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.sectionGap),
               Text('Status', style: theme.textTheme.labelLarge),
               const SizedBox(height: 8),
               DecisionToggle(
@@ -198,37 +203,53 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                     ? (_) {}
                     : (newValue) => _changeStatus(newValue, item.isSaved),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.sectionGap),
               Text('Product Link', style: theme.textTheme.labelLarge),
               const SizedBox(height: 8),
-              if (item.purchaseUrl != null && item.purchaseUrl!.isNotEmpty)
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                child: item.purchaseUrl != null && item.purchaseUrl!.isNotEmpty
+                    ? Row(
+                        key: const ValueKey('link'),
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _isBusy
+                                  ? null
+                                  : () => _openPurchaseUrl(item.purchaseUrl!),
+                              icon: const Icon(Icons.open_in_new),
+                              label: const Text('Visit product page'),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            onPressed: _isBusy
+                                ? null
+                                : () => _editPurchaseLink(item.purchaseUrl),
+                            icon: const Icon(Icons.edit_outlined),
+                            tooltip: 'Edit link',
+                          ),
+                        ],
+                      )
+                    : OutlinedButton.icon(
+                        key: const ValueKey('no-link'),
                         onPressed: _isBusy
                             ? null
-                            : () => _openPurchaseUrl(item.purchaseUrl!),
-                        icon: const Icon(Icons.open_in_new),
-                        label: const Text('Visit product page'),
+                            : () => _editPurchaseLink(null),
+                        icon: const Icon(Icons.add_link),
+                        label: const Text('Add product link'),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: _isBusy
-                          ? null
-                          : () => _editPurchaseLink(item.purchaseUrl),
-                      icon: const Icon(Icons.edit_outlined),
-                      tooltip: 'Edit link',
-                    ),
-                  ],
-                )
-              else
-                OutlinedButton.icon(
-                  onPressed: _isBusy ? null : () => _editPurchaseLink(null),
-                  icon: const Icon(Icons.add_link),
-                  label: const Text('Add product link'),
+              ),
+              if (_isBusy) ...[
+                const SizedBox(height: 16),
+                const Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
                 ),
+              ],
             ],
           ),
         ),

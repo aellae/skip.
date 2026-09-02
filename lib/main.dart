@@ -45,6 +45,12 @@ class SkipApp extends StatelessWidget {
             title: 'SKIP',
             debugShowCheckedModeBanner: false,
             theme: themeProvider.themeData,
+            builder: (context, child) => AnimatedTheme(
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeInOutCubic,
+              data: themeProvider.themeData,
+              child: child!,
+            ),
             home: const HomeScreen(),
           );
         },

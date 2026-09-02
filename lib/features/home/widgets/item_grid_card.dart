@@ -46,7 +46,13 @@ class ItemGridCard extends StatelessWidget {
         children: [
           Stack(
             children: [
-              AspectRatio(aspectRatio: 1, child: _buildImage(skipTheme)),
+              Hero(
+                tag: 'item-image-${item.imagePath}',
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: _buildImage(skipTheme),
+                ),
+              ),
               if (skipTheme.isY2K)
                 Positioned(
                   top: 6,

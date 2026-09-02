@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/constants/app_spacing.dart';
 import '../../core/widgets/skip_app_bar.dart';
 import '../../core/widgets/status_indicator.dart';
 import '../../data/items_provider.dart';
@@ -30,7 +31,7 @@ class InsightsScreen extends StatelessWidget {
               savedLabel: "This Month's Savings",
               spentLabel: "This Month's Spent",
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.sectionGap),
             Text('Last 6 Months', style: theme.textTheme.labelLarge),
             const SizedBox(height: 8),
             Row(

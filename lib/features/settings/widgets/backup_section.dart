@@ -116,6 +116,7 @@ class _BackupSectionState extends State<BackupSection> {
   }
 
   void _showExportSheet() {
+    final accent = Theme.of(context).colorScheme.primary;
     showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) => SafeArea(
@@ -123,7 +124,7 @@ class _BackupSectionState extends State<BackupSection> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.data_object),
+              leading: Icon(Icons.data_object, color: accent),
               title: const Text('Export as JSON'),
               onTap: () {
                 Navigator.of(sheetContext).pop();
@@ -131,7 +132,7 @@ class _BackupSectionState extends State<BackupSection> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.table_chart_outlined),
+              leading: Icon(Icons.table_chart_outlined, color: accent),
               title: const Text('Export as CSV'),
               onTap: () {
                 Navigator.of(sheetContext).pop();
@@ -168,6 +169,16 @@ class _BackupSectionState extends State<BackupSection> {
             icon: const Icon(Icons.file_upload_outlined),
             label: const Text('Import backup'),
           ),
+          if (_isBusy) ...[
+            const SizedBox(height: 12),
+            const Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_themes.dart';
-import '../../../core/utils/currency_formatter.dart';
+import '../../../core/widgets/animated_count_up.dart';
 import '../../../core/widgets/skip_card.dart';
 
 /// The two headline financial status cards: Total Saved and Total Spent.
@@ -76,8 +76,8 @@ class _SummaryCard extends StatelessWidget {
         children: [
           Text(label, style: theme.textTheme.labelLarge),
           const SizedBox(height: 8),
-          Text(
-            formatCurrency(amount),
+          AnimatedCountUp(
+            value: amount,
             style: theme.textTheme.headlineSmall?.copyWith(color: color),
           ),
         ],

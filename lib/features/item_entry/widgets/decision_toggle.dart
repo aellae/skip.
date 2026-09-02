@@ -7,6 +7,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../core/audio/sfx_player.dart';
 import '../../../core/theme/app_themes.dart';
+import '../../../core/theme/contrast.dart';
 import '../../../core/widgets/tap_scale.dart';
 
 /// "Resisted! / Skip" vs. "Bought It / Spent" decision toggle.
@@ -190,9 +191,7 @@ class _ToggleOption extends StatelessWidget {
       child: Text(
         label,
         style: theme.textTheme.titleMedium?.copyWith(
-          color: selected
-              ? (skipTheme.isY2K ? Colors.white : theme.colorScheme.surface)
-              : theme.colorScheme.onSurface,
+          color: selected ? bestOnColor(color) : theme.colorScheme.onSurface,
         ),
       ),
     );
