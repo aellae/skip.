@@ -22,7 +22,24 @@
       "Bash(git stash *)",
       "Bash(xcrun simctl *)",
       "Bash(flutter run *)",
-      "Bash(mkdir -p /private/tmp/claude-501/-Users-elle-Desktop-Progetti-Personali-skip-/85ac8515-1787-4503-92b8-95519646b8d0/scratchpad)"
+      "Bash(mkdir -p /private/tmp/claude-501/-Users-elle-Desktop-Progetti-Personali-skip-/85ac8515-1787-4503-92b8-95519646b8d0/scratchpad)",
+      "Bash(tmutil listlocalsnapshots *)",
+      "Bash(diskutil apfs *)",
+      "Bash(echo \"EXIT:$?\")",
+      "Read(//Users/elle/.android/avd/**)",
+      "Bash(grep -E \"\\\\.avd$|\\\\.ini$\")",
+      "Bash(set -e)",
+      "Bash(rm -rf /Users/elle/Library/Developer/Xcode/DerivedData)",
+      "Bash(rm -rf '/Users/elle/Library/Developer/Xcode/iOS DeviceSupport')",
+      "Bash(rm -rf /Users/elle/.android/avd/Medium_Phone.avd/snapshots)",
+      "Bash(sysctl vm.swapusage)",
+      "Bash(memory_pressure)",
+      "Bash(xcrun devicectl *)",
+      "Bash(flutter build *)",
+      "Bash(pkill -9 -f \"qemu-system\")",
+      "Bash(pkill -9 -f \"emulator64\")",
+      "Bash(pkill -9 -f \"Android Emulator\")",
+      "Bash(idevicecrashreport -k /private/tmp/claude-501/-Users-elle-Desktop-Progetti-Personali-skip-/1a8d15d1-f414-4584-8733-49e37f9c0007/scratchpad/crashlogs6)"
     ]
   }
 }

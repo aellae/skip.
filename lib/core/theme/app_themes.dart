@@ -1,7 +1,6 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../constants/app_colors.dart';
 
@@ -108,57 +107,78 @@ class AppThemes {
 
   static final TextTheme _minimalTextTheme =
       TextTheme(
-        displayLarge: GoogleFonts.playfairDisplay(
+        displayLarge: const TextStyle(
+          fontFamily: 'Playfair Display',
           fontSize: 57,
           fontWeight: FontWeight.w600,
         ),
-        displayMedium: GoogleFonts.playfairDisplay(
+        displayMedium: const TextStyle(
+          fontFamily: 'Playfair Display',
           fontSize: 45,
           fontWeight: FontWeight.w600,
         ),
-        displaySmall: GoogleFonts.playfairDisplay(
+        displaySmall: const TextStyle(
+          fontFamily: 'Playfair Display',
           fontSize: 36,
           fontWeight: FontWeight.w600,
         ),
-        headlineLarge: GoogleFonts.playfairDisplay(
+        headlineLarge: const TextStyle(
+          fontFamily: 'Playfair Display',
           fontSize: 32,
           fontWeight: FontWeight.w600,
         ),
-        headlineMedium: GoogleFonts.playfairDisplay(
+        headlineMedium: const TextStyle(
+          fontFamily: 'Playfair Display',
           fontSize: 28,
           fontWeight: FontWeight.w600,
         ),
-        headlineSmall: GoogleFonts.playfairDisplay(
+        headlineSmall: const TextStyle(
+          fontFamily: 'Playfair Display',
           fontSize: 24,
           fontWeight: FontWeight.w600,
         ),
-        titleLarge: GoogleFonts.playfairDisplay(
+        titleLarge: const TextStyle(
+          fontFamily: 'Playfair Display',
           fontSize: 22,
           fontWeight: FontWeight.w500,
         ),
-        titleMedium: GoogleFonts.inter(
+        titleMedium: const TextStyle(
+          fontFamily: 'Inter',
           fontSize: 16,
           fontWeight: FontWeight.w600,
         ),
-        titleSmall: GoogleFonts.inter(
+        titleSmall: const TextStyle(
+          fontFamily: 'Inter',
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
-        bodyLarge: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w400),
-        bodyMedium: GoogleFonts.inter(
+        bodyLarge: const TextStyle(
+          fontFamily: 'Inter',
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+        ),
+        bodyMedium: const TextStyle(
+          fontFamily: 'Inter',
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
-        bodySmall: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w400),
-        labelLarge: GoogleFonts.inter(
+        bodySmall: const TextStyle(
+          fontFamily: 'Inter',
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+        ),
+        labelLarge: const TextStyle(
+          fontFamily: 'Inter',
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
-        labelMedium: GoogleFonts.inter(
+        labelMedium: const TextStyle(
+          fontFamily: 'Inter',
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
-        labelSmall: GoogleFonts.inter(
+        labelSmall: const TextStyle(
+          fontFamily: 'Inter',
           fontSize: 11,
           fontWeight: FontWeight.w500,
         ),
@@ -168,39 +188,81 @@ class AppThemes {
       );
 
   static final TextTheme _y2kTextTheme = TextTheme(
-    displayLarge: GoogleFonts.titanOne(
+    displayLarge: const TextStyle(
+      fontFamily: 'Titan One',
       fontSize: 52,
       fontWeight: FontWeight.w400,
     ),
-    displayMedium: GoogleFonts.titanOne(
+    displayMedium: const TextStyle(
+      fontFamily: 'Titan One',
       fontSize: 42,
       fontWeight: FontWeight.w400,
     ),
-    displaySmall: GoogleFonts.titanOne(
+    displaySmall: const TextStyle(
+      fontFamily: 'Titan One',
       fontSize: 34,
       fontWeight: FontWeight.w400,
     ),
-    headlineLarge: GoogleFonts.titanOne(
+    headlineLarge: const TextStyle(
+      fontFamily: 'Titan One',
       fontSize: 30,
       fontWeight: FontWeight.w400,
     ),
-    headlineMedium: GoogleFonts.titanOne(
+    headlineMedium: const TextStyle(
+      fontFamily: 'Titan One',
       fontSize: 26,
       fontWeight: FontWeight.w400,
     ),
-    headlineSmall: GoogleFonts.titanOne(
+    headlineSmall: const TextStyle(
+      fontFamily: 'Titan One',
       fontSize: 22,
       fontWeight: FontWeight.w400,
     ),
-    titleLarge: GoogleFonts.titanOne(fontSize: 20, fontWeight: FontWeight.w400),
-    titleMedium: GoogleFonts.fredoka(fontSize: 16, fontWeight: FontWeight.w600),
-    titleSmall: GoogleFonts.fredoka(fontSize: 14, fontWeight: FontWeight.w600),
-    bodyLarge: GoogleFonts.fredoka(fontSize: 16, fontWeight: FontWeight.w500),
-    bodyMedium: GoogleFonts.fredoka(fontSize: 14, fontWeight: FontWeight.w500),
-    bodySmall: GoogleFonts.fredoka(fontSize: 12, fontWeight: FontWeight.w500),
-    labelLarge: GoogleFonts.fredoka(fontSize: 14, fontWeight: FontWeight.w700),
-    labelMedium: GoogleFonts.fredoka(fontSize: 12, fontWeight: FontWeight.w600),
-    labelSmall: GoogleFonts.fredoka(fontSize: 11, fontWeight: FontWeight.w600),
+    titleLarge: const TextStyle(
+      fontFamily: 'Titan One',
+      fontSize: 20,
+      fontWeight: FontWeight.w400,
+    ),
+    titleMedium: const TextStyle(
+      fontFamily: 'Fredoka',
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+    ),
+    titleSmall: const TextStyle(
+      fontFamily: 'Fredoka',
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+    ),
+    bodyLarge: const TextStyle(
+      fontFamily: 'Fredoka',
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+    ),
+    bodyMedium: const TextStyle(
+      fontFamily: 'Fredoka',
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+    ),
+    bodySmall: const TextStyle(
+      fontFamily: 'Fredoka',
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+    ),
+    labelLarge: const TextStyle(
+      fontFamily: 'Fredoka',
+      fontSize: 14,
+      fontWeight: FontWeight.w700,
+    ),
+    labelMedium: const TextStyle(
+      fontFamily: 'Fredoka',
+      fontSize: 12,
+      fontWeight: FontWeight.w600,
+    ),
+    labelSmall: const TextStyle(
+      fontFamily: 'Fredoka',
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+    ),
   ).apply(bodyColor: AppColors.y2kMetallicSilver, displayColor: Colors.white);
 
   static final ThemeData minimal = ThemeData(
