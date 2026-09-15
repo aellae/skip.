@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/localization/app_currency.dart';
+import '../../../core/localization/currency_provider.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/theme/app_themes.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/animated_count_up.dart';
 import '../../../core/widgets/skip_card.dart';
 
@@ -35,6 +38,7 @@ class SummaryCards extends StatelessWidget {
   Widget build(BuildContext context) {
     final skipTheme = Theme.of(context).extension<SkipThemeExtension>()!;
     final strings = context.watch<LocaleProvider>().strings;
+    final currency = context.watch<CurrencyProvider>().currency;
     return Row(
       children: [
         Expanded(
@@ -42,6 +46,7 @@ class SummaryCards extends StatelessWidget {
             label: savedLabel ?? strings.totalSaved,
             amount: totalSaved,
             color: skipTheme.savedColor,
+            currency: currency,
             onTap: onTap,
           ),
         ),
@@ -51,6 +56,7 @@ class SummaryCards extends StatelessWidget {
             label: spentLabel ?? strings.totalSpent,
             amount: totalSpent,
             color: skipTheme.spentColor,
+            currency: currency,
             onTap: onTap,
           ),
         ),
@@ -63,12 +69,14 @@ class _SummaryCard extends StatelessWidget {
   final String label;
   final double amount;
   final Color color;
+  final AppCurrency currency;
   final VoidCallback? onTap;
 
   const _SummaryCard({
     required this.label,
     required this.amount,
     required this.color,
+    required this.currency,
     this.onTap,
   });
 
@@ -85,6 +93,7 @@ class _SummaryCard extends StatelessWidget {
           const SizedBox(height: 8),
           AnimatedCountUp(
             value: amount,
+            formatter: (v) => formatCurrency(v, currency: currency),
             style: theme.textTheme.headlineSmall?.copyWith(color: color),
           ),
         ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:skip/core/localization/currency_provider.dart';
 import 'package:skip/core/localization/locale_provider.dart';
 import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/data/items_provider.dart';
@@ -13,6 +14,7 @@ Widget _buildApp(ItemsProvider provider, {ThemeData? theme}) {
     providers: [
       ChangeNotifierProvider.value(value: provider),
       ChangeNotifierProvider(create: (_) => LocaleProvider()),
+      ChangeNotifierProvider(create: (_) => CurrencyProvider()),
     ],
     child: MaterialApp(
       theme: theme ?? AppThemes.minimal,
@@ -96,6 +98,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Insights'), findsOneWidget);
-    expect(find.text('Last 6 Months'), findsOneWidget);
+    expect(
+      find.text(
+        'No trends to show yet.\nLog a few items to see your monthly breakdown.',
+      ),
+      findsOneWidget,
+    );
   });
 }

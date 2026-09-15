@@ -31,7 +31,7 @@ This document provides guidelines, technical conventions, and architectural rule
 - **Database:** `sqflite`
 - **File System:** `path_provider` & `path`
 - **Media:** `image_picker`
-- **Fonts:** `google_fonts`
+- **Fonts:** Bundled locally (Playfair Display, Inter, Titan One, Fredoka) — declared in `pubspec.yaml`'s `flutter.fonts` and referenced via `fontFamily:` in `app_themes.dart`; no `google_fonts` package dependency.
 
 ---
 

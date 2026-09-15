@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
+import 'package:skip/core/localization/app_currency.dart';
+import 'package:skip/core/localization/currency_provider.dart';
 import 'package:skip/core/localization/locale_provider.dart';
 import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/core/utils/file_helper.dart';
@@ -35,6 +37,7 @@ void main() {
     WidgetTester tester, {
     String? purchaseUrl,
     Future<bool> Function(Uri url)? launchUrlOverride,
+    AppCurrency currency = AppCurrency.usd,
   }) async {
     await itemsProvider.addItem(
       title: 'Jacket',
@@ -50,6 +53,9 @@ void main() {
         providers: [
           ChangeNotifierProvider.value(value: itemsProvider),
           ChangeNotifierProvider(create: (_) => LocaleProvider()),
+          ChangeNotifierProvider(
+            create: (_) => CurrencyProvider(initial: currency),
+          ),
         ],
         child: MaterialApp(
           theme: AppThemes.minimal,
@@ -216,5 +222,76 @@ void main() {
 
     expect(itemsProvider.items.single.purchaseUrl, isNull);
     expect(find.text('Add product link'), findsOneWidget);
+  });
+
+  testWidgets('editing details persists a new title and price', (tester) async {
+    await pumpDetail(tester);
+
+    await tester.ensureVisible(find.byIcon(Icons.edit));
+    await tester.tap(find.byIcon(Icons.edit));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextFormField, 'Price'), '150');
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Title (optional)'),
+      'Better Jacket',
+    );
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(itemsProvider.items.single.title, 'Better Jacket');
+    expect(itemsProvider.items.single.price, 150);
+  });
+
+  testWidgets(
+    'clearing the title in the edit-details dialog saves it as null',
+    (tester) async {
+      await pumpDetail(tester);
+
+      await tester.ensureVisible(find.byIcon(Icons.edit));
+      await tester.tap(find.byIcon(Icons.edit));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Title (optional)'),
+        '',
+      );
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      expect(itemsProvider.items.single.title, isNull);
+    },
+  );
+
+  testWidgets('an invalid price is rejected in the edit-details dialog', (
+    tester,
+  ) async {
+    await pumpDetail(tester);
+
+    await tester.ensureVisible(find.byIcon(Icons.edit));
+    await tester.tap(find.byIcon(Icons.edit));
+    await tester.pumpAndSettle();
+    final field = tester.widget<TextFormField>(
+      find.widgetWithText(TextFormField, 'Price'),
+    );
+    field.controller!.text = '0';
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Price must be greater than zero.'), findsOneWidget);
+    expect(itemsProvider.items.single.price, 120);
+  });
+
+  testWidgets('cancelling the edit-details dialog leaves the item unchanged', (
+    tester,
+  ) async {
+    await pumpDetail(tester);
+
+    await tester.ensureVisible(find.byIcon(Icons.edit));
+    await tester.tap(find.byIcon(Icons.edit));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextFormField, 'Price'), '999');
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(itemsProvider.items.single.price, 120);
   });
 }

@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_spacing.dart';
+import '../../core/localization/app_currency.dart';
 import '../../core/localization/app_locale.dart';
 import '../../core/localization/app_strings.dart';
+import '../../core/localization/currency_provider.dart';
 import '../../core/localization/locale_provider.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/theme/theme_provider.dart';
-import '../../core/utils/currency_formatter.dart';
+import '../../core/widgets/animated_count_up.dart';
+import '../../core/widgets/entrance_fade.dart';
 import '../../core/widgets/skip_app_bar.dart';
 import '../../core/widgets/skip_card.dart';
 import '../../core/widgets/tap_scale.dart';
 import '../../data/items_provider.dart';
+import 'support_screen.dart';
 import 'widgets/backup_section.dart';
 
 /// Aesthetic switcher + language switcher + quick summary stats.
@@ -24,49 +28,86 @@ class SettingsScreen extends StatelessWidget {
     final skipTheme = theme.extension<SkipThemeExtension>()!;
     final themeProvider = context.watch<ThemeProvider>();
     final localeProvider = context.watch<LocaleProvider>();
+    final currencyProvider = context.watch<CurrencyProvider>();
     final itemsProvider = context.watch<ItemsProvider>();
     final strings = localeProvider.strings;
 
     return Scaffold(
       appBar: SkipAppBar(title: Text(strings.settingsTitle)),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Text(strings.aesthetic, style: theme.textTheme.labelLarge),
-            const SizedBox(height: 12),
-            _AestheticSwitcher(
-              aesthetic: themeProvider.aesthetic,
-              onChanged: themeProvider.setAesthetic,
-              strings: strings,
-            ),
-            const SizedBox(height: AppSpacing.sectionGap),
-            Text(strings.language, style: theme.textTheme.labelLarge),
-            const SizedBox(height: 12),
-            _LanguageSwitcher(
-              locale: localeProvider.locale,
-              onChanged: localeProvider.setLocale,
-              strings: strings,
-            ),
-            const SizedBox(height: AppSpacing.sectionGap),
-            Text(strings.summary, style: theme.textTheme.labelLarge),
-            const SizedBox(height: 12),
-            _StatTile(
-              label: strings.itemsResisted,
-              value: '${itemsProvider.resistedCount}',
-              color: skipTheme.savedColor,
-            ),
-            const SizedBox(height: 12),
-            _StatTile(
-              label: strings.averageSavedPerItem,
-              value: formatCurrency(itemsProvider.averageSavedPerItem),
-              color: skipTheme.savedColor,
-            ),
-            const SizedBox(height: AppSpacing.sectionGap),
-            Text(strings.data, style: theme.textTheme.labelLarge),
-            const SizedBox(height: 12),
-            const BackupSection(),
-          ],
+        child: EntranceFade(
+          beginScale: 1.0,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Text(strings.aesthetic, style: theme.textTheme.labelLarge),
+              const SizedBox(height: 12),
+              _AestheticSwitcher(
+                aesthetic: themeProvider.aesthetic,
+                onChanged: themeProvider.setAesthetic,
+                strings: strings,
+              ),
+              const SizedBox(height: AppSpacing.sectionGap),
+              Text(strings.language, style: theme.textTheme.labelLarge),
+              const SizedBox(height: 12),
+              _LanguageSwitcher(
+                locale: localeProvider.locale,
+                onChanged: localeProvider.setLocale,
+                strings: strings,
+              ),
+              const SizedBox(height: AppSpacing.sectionGap),
+              Text(strings.currency, style: theme.textTheme.labelLarge),
+              const SizedBox(height: 12),
+              _CurrencySwitcher(
+                currency: currencyProvider.currency,
+                onChanged: currencyProvider.setCurrency,
+                strings: strings,
+              ),
+              const SizedBox(height: AppSpacing.sectionGap),
+              Text(strings.summary, style: theme.textTheme.labelLarge),
+              const SizedBox(height: 12),
+              _StatTile(
+                label: strings.itemsResisted,
+                value: itemsProvider.resistedCount.toDouble(),
+                formatter: (v) => v.round().toString(),
+                color: skipTheme.savedColor,
+              ),
+              const SizedBox(height: 12),
+              _StatTile(
+                label: strings.averageSavedPerItem,
+                value: itemsProvider.averageSavedPerItem,
+                color: skipTheme.savedColor,
+              ),
+              const SizedBox(height: AppSpacing.sectionGap),
+              Text(strings.data, style: theme.textTheme.labelLarge),
+              const SizedBox(height: 12),
+              const BackupSection(),
+              const SizedBox(height: AppSpacing.sectionGap),
+              Text(
+                strings.supportSectionLabel,
+                style: theme.textTheme.labelLarge,
+              ),
+              const SizedBox(height: 12),
+              SkipCard(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const SupportScreen()),
+                ),
+                child: Row(
+                  children: [
+                    const Text('💜', style: TextStyle(fontSize: 20)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        strings.supportSkip,
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -112,9 +153,11 @@ class _AestheticSwitcher extends StatelessWidget {
   }
 }
 
-/// Two-way English/Italian toggle, visually mirroring [_AestheticSwitcher]
-/// (same ring-selected pill shape) but without a per-option theme preview —
-/// language has no visual identity of its own to show off.
+/// Four-way language toggle, visually mirroring [_AestheticSwitcher] (same
+/// ring-selected pill shape) but without a per-option theme preview —
+/// language has no visual identity of its own to show off. Laid out as a
+/// 2x2 grid (rather than one Row of four) so each pill stays comfortably
+/// tappable at phone width.
 class _LanguageSwitcher extends StatelessWidget {
   final AppLocale locale;
   final ValueChanged<AppLocale> onChanged;
@@ -128,24 +171,50 @@ class _LanguageSwitcher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: _LanguageOption(
-            flag: '🇬🇧',
-            label: strings.english,
-            selected: locale == AppLocale.en,
-            onTap: () => onChanged(AppLocale.en),
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: _LanguageOption(
+                flag: '🇬🇧',
+                label: strings.english,
+                selected: locale == AppLocale.en,
+                onTap: () => onChanged(AppLocale.en),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _LanguageOption(
+                flag: '🇮🇹',
+                label: strings.italian,
+                selected: locale == AppLocale.it,
+                onTap: () => onChanged(AppLocale.it),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _LanguageOption(
-            flag: '🇮🇹',
-            label: strings.italian,
-            selected: locale == AppLocale.it,
-            onTap: () => onChanged(AppLocale.it),
-          ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _LanguageOption(
+                flag: '🇫🇷',
+                label: strings.french,
+                selected: locale == AppLocale.fr,
+                onTap: () => onChanged(AppLocale.fr),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _LanguageOption(
+                flag: '🇩🇪',
+                label: strings.german,
+                selected: locale == AppLocale.de,
+                onTap: () => onChanged(AppLocale.de),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -208,6 +277,47 @@ class _LanguageOption extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Two-way currency toggle — set independently of [_LanguageSwitcher], since
+/// a user may want e.g. USD pricing under an Italian UI or vice versa.
+/// Reuses [_LanguageOption]'s pill styling with the currency symbol standing
+/// in for a flag.
+class _CurrencySwitcher extends StatelessWidget {
+  final AppCurrency currency;
+  final ValueChanged<AppCurrency> onChanged;
+  final AppStrings strings;
+
+  const _CurrencySwitcher({
+    required this.currency,
+    required this.onChanged,
+    required this.strings,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _LanguageOption(
+            flag: '\$',
+            label: strings.usDollar,
+            selected: currency == AppCurrency.usd,
+            onTap: () => onChanged(AppCurrency.usd),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _LanguageOption(
+            flag: '€',
+            label: strings.euro,
+            selected: currency == AppCurrency.eur,
+            onTap: () => onChanged(AppCurrency.eur),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -308,13 +418,15 @@ class _AestheticOption extends StatelessWidget {
 
 class _StatTile extends StatelessWidget {
   final String label;
-  final String value;
+  final double value;
   final Color color;
+  final String Function(double)? formatter;
 
   const _StatTile({
     required this.label,
     required this.value,
     required this.color,
+    this.formatter,
   });
 
   @override
@@ -326,8 +438,9 @@ class _StatTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: theme.textTheme.bodyLarge),
-          Text(
-            value,
+          AnimatedCountUp(
+            value: value,
+            formatter: formatter,
             style: theme.textTheme.titleLarge?.copyWith(color: color),
           ),
         ],

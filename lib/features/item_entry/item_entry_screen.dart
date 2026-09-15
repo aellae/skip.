@@ -5,12 +5,16 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/constants/app_spacing.dart';
 import '../../core/localization/app_strings.dart';
+import '../../core/localization/currency_provider.dart';
 import '../../core/localization/locale_provider.dart';
 import '../../core/theme/app_themes.dart';
+import '../../core/utils/currency_formatter.dart';
 import '../../core/utils/file_helper.dart';
 import '../../core/utils/url_validator.dart';
 import '../../core/widgets/skip_app_bar.dart';
+import '../../core/widgets/skip_card.dart';
 import '../../core/widgets/tap_scale.dart';
 import '../../data/items_provider.dart';
 import 'widgets/decision_toggle.dart';
@@ -34,6 +38,9 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
   final _priceController = TextEditingController();
   final _titleController = TextEditingController();
   final _purchaseUrlController = TextEditingController();
+  final _priceFocus = FocusNode();
+  final _titleFocus = FocusNode();
+  final _purchaseUrlFocus = FocusNode();
 
   String? _relativeImagePath;
   File? _previewFile;
@@ -45,6 +52,9 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     _priceController.dispose();
     _titleController.dispose();
     _purchaseUrlController.dispose();
+    _priceFocus.dispose();
+    _titleFocus.dispose();
+    _purchaseUrlFocus.dispose();
     super.dispose();
   }
 
@@ -80,29 +90,28 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
   }
 
   void _showImageSourceSheet() {
-    final accent = Theme.of(context).colorScheme.primary;
     final strings = context.read<LocaleProvider>().strings;
     showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TapScale(
-              onTap: () => _pickImage(ImageSource.camera),
-              child: ListTile(
-                leading: Icon(Icons.camera_alt, color: accent),
-                title: Text(strings.camera),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _ImageSourceOption(
+                icon: Icons.camera_alt,
+                label: strings.camera,
+                onTap: () => _pickImage(ImageSource.camera),
               ),
-            ),
-            TapScale(
-              onTap: () => _pickImage(ImageSource.gallery),
-              child: ListTile(
-                leading: Icon(Icons.photo_library, color: accent),
-                title: Text(strings.gallery),
+              const SizedBox(height: AppSpacing.sm),
+              _ImageSourceOption(
+                icon: Icons.photo_library,
+                label: strings.gallery,
+                onTap: () => _pickImage(ImageSource.gallery),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -154,12 +163,14 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     final theme = Theme.of(context);
     final skipTheme = theme.extension<SkipThemeExtension>()!;
     final strings = context.watch<LocaleProvider>().strings;
+    final currency = context.watch<CurrencyProvider>().currency;
+    final isEuro = isEuroCurrency(currency);
 
     return Scaffold(
       appBar: SkipAppBar(title: Text(strings.logAnItem)),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Form(
             key: _formKey,
             child: Column(
@@ -215,48 +226,61 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _priceController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d*\.?\d{0,2}'),
+                const SizedBox(height: AppSpacing.lg),
+                _ThemedFocusField(
+                  focusNode: _priceFocus,
+                  child: TextFormField(
+                    controller: _priceController,
+                    focusNode: _priceFocus,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
                     ),
-                  ],
-                  decoration: InputDecoration(
-                    labelText: strings.priceLabel,
-                    prefixText: '\$ ',
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d*\.?\d{0,2}'),
+                      ),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: strings.priceLabel,
+                      prefixText: isEuro ? null : '\$ ',
+                      suffixText: isEuro ? '€' : null,
+                    ),
+                    validator: (value) => _validatePrice(value, strings),
                   ),
-                  validator: (value) => _validatePrice(value, strings),
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _titleController,
-                  decoration: InputDecoration(
-                    labelText: strings.titleOptionalLabel,
+                const SizedBox(height: AppSpacing.md),
+                _ThemedFocusField(
+                  focusNode: _titleFocus,
+                  child: TextFormField(
+                    controller: _titleController,
+                    focusNode: _titleFocus,
+                    decoration: InputDecoration(
+                      labelText: strings.titleOptionalLabel,
+                    ),
+                    textCapitalization: TextCapitalization.sentences,
                   ),
-                  textCapitalization: TextCapitalization.sentences,
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _purchaseUrlController,
-                  decoration: InputDecoration(
-                    labelText: strings.productLinkOptionalLabel,
+                const SizedBox(height: AppSpacing.md),
+                _ThemedFocusField(
+                  focusNode: _purchaseUrlFocus,
+                  child: TextFormField(
+                    controller: _purchaseUrlController,
+                    focusNode: _purchaseUrlFocus,
+                    decoration: InputDecoration(
+                      labelText: strings.productLinkOptionalLabel,
+                    ),
+                    keyboardType: TextInputType.url,
+                    autocorrect: false,
+                    validator: (value) => _validatePurchaseUrl(value, strings),
                   ),
-                  keyboardType: TextInputType.url,
-                  autocorrect: false,
-                  validator: (value) => _validatePurchaseUrl(value, strings),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.lg),
                 Text(
                   strings.tapOneToLogIt,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.labelLarge,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 IgnorePointer(
                   ignoring: _isSaving,
                   child: Opacity(
@@ -282,6 +306,93 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ImageSourceOption extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ImageSourceOption({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SkipCard(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Icon(icon, color: theme.colorScheme.primary),
+          const SizedBox(width: AppSpacing.md),
+          Text(label, style: theme.textTheme.bodyLarge),
+        ],
+      ),
+    );
+  }
+}
+
+/// Themed focus indicator around a form field: a colored glow in Y2K, an
+/// animated bottom-border draw-in in Minimal. Owns [focusNode]'s listener
+/// only — the caller still creates/disposes the [FocusNode] and passes it
+/// to both this wrapper and the wrapped field.
+class _ThemedFocusField extends StatefulWidget {
+  final FocusNode focusNode;
+  final Widget child;
+
+  const _ThemedFocusField({required this.focusNode, required this.child});
+
+  @override
+  State<_ThemedFocusField> createState() => _ThemedFocusFieldState();
+}
+
+class _ThemedFocusFieldState extends State<_ThemedFocusField> {
+  bool _focused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.focusNode.addListener(_onFocusChange);
+  }
+
+  void _onFocusChange() {
+    if (mounted) setState(() => _focused = widget.focusNode.hasFocus);
+  }
+
+  @override
+  void dispose() {
+    widget.focusNode.removeListener(_onFocusChange);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final skipTheme = theme.extension<SkipThemeExtension>()!;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(skipTheme.buttonRadius),
+        boxShadow: skipTheme.isY2K && _focused ? skipTheme.glowShadow : null,
+        border: skipTheme.isY2K
+            ? null
+            : Border(
+                bottom: BorderSide(
+                  color: _focused
+                      ? theme.colorScheme.primary
+                      : Colors.transparent,
+                  width: 2,
+                ),
+              ),
+      ),
+      child: widget.child,
     );
   }
 }

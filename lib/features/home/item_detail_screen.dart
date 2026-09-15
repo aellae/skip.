@@ -1,11 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/constants/app_spacing.dart';
+import '../../core/localization/app_currency.dart';
 import '../../core/localization/app_strings.dart';
+import '../../core/localization/currency_provider.dart';
 import '../../core/localization/locale_provider.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/utils/currency_formatter.dart';
@@ -121,11 +124,37 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     setState(() => _isBusy = false);
   }
 
+  Future<void> _editDetails(ItemModel item) async {
+    final strings = context.read<LocaleProvider>().strings;
+    final currency = context.read<CurrencyProvider>().currency;
+    final result = await showDialog<_ItemDetailsEdit>(
+      context: context,
+      builder: (dialogContext) => _EditDetailsDialog(
+        currentTitle: item.title,
+        currentPrice: item.price,
+        currency: currency,
+        strings: strings,
+      ),
+    );
+    if (!mounted) return;
+    if (result == null || widget.item.id == null) return;
+
+    setState(() => _isBusy = true);
+    await context.read<ItemsProvider>().updateDetails(
+      widget.item.id!,
+      title: result.title,
+      price: result.price,
+    );
+    if (!mounted) return;
+    setState(() => _isBusy = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final skipTheme = theme.extension<SkipThemeExtension>()!;
     final strings = context.watch<LocaleProvider>().strings;
+    final currency = context.watch<CurrencyProvider>().currency;
     final item = context.select<ItemsProvider, ItemModel>(
       (provider) => provider.items.firstWhere(
         (i) => i.id == widget.item.id,
@@ -148,7 +177,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -187,15 +216,35 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              if (item.title != null && item.title!.isNotEmpty) ...[
-                Text(item.title!, style: theme.textTheme.headlineSmall),
-                const SizedBox(height: 4),
-              ],
-              Text(
-                formatCurrency(item.price),
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  color: statusColor,
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (item.title != null && item.title!.isNotEmpty) ...[
+                          Text(
+                            item.title!,
+                            style: theme.textTheme.headlineSmall,
+                          ),
+                          const SizedBox(height: 4),
+                        ],
+                        Text(
+                          formatCurrency(item.price, currency: currency),
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            color: statusColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _isBusy ? null : () => _editDetails(item),
+                    icon: const Icon(Icons.edit),
+                    tooltip: strings.editDetailsTooltip,
+                  ),
+                ],
               ),
               const SizedBox(height: 4),
               Text(
@@ -330,6 +379,117 @@ class _PurchaseLinkDialogState extends State<_PurchaseLinkDialog> {
           onPressed: () {
             if (!(_formKey.currentState?.validate() ?? false)) return;
             Navigator.of(context).pop(_controller.text.trim());
+          },
+          child: Text(widget.strings.save),
+        ),
+      ],
+    );
+  }
+}
+
+/// Result of [_EditDetailsDialog]: the title/price to persist.
+class _ItemDetailsEdit {
+  final String? title;
+  final double price;
+
+  const _ItemDetailsEdit({required this.title, required this.price});
+}
+
+/// Edit dialog for an item's title and price — the two fields that
+/// otherwise require deleting and re-adding the item to fix a typo.
+class _EditDetailsDialog extends StatefulWidget {
+  final String? currentTitle;
+  final double currentPrice;
+  final AppCurrency currency;
+  final AppStrings strings;
+
+  const _EditDetailsDialog({
+    required this.currentTitle,
+    required this.currentPrice,
+    required this.currency,
+    required this.strings,
+  });
+
+  @override
+  State<_EditDetailsDialog> createState() => _EditDetailsDialogState();
+}
+
+class _EditDetailsDialogState extends State<_EditDetailsDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final _priceController = TextEditingController(
+    text: widget.currentPrice.toStringAsFixed(2),
+  );
+  late final _titleController = TextEditingController(
+    text: widget.currentTitle ?? '',
+  );
+
+  @override
+  void dispose() {
+    _priceController.dispose();
+    _titleController.dispose();
+    super.dispose();
+  }
+
+  String? _validatePrice(String? value) {
+    if (value == null || value.trim().isEmpty) return widget.strings.enterPrice;
+    final parsed = double.tryParse(value);
+    if (parsed == null) return widget.strings.enterValidNumber;
+    if (parsed <= 0) return widget.strings.priceGreaterThanZero;
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEuro = isEuroCurrency(widget.currency);
+    return AlertDialog(
+      title: Text(widget.strings.editDetailsDialogTitle),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _priceController,
+              autofocus: true,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+              ],
+              decoration: InputDecoration(
+                labelText: widget.strings.priceLabel,
+                prefixText: isEuro ? null : '\$ ',
+                suffixText: isEuro ? '€' : null,
+              ),
+              validator: _validatePrice,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextFormField(
+              controller: _titleController,
+              decoration: InputDecoration(
+                labelText: widget.strings.titleOptionalLabel,
+              ),
+              textCapitalization: TextCapitalization.sentences,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(widget.strings.cancel),
+        ),
+        TextButton(
+          onPressed: () {
+            if (!(_formKey.currentState?.validate() ?? false)) return;
+            final title = _titleController.text.trim();
+            Navigator.of(context).pop(
+              _ItemDetailsEdit(
+                title: title.isEmpty ? null : title,
+                price: double.parse(_priceController.text),
+              ),
+            );
           },
           child: Text(widget.strings.save),
         ),

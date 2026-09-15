@@ -18,7 +18,7 @@ void main() {
     test('uses Playfair Display for headlines and Inter for body text', () {
       expect(
         theme.textTheme.headlineMedium!.fontFamily,
-        contains('PlayfairDisplay'),
+        contains('Playfair Display'),
       );
       expect(theme.textTheme.bodyMedium!.fontFamily, contains('Inter'));
     });
@@ -39,7 +39,7 @@ void main() {
     });
 
     test('uses Titan One for headlines and Fredoka for body text', () {
-      expect(theme.textTheme.headlineMedium!.fontFamily, contains('TitanOne'));
+      expect(theme.textTheme.headlineMedium!.fontFamily, contains('Titan One'));
       expect(theme.textTheme.bodyMedium!.fontFamily, contains('Fredoka'));
     });
 

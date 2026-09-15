@@ -56,7 +56,12 @@
       "Bash(disown)",
       "Bash(echo \"PID: $!\")",
       "Bash(ps -p 75801 -o pid,etime,command)",
-      "Bash(kill 75801)"
+      "Bash(kill 75801)",
+      "Bash(flutter clean *)",
+      "Bash(rm -rf ios/Pods ios/.symlinks)",
+      "Bash(rm -rf ~/Library/Developer/Xcode/DerivedData/Runner-*)",
+      "Bash(rm -rf /private/tmp/claude-501/-Users-elle-Desktop-Progetti-Personali-skip-/88aaf6d4-cbdf-4ba2-8ded-b0fd1f26cd60/scratchpad/*)",
+      "Read(//Users/elle/Library/Developer/Xcode/DerivedData/**)"
     ],
     "additionalDirectories": [
       "/Users/elle/Desktop/Progetti Personali/skip./test/core",

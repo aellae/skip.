@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:skip/core/localization/app_currency.dart';
+import 'package:skip/core/localization/app_locale.dart';
+import 'package:skip/core/localization/currency_provider.dart';
 import 'package:skip/core/localization/locale_provider.dart';
 import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/data/items_provider.dart';
@@ -69,14 +72,21 @@ void main() {
 
   Future<void> pumpEntryScreen(
     WidgetTester tester,
-    ItemsProvider itemsProvider,
-  ) async {
+    ItemsProvider itemsProvider, {
+    AppLocale locale = AppLocale.en,
+    AppCurrency currency = AppCurrency.usd,
+  }) async {
     fakePicker = _FakeImagePicker(sourceImage);
     await tester.pumpWidget(
       MultiProvider(
         providers: [
           ChangeNotifierProvider.value(value: itemsProvider),
-          ChangeNotifierProvider(create: (_) => LocaleProvider()),
+          ChangeNotifierProvider(
+            create: (_) => LocaleProvider(initial: locale),
+          ),
+          ChangeNotifierProvider(
+            create: (_) => CurrencyProvider(initial: currency),
+          ),
         ],
         child: MaterialApp(
           theme: AppThemes.minimal,
@@ -251,6 +261,39 @@ void main() {
 
     expect(itemsProvider.items.single.purchaseUrl, isNull);
   });
+
+  testWidgets('price field shows a dollar prefix for USD', (tester) async {
+    final itemsProvider = buildTestItemsProvider();
+    await pumpEntryScreen(tester, itemsProvider);
+
+    expect(find.text('\$ '), findsOneWidget);
+    expect(find.text('€'), findsNothing);
+  });
+
+  testWidgets('price field shows a euro suffix for EUR', (tester) async {
+    final itemsProvider = buildTestItemsProvider();
+    await pumpEntryScreen(tester, itemsProvider, currency: AppCurrency.eur);
+
+    expect(find.text('€'), findsOneWidget);
+    expect(find.text('\$ '), findsNothing);
+  });
+
+  testWidgets(
+    'currency and language are independent — Italian UI can still price in USD',
+    (tester) async {
+      final itemsProvider = buildTestItemsProvider();
+      await pumpEntryScreen(
+        tester,
+        itemsProvider,
+        locale: AppLocale.it,
+        currency: AppCurrency.usd,
+      );
+
+      expect(find.text('Prezzo'), findsOneWidget);
+      expect(find.text('\$ '), findsOneWidget);
+      expect(find.text('€'), findsNothing);
+    },
+  );
 
   testWidgets('rejects an invalid product link', (tester) async {
     final itemsProvider = buildTestItemsProvider();

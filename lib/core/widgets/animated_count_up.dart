@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../utils/currency_formatter.dart';
 
 /// Animates [value] counting up/down to its new total whenever it changes,
-/// formatted via [formatCurrency].
+/// formatted via [formatter] (defaults to [formatCurrency]).
 ///
 /// Deliberately keeps its own [AnimationController] rather than using
 /// `TweenAnimationBuilder(tween: Tween(begin: 0, end: value))` — `Tween`
@@ -13,8 +13,14 @@ import '../utils/currency_formatter.dart';
 class AnimatedCountUp extends StatefulWidget {
   final double value;
   final TextStyle? style;
+  final String Function(double)? formatter;
 
-  const AnimatedCountUp({super.key, required this.value, this.style});
+  const AnimatedCountUp({
+    super.key,
+    required this.value,
+    this.style,
+    this.formatter,
+  });
 
   @override
   State<AnimatedCountUp> createState() => _AnimatedCountUpState();
@@ -61,10 +67,11 @@ class _AnimatedCountUpState extends State<AnimatedCountUp>
 
   @override
   Widget build(BuildContext context) {
+    final formatter = widget.formatter ?? formatCurrency;
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, _) =>
-          Text(formatCurrency(_animation.value), style: widget.style),
+          Text(formatter(_animation.value), style: widget.style),
     );
   }
 }

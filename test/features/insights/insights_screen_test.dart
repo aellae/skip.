@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:skip/core/localization/currency_provider.dart';
 import 'package:skip/core/localization/locale_provider.dart';
 import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/data/items_provider.dart';
@@ -21,6 +22,7 @@ void main() {
         providers: [
           ChangeNotifierProvider.value(value: itemsProvider),
           ChangeNotifierProvider(create: (_) => LocaleProvider()),
+          ChangeNotifierProvider(create: (_) => CurrencyProvider()),
         ],
         child: MaterialApp(
           theme: theme ?? AppThemes.minimal,
@@ -46,7 +48,7 @@ void main() {
     expect(find.text('\$5.00'), findsOneWidget);
   });
 
-  testWidgets('shows zero totals with no items and still renders the chart', (
+  testWidgets('shows zero totals and an empty state with no items', (
     tester,
   ) async {
     final itemsProvider = buildTestItemsProvider();
@@ -54,9 +56,15 @@ void main() {
     await pumpInsights(tester, itemsProvider);
 
     expect(find.text('\$0.00'), findsNWidgets(2));
-    expect(find.text('Last 6 Months'), findsOneWidget);
-    expect(find.text('Saved'), findsOneWidget);
-    expect(find.text('Spent'), findsOneWidget);
+    expect(
+      find.text(
+        'No trends to show yet.\nLog a few items to see your monthly breakdown.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Last 6 Months'), findsNothing);
+    expect(find.text('Saved'), findsNothing);
+    expect(find.text('Spent'), findsNothing);
   });
 
   testWidgets('renders in the Y2K theme without error', (tester) async {

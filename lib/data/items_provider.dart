@@ -75,6 +75,34 @@ class ItemsProvider extends ChangeNotifier {
     await load();
   }
 
+  /// Updates the title and price on an existing item — the only fields a
+  /// typo'd entry needs fixing without deleting and re-adding it (status and
+  /// purchase link already have their own setters below). Uses a fresh
+  /// [ItemModel] rather than [ItemModel.copyWith] because copyWith's `??`
+  /// pattern can't express "clear the title".
+  Future<void> updateDetails(
+    int id, {
+    required String? title,
+    required double price,
+  }) async {
+    final index = _items.indexWhere((item) => item.id == id);
+    if (index == -1) return;
+    final current = _items[index];
+    await _db.updateItem(
+      ItemModel(
+        id: current.id,
+        title: title,
+        price: price,
+        imagePath: current.imagePath,
+        isSaved: current.isSaved,
+        category: current.category,
+        createdAt: current.createdAt,
+        purchaseUrl: current.purchaseUrl,
+      ),
+    );
+    await load();
+  }
+
   /// Sets or clears (pass `null`) the retroactive purchase link on an
   /// existing item. Uses a fresh [ItemModel] rather than [ItemModel.copyWith]
   /// because `copyWith`'s `??` pattern can't express "clear this field".

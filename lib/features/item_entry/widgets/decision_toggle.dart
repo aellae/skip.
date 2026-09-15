@@ -127,6 +127,18 @@ class _DecisionToggleState extends State<DecisionToggle> {
             shouldLoop: false,
             numberOfParticles: 18,
             gravity: 0.4,
+            // Default confetti particles are square — round ones match the
+            // rest of the Bratz/Y2K aesthetic (circular badges, pill buttons).
+            createParticlePath: (size) {
+              final radius = size.width / 2;
+              return Path()
+                ..addOval(
+                  Rect.fromCircle(
+                    center: Offset(radius, radius),
+                    radius: radius,
+                  ),
+                );
+            },
             colors: [
               theme.colorScheme.primary,
               theme.colorScheme.secondary,

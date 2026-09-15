@@ -321,7 +321,8 @@ class AppThemes {
       filled: true,
       fillColor: AppColors.minimalSilkBeige,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(2),
+        // Matches buttonRadius — inputs are interactive surfaces too.
+        borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide.none,
       ),
     ),

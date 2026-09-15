@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../../core/localization/currency_provider.dart';
 import '../../../core/theme/app_themes.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/file_helper.dart';
@@ -33,6 +35,7 @@ class ItemGridCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final skipTheme = theme.extension<SkipThemeExtension>()!;
+    final currency = context.watch<CurrencyProvider>().currency;
     final statusColor = item.isSaved
         ? skipTheme.savedColor
         : skipTheme.spentColor;
@@ -98,7 +101,7 @@ class ItemGridCard extends StatelessWidget {
                     StatusIndicator(isSaved: item.isSaved),
                     const SizedBox(width: 6),
                     Text(
-                      formatCurrency(item.price),
+                      formatCurrency(item.price, currency: currency),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: statusColor,
                       ),

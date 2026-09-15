@@ -48,16 +48,20 @@ void main() {
     test('fromCode round-trips known codes', () {
       expect(AppLocale.fromCode('en'), AppLocale.en);
       expect(AppLocale.fromCode('it'), AppLocale.it);
+      expect(AppLocale.fromCode('fr'), AppLocale.fr);
+      expect(AppLocale.fromCode('de'), AppLocale.de);
     });
 
     test('fromCode falls back to English for unknown/null codes', () {
-      expect(AppLocale.fromCode('fr'), AppLocale.en);
+      expect(AppLocale.fromCode('es'), AppLocale.en);
       expect(AppLocale.fromCode(null), AppLocale.en);
     });
 
     test('code is stable for persistence', () {
       expect(AppLocale.en.code, 'en');
       expect(AppLocale.it.code, 'it');
+      expect(AppLocale.fr.code, 'fr');
+      expect(AppLocale.de.code, 'de');
     });
   });
 }

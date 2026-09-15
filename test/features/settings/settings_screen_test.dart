@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skip/core/localization/app_currency.dart';
 import 'package:skip/core/localization/app_locale.dart';
+import 'package:skip/core/localization/currency_provider.dart';
 import 'package:skip/core/localization/locale_provider.dart';
 import 'package:skip/core/theme/theme_provider.dart';
 import 'package:skip/core/utils/currency_formatter.dart';
@@ -20,6 +22,7 @@ void main() {
     required ThemeProvider themeProvider,
     required ItemsProvider itemsProvider,
     LocaleProvider? localeProvider,
+    CurrencyProvider? currencyProvider,
   }) async {
     await tester.pumpWidget(
       MultiProvider(
@@ -28,6 +31,9 @@ void main() {
           ChangeNotifierProvider.value(value: itemsProvider),
           ChangeNotifierProvider.value(
             value: localeProvider ?? LocaleProvider(),
+          ),
+          ChangeNotifierProvider.value(
+            value: currencyProvider ?? CurrencyProvider(),
           ),
         ],
         child: Consumer<ThemeProvider>(
@@ -55,6 +61,7 @@ void main() {
       itemsProvider: itemsProvider,
     );
 
+    await tester.scrollUntilVisible(find.text(formatCurrency(20)), 200);
     expect(find.text('2'), findsOneWidget);
     expect(find.text(formatCurrency(20)), findsOneWidget);
   });
@@ -100,6 +107,7 @@ void main() {
       itemsProvider: buildTestItemsProvider(),
     );
 
+    await tester.scrollUntilVisible(find.text('Data'), 200);
     expect(find.text('Data'), findsOneWidget);
     expect(find.text('Export backup'), findsOneWidget);
     expect(find.text('Import backup'), findsOneWidget);
@@ -126,6 +134,23 @@ void main() {
     expect(find.text('Estetica'), findsOneWidget);
   });
 
+  testWidgets('tapping Support SKIP opens the support screen', (tester) async {
+    await pumpSettings(
+      tester,
+      themeProvider: ThemeProvider(),
+      itemsProvider: buildTestItemsProvider(),
+    );
+
+    await tester.scrollUntilVisible(find.text('Support SKIP'), 200);
+    await tester.ensureVisible(find.text('Support SKIP'));
+    await tester.pumpAndSettle();
+    expect(find.text('Support'), findsOneWidget);
+    await tester.tap(find.text('Support SKIP'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Support the developer'), findsOneWidget);
+  });
+
   testWidgets('tapping English switches back to English', (tester) async {
     final localeProvider = LocaleProvider(initial: AppLocale.it);
     await pumpSettings(
@@ -141,4 +166,43 @@ void main() {
     expect(localeProvider.isItalian, isFalse);
     expect(find.text('Settings'), findsOneWidget);
   });
+
+  testWidgets('tapping Euro switches the active currency', (tester) async {
+    final currencyProvider = CurrencyProvider();
+    await pumpSettings(
+      tester,
+      themeProvider: ThemeProvider(),
+      itemsProvider: buildTestItemsProvider(),
+      currencyProvider: currencyProvider,
+    );
+
+    expect(currencyProvider.currency, AppCurrency.usd);
+
+    await tester.tap(find.text('Euro'));
+    await tester.pumpAndSettle();
+
+    expect(currencyProvider.currency, AppCurrency.eur);
+  });
+
+  testWidgets(
+    'currency stays independent of language — switching to Italian keeps USD selected',
+    (tester) async {
+      final localeProvider = LocaleProvider();
+      final currencyProvider = CurrencyProvider();
+      await pumpSettings(
+        tester,
+        themeProvider: ThemeProvider(),
+        itemsProvider: buildTestItemsProvider(),
+        localeProvider: localeProvider,
+        currencyProvider: currencyProvider,
+      );
+
+      await tester.tap(find.text('Italiano'));
+      await tester.pumpAndSettle();
+
+      expect(localeProvider.isItalian, isTrue);
+      expect(currencyProvider.currency, AppCurrency.usd);
+      expect(find.text('Dollaro USA'), findsOneWidget);
+    },
+  );
 }

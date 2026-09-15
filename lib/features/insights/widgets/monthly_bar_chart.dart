@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/app_currency.dart';
 import '../../../core/theme/app_themes.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
@@ -9,8 +10,13 @@ import '../../../data/models/monthly_total.dart';
 /// Grouped bar chart: saved (left bar) vs spent (right bar) per month.
 class MonthlyBarChart extends StatelessWidget {
   final List<MonthlyTotal> monthlyTotals;
+  final AppCurrency currency;
 
-  const MonthlyBarChart({super.key, required this.monthlyTotals});
+  const MonthlyBarChart({
+    super.key,
+    required this.monthlyTotals,
+    required this.currency,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -57,13 +63,16 @@ class MonthlyBarChart extends StatelessWidget {
         barTouchData: BarTouchData(
           enabled: true,
           touchTooltipData: BarTouchTooltipData(
+            // fl_chart's tooltip defaults to a 4px radius — round it to match
+            // the app's own card language instead of the package default.
+            tooltipBorderRadius: BorderRadius.circular(skipTheme.cardRadius),
             getTooltipColor: (_) => skipTheme.cardBackground,
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
               final statusColor = rodIndex == 0
                   ? skipTheme.savedColor
                   : skipTheme.spentColor;
               return BarTooltipItem(
-                formatCurrencyCompact(rod.toY),
+                formatCurrencyCompact(rod.toY, currency: currency),
                 (axisStyle ?? const TextStyle()).copyWith(color: statusColor),
               );
             },
@@ -81,8 +90,10 @@ class MonthlyBarChart extends StatelessWidget {
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 40,
-              getTitlesWidget: (value, meta) =>
-                  Text(formatCurrencyCompact(value), style: axisStyle),
+              getTitlesWidget: (value, meta) => Text(
+                formatCurrencyCompact(value, currency: currency),
+                style: axisStyle,
+              ),
             ),
           ),
           bottomTitles: AxisTitles(

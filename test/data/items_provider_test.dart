@@ -105,6 +105,45 @@ void main() {
     expect(provider.items.single.purchaseUrl, 'https://example.com/product');
   });
 
+  test('updateDetails changes title and price on an existing item', () async {
+    await provider.addItem(
+      title: 'Shoes',
+      price: 80,
+      imagePath: 'a.jpg',
+      isSaved: true,
+    );
+    final id = provider.items.single.id!;
+
+    await provider.updateDetails(id, title: 'Boots', price: 95);
+
+    expect(provider.items.single.title, 'Boots');
+    expect(provider.items.single.price, 95);
+    expect(provider.totalSaved, 95);
+  });
+
+  test('updateDetails(title: null) clears the title', () async {
+    await provider.addItem(
+      title: 'Shoes',
+      price: 80,
+      imagePath: 'a.jpg',
+      isSaved: true,
+    );
+    final id = provider.items.single.id!;
+
+    await provider.updateDetails(id, title: null, price: 80);
+
+    expect(provider.items.single.title, isNull);
+  });
+
+  test('updateDetails is a no-op for an unknown id', () async {
+    await provider.addItem(price: 50, imagePath: 'x.jpg', isSaved: true);
+
+    await provider.updateDetails(999, title: 'Nope', price: 1);
+
+    expect(provider.items.single.title, isNull);
+    expect(provider.items.single.price, 50);
+  });
+
   test('setPurchaseUrl sets a link on an existing item', () async {
     await provider.addItem(price: 30, imagePath: 'a.jpg', isSaved: true);
     final id = provider.items.single.id!;
