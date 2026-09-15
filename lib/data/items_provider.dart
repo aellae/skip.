@@ -20,11 +20,13 @@ class ItemsProvider extends ChangeNotifier {
     : _db = databaseHelper ?? DatabaseHelper.instance;
 
   List<ItemModel> _items = [];
+  List<ItemModel> _trashedItems = [];
   double _totalSaved = 0;
   double _totalSpent = 0;
   bool _isLoading = false;
 
   List<ItemModel> get items => List.unmodifiable(_items);
+  List<ItemModel> get trashedItems => List.unmodifiable(_trashedItems);
   double get totalSaved => _totalSaved;
   double get totalSpent => _totalSpent;
   bool get isLoading => _isLoading;
@@ -39,6 +41,7 @@ class ItemsProvider extends ChangeNotifier {
     notifyListeners();
 
     _items = await _db.getAllItems();
+    _trashedItems = await _db.getTrashedItems();
     _totalSaved = await _db.getTotalSaved();
     _totalSpent = await _db.getTotalSpent();
 
@@ -125,9 +128,27 @@ class ItemsProvider extends ChangeNotifier {
     await load();
   }
 
+  /// Moves an item to Trash (recoverable via [restoreItem]) — does not
+  /// touch its image file. Permanent removal happens later, via
+  /// [purgeExpiredTrash].
   Future<void> deleteItem(int id) async {
     await _db.deleteItem(id);
     await load();
+  }
+
+  /// Moves a trashed item back into the live set.
+  Future<void> restoreItem(int id) async {
+    await _db.restoreItem(id);
+    await load();
+  }
+
+  /// Permanently removes items trashed more than [retention] ago, deleting
+  /// their image files too. Safe to call on every app start.
+  Future<void> purgeExpiredTrash({
+    Duration retention = const Duration(days: 30),
+  }) async {
+    final purged = await _db.purgeExpiredTrash(retention: retention);
+    if (purged > 0) await load();
   }
 
   Future<String> buildJsonBackup() => _backupService.buildJsonBackup();

@@ -10,11 +10,13 @@ import '../../core/localization/app_currency.dart';
 import '../../core/localization/app_strings.dart';
 import '../../core/localization/currency_provider.dart';
 import '../../core/localization/locale_provider.dart';
+import '../../core/settings/wage_provider.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/utils/file_helper.dart';
 import '../../core/utils/url_validator.dart';
+import '../../core/utils/wage_formatter.dart';
 import '../../core/widgets/skip_app_bar.dart';
 import '../../data/items_provider.dart';
 import '../../data/models/item_model.dart';
@@ -155,6 +157,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     final skipTheme = theme.extension<SkipThemeExtension>()!;
     final strings = context.watch<LocaleProvider>().strings;
     final currency = context.watch<CurrencyProvider>().currency;
+    final hourlyWage = context.watch<WageProvider>().hourlyWage;
     final item = context.select<ItemsProvider, ItemModel>(
       (provider) => provider.items.firstWhere(
         (i) => i.id == widget.item.id,
@@ -236,6 +239,12 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                             color: statusColor,
                           ),
                         ),
+                        if (hoursOfWork(item.price, hourlyWage)
+                            case final hours?)
+                          Text(
+                            strings.hoursOfWork(hours),
+                            style: theme.textTheme.bodyMedium,
+                          ),
                       ],
                     ),
                   ),

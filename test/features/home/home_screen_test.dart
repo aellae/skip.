@@ -3,18 +3,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:skip/core/localization/currency_provider.dart';
 import 'package:skip/core/localization/locale_provider.dart';
+import 'package:skip/core/settings/sfx_provider.dart';
+import 'package:skip/core/settings/wage_provider.dart';
 import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/data/items_provider.dart';
 import 'package:skip/features/home/home_screen.dart';
 
 import '../../test_helpers/widget_test_env.dart';
 
-Widget _buildApp(ItemsProvider provider, {ThemeData? theme}) {
+Widget _buildApp(
+  ItemsProvider provider, {
+  ThemeData? theme,
+  double? hourlyWage,
+}) {
   return MultiProvider(
     providers: [
       ChangeNotifierProvider.value(value: provider),
       ChangeNotifierProvider(create: (_) => LocaleProvider()),
       ChangeNotifierProvider(create: (_) => CurrencyProvider()),
+      ChangeNotifierProvider(create: (_) => SfxProvider()),
+      ChangeNotifierProvider(create: (_) => WageProvider(initial: hourlyWage)),
     ],
     child: MaterialApp(
       theme: theme ?? AppThemes.minimal,
@@ -73,6 +81,23 @@ void main() {
 
     expect(find.textContaining('Nothing logged yet'), findsOneWidget);
     expect(find.text('\$0.00'), findsNWidgets(2));
+  });
+
+  testWidgets('shows hours of work on each card when an hourly wage is set', (
+    tester,
+  ) async {
+    final itemsProvider = buildTestItemsProvider();
+    await itemsProvider.addItem(
+      title: 'Jacket',
+      price: 120,
+      imagePath: 'skip_images/a.jpg',
+      isSaved: true,
+    );
+
+    await tester.pumpWidget(_buildApp(itemsProvider, hourlyWage: 20));
+    await tester.pumpAndSettle();
+
+    expect(find.text('≈ 6.0 hrs of work'), findsOneWidget);
   });
 
   testWidgets('shows the dynamic logo text from the active theme', (

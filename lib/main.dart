@@ -5,6 +5,8 @@ import 'core/localization/app_currency.dart';
 import 'core/localization/app_locale.dart';
 import 'core/localization/currency_provider.dart';
 import 'core/localization/locale_provider.dart';
+import 'core/settings/sfx_provider.dart';
+import 'core/settings/wage_provider.dart';
 import 'core/theme/theme_provider.dart';
 import 'data/items_provider.dart';
 import 'features/home/home_screen.dart';
@@ -24,10 +26,16 @@ void main() async {
         : AppCurrency.eur,
   );
   await currencyProvider.loadSaved();
+  final sfxProvider = SfxProvider();
+  await sfxProvider.loadSaved();
+  final wageProvider = WageProvider();
+  await wageProvider.loadSaved();
   runApp(
     SkipApp(
       localeProviderOverride: localeProvider,
       currencyProviderOverride: currencyProvider,
+      sfxProviderOverride: sfxProvider,
+      wageProviderOverride: wageProvider,
     ),
   );
 }
@@ -40,6 +48,8 @@ class SkipApp extends StatelessWidget {
   final ItemsProvider? itemsProviderOverride;
   final LocaleProvider? localeProviderOverride;
   final CurrencyProvider? currencyProviderOverride;
+  final SfxProvider? sfxProviderOverride;
+  final WageProvider? wageProviderOverride;
 
   const SkipApp({
     super.key,
@@ -47,6 +57,8 @@ class SkipApp extends StatelessWidget {
     this.itemsProviderOverride,
     this.localeProviderOverride,
     this.currencyProviderOverride,
+    this.sfxProviderOverride,
+    this.wageProviderOverride,
   });
 
   @override
@@ -64,6 +76,12 @@ class SkipApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => currencyProviderOverride ?? CurrencyProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => sfxProviderOverride ?? SfxProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => wageProviderOverride ?? WageProvider(),
         ),
       ],
       child: Consumer<ThemeProvider>(

@@ -9,6 +9,7 @@ class ItemModel {
   final String? category;
   final DateTime createdAt;
   final String? purchaseUrl;
+  final DateTime? deletedAt;
 
   const ItemModel({
     this.id,
@@ -19,6 +20,7 @@ class ItemModel {
     this.category,
     required this.createdAt,
     this.purchaseUrl,
+    this.deletedAt,
   });
 
   ItemModel copyWith({
@@ -30,6 +32,7 @@ class ItemModel {
     String? category,
     DateTime? createdAt,
     String? purchaseUrl,
+    DateTime? deletedAt,
   }) {
     return ItemModel(
       id: id ?? this.id,
@@ -40,6 +43,7 @@ class ItemModel {
       category: category ?? this.category,
       createdAt: createdAt ?? this.createdAt,
       purchaseUrl: purchaseUrl ?? this.purchaseUrl,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
   }
 
@@ -53,6 +57,7 @@ class ItemModel {
       'category': category,
       'created_at': createdAt.toIso8601String(),
       'purchase_url': purchaseUrl,
+      'deleted_at': deletedAt?.toIso8601String(),
     };
   }
 
@@ -66,6 +71,9 @@ class ItemModel {
       category: map['category'] as String?,
       createdAt: DateTime.parse(map['created_at'] as String),
       purchaseUrl: map['purchase_url'] as String?,
+      deletedAt: map['deleted_at'] == null
+          ? null
+          : DateTime.parse(map['deleted_at'] as String),
     );
   }
 
@@ -80,7 +88,8 @@ class ItemModel {
         other.isSaved == isSaved &&
         other.category == category &&
         other.createdAt == createdAt &&
-        other.purchaseUrl == purchaseUrl;
+        other.purchaseUrl == purchaseUrl &&
+        other.deletedAt == deletedAt;
   }
 
   @override
@@ -93,6 +102,7 @@ class ItemModel {
     category,
     createdAt,
     purchaseUrl,
+    deletedAt,
   );
 
   @override

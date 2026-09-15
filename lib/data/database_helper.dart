@@ -12,7 +12,7 @@ import 'models/item_model.dart';
 /// files when an item record is deleted from SQLite").
 class DatabaseHelper {
   static const String dbName = 'skip.db';
-  static const int dbVersion = 2;
+  static const int dbVersion = 3;
   static const String tableItems = 'items';
 
   static final DatabaseHelper instance = DatabaseHelper();
@@ -58,7 +58,8 @@ class DatabaseHelper {
         is_saved INTEGER NOT NULL,
         category TEXT,
         created_at TEXT NOT NULL,
-        purchase_url TEXT
+        purchase_url TEXT,
+        deleted_at TEXT
       )
     ''');
     await db.execute(
@@ -72,6 +73,9 @@ class DatabaseHelper {
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       await db.execute('ALTER TABLE $tableItems ADD COLUMN purchase_url TEXT');
+    }
+    if (oldVersion < 3) {
+      await db.execute('ALTER TABLE $tableItems ADD COLUMN deleted_at TEXT');
     }
   }
 
@@ -105,33 +109,86 @@ class DatabaseHelper {
     return ItemModel.fromMap(rows.first);
   }
 
-  /// Returns all items, most recent first. Pass [isSaved] to filter to only
-  /// resisted (`true`) or purchased (`false`) items.
+  /// Returns all non-trashed items, most recent first. Pass [isSaved] to
+  /// filter to only resisted (`true`) or purchased (`false`) items.
   Future<List<ItemModel>> getAllItems({bool? isSaved}) async {
     final db = await database;
+    final conditions = ['deleted_at IS NULL'];
+    final args = <Object?>[];
+    if (isSaved != null) {
+      conditions.add('is_saved = ?');
+      args.add(isSaved ? 1 : 0);
+    }
     final rows = await db.query(
       tableItems,
-      where: isSaved == null ? null : 'is_saved = ?',
-      whereArgs: isSaved == null ? null : [isSaved ? 1 : 0],
+      where: conditions.join(' AND '),
+      whereArgs: args,
       orderBy: 'created_at DESC',
     );
     return rows.map(ItemModel.fromMap).toList();
   }
 
-  /// Deletes the item row and its backing image file. Returns the number
-  /// of rows deleted (0 if no item existed with that id).
-  Future<int> deleteItem(int id) async {
-    final existing = await getItemById(id);
+  /// Returns trashed items, most recently trashed first.
+  Future<List<ItemModel>> getTrashedItems() async {
     final db = await database;
-    final rowsDeleted = await db.delete(
+    final rows = await db.query(
       tableItems,
+      where: 'deleted_at IS NOT NULL',
+      orderBy: 'deleted_at DESC',
+    );
+    return rows.map(ItemModel.fromMap).toList();
+  }
+
+  /// Soft-deletes the item: marks it trashed (`deleted_at` set) without
+  /// removing the row or its image file yet — recoverable via [restoreItem]
+  /// until [purgeExpiredTrash] catches up with it. Returns the number of
+  /// rows affected (0 if no such item existed).
+  Future<int> deleteItem(int id) => _setDeletedAt(id, DateTime.now());
+
+  /// Clears `deleted_at`, moving a trashed item back into the live set.
+  /// Returns the number of rows affected (0 if no such item existed).
+  Future<int> restoreItem(int id) => _setDeletedAt(id, null);
+
+  Future<int> _setDeletedAt(int id, DateTime? deletedAt) async {
+    final db = await database;
+    return db.update(
+      tableItems,
+      {'deleted_at': deletedAt?.toIso8601String()},
       where: 'id = ?',
       whereArgs: [id],
     );
-    if (existing != null && rowsDeleted > 0) {
-      await fileHelper.deleteImage(existing.imagePath);
+  }
+
+  /// Permanently removes items trashed more than [retention] ago: deletes
+  /// both the row and its backing image file (CLAUDE.md's image-cleanup
+  /// rule, deferred until purge rather than applied at soft-delete time).
+  /// Returns the number of items purged.
+  Future<int> purgeExpiredTrash({
+    Duration retention = const Duration(days: 30),
+    DateTime? now,
+  }) async {
+    final db = await database;
+    final cutoff = (now ?? DateTime.now()).subtract(retention);
+    final rows = await db.query(
+      tableItems,
+      where: 'deleted_at IS NOT NULL AND deleted_at < ?',
+      whereArgs: [cutoff.toIso8601String()],
+    );
+
+    var purged = 0;
+    for (final row in rows) {
+      final item = ItemModel.fromMap(row);
+      final rowsDeleted = await db.delete(
+        tableItems,
+        where: 'id = ?',
+        whereArgs: [item.id],
+      );
+      if (rowsDeleted > 0) {
+        await fileHelper.deleteImage(item.imagePath);
+        purged++;
+      }
     }
-    return rowsDeleted;
+    return purged;
   }
 
   Future<double> getTotalSaved() => _sumPrice(isSaved: true);
@@ -141,7 +198,8 @@ class DatabaseHelper {
   Future<double> _sumPrice({required bool isSaved}) async {
     final db = await database;
     final result = await db.rawQuery(
-      'SELECT SUM(price) as total FROM $tableItems WHERE is_saved = ?',
+      'SELECT SUM(price) as total FROM $tableItems '
+      'WHERE is_saved = ? AND deleted_at IS NULL',
       [isSaved ? 1 : 0],
     );
     final total = result.first['total'];

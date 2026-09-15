@@ -1,4 +1,5 @@
 import '../../data/backup_service.dart';
+import '../utils/wage_formatter.dart';
 import 'app_locale.dart';
 
 /// Every user-facing string in SKIP, in all supported languages side by
@@ -44,12 +45,16 @@ class AppStrings {
     AppLocale.de => 'Diesen Artikel löschen?',
   };
   String get deleteItemContent => switch (locale) {
-    AppLocale.en => 'This removes it and its photo permanently.',
+    AppLocale.en =>
+      'Moves it to Trash. You can restore it from Settings within 30 days.',
     AppLocale.it =>
-      'Questa azione lo rimuove insieme alla foto in modo permanente.',
+      'Lo sposta nel Cestino. Puoi ripristinarlo dalle Impostazioni entro 30 giorni.',
     AppLocale.fr =>
-      'Cette action le supprime définitivement, ainsi que sa photo.',
-    AppLocale.de => 'Dadurch werden er und sein Foto dauerhaft gelöscht.',
+      'Le déplace vers la Corbeille. Vous pouvez le restaurer depuis les '
+          'Paramètres dans les 30 jours.',
+    AppLocale.de =>
+      'Verschiebt ihn in den Papierkorb. Du kannst ihn innerhalb von 30 '
+          'Tagen in den Einstellungen wiederherstellen.',
   };
   String get cancel => switch (locale) {
     AppLocale.en => 'Cancel',
@@ -449,6 +454,88 @@ class AppStrings {
     AppLocale.it => 'Euro',
     AppLocale.fr => 'Euro',
     AppLocale.de => 'Euro',
+  };
+  String get costInHours => switch (locale) {
+    AppLocale.en => 'Cost in Hours',
+    AppLocale.it => 'Costo in ore',
+    AppLocale.fr => 'Coût en heures',
+    AppLocale.de => 'Kosten in Stunden',
+  };
+  String get hourlyWageLabel => switch (locale) {
+    AppLocale.en => 'Hourly wage',
+    AppLocale.it => 'Paga oraria',
+    AppLocale.fr => 'Salaire horaire',
+    AppLocale.de => 'Stundenlohn',
+  };
+  String get hourlyWageNotSet => switch (locale) {
+    AppLocale.en => 'Not set — prices shown as-is',
+    AppLocale.it => 'Non impostata: i prezzi restano invariati',
+    AppLocale.fr => 'Non défini — les prix restent inchangés',
+    AppLocale.de => 'Nicht festgelegt – Preise bleiben unverändert',
+  };
+  String get hourlyWageDialogTitle => switch (locale) {
+    AppLocale.en => 'Set hourly wage',
+    AppLocale.it => 'Imposta paga oraria',
+    AppLocale.fr => 'Définir le salaire horaire',
+    AppLocale.de => 'Stundenlohn festlegen',
+  };
+  String hourlyWageValue(String formattedAmount) => switch (locale) {
+    AppLocale.en => '$formattedAmount / hr',
+    AppLocale.it => '$formattedAmount /ora',
+    AppLocale.fr => '$formattedAmount /h',
+    AppLocale.de => '$formattedAmount /Std.',
+  };
+  String hoursOfWork(double hours) {
+    final formatted = formatHoursOfWork(hours, locale);
+    return switch (locale) {
+      AppLocale.en => '≈ $formatted hrs of work',
+      AppLocale.it => '≈ $formatted ore di lavoro',
+      AppLocale.fr => '≈ $formatted h de travail',
+      AppLocale.de => '≈ $formatted Std. Arbeit',
+    };
+  }
+
+  String get sound => switch (locale) {
+    AppLocale.en => 'Sound',
+    AppLocale.it => 'Audio',
+    AppLocale.fr => 'Son',
+    AppLocale.de => 'Ton',
+  };
+  String get soundEffects => switch (locale) {
+    AppLocale.en => 'Sound effects',
+    AppLocale.it => 'Effetti sonori',
+    AppLocale.fr => 'Effets sonores',
+    AppLocale.de => 'Soundeffekte',
+  };
+  String get trashSectionLabel => switch (locale) {
+    AppLocale.en => 'Trash',
+    AppLocale.it => 'Cestino',
+    AppLocale.fr => 'Corbeille',
+    AppLocale.de => 'Papierkorb',
+  };
+  String get emptyTrashMessage => switch (locale) {
+    AppLocale.en => 'Trash is empty.',
+    AppLocale.it => 'Il cestino è vuoto.',
+    AppLocale.fr => 'La corbeille est vide.',
+    AppLocale.de => 'Der Papierkorb ist leer.',
+  };
+  String get restore => switch (locale) {
+    AppLocale.en => 'Restore',
+    AppLocale.it => 'Ripristina',
+    AppLocale.fr => 'Restaurer',
+    AppLocale.de => 'Wiederherstellen',
+  };
+  String get trashRetentionNotice => switch (locale) {
+    AppLocale.en => 'Items are permanently deleted 30 days after trashing.',
+    AppLocale.it =>
+      'Gli articoli vengono eliminati definitivamente 30 giorni dopo essere '
+          'stati cestinati.',
+    AppLocale.fr =>
+      'Les articles sont définitivement supprimés 30 jours après leur mise '
+          'à la corbeille.',
+    AppLocale.de =>
+      'Artikel werden 30 Tage nach dem Verschieben in den Papierkorb '
+          'endgültig gelöscht.',
   };
 
   // Each language's own name, in that language — not translated into the

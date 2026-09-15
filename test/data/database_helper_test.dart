@@ -110,27 +110,108 @@ void main() {
       expect(() => db.updateItem(makeItem()), throwsArgumentError);
     });
 
-    test('deleteItem removes the row and deletes its image file', () async {
-      final id = await db.insertItem(
-        makeItem(imagePath: 'skip_images/to_delete.jpg'),
-      );
+    test(
+      'deleteItem soft-deletes: hides the item without removing the row or its image file',
+      () async {
+        final id = await db.insertItem(
+          makeItem(imagePath: 'skip_images/to_delete.jpg'),
+        );
 
-      final rowsDeleted = await db.deleteItem(id);
+        final rowsAffected = await db.deleteItem(id);
 
-      expect(rowsDeleted, 1);
-      expect(await db.getItemById(id), isNull);
-      verify(
-        () => mockFileHelper.deleteImage('skip_images/to_delete.jpg'),
-      ).called(1);
+        expect(rowsAffected, 1);
+        expect(await db.getItemById(id), isNotNull);
+        expect((await db.getItemById(id))!.deletedAt, isNotNull);
+        expect(await db.getAllItems(), isEmpty);
+        verifyNever(() => mockFileHelper.deleteImage(any()));
+      },
+    );
+
+    test(
+      'deleteItem on a missing id affects nothing and never touches the file system',
+      () async {
+        final rowsAffected = await db.deleteItem(999);
+
+        expect(rowsAffected, 0);
+        verifyNever(() => mockFileHelper.deleteImage(any()));
+      },
+    );
+
+    test('restoreItem clears deleted_at and brings the item back', () async {
+      final id = await db.insertItem(makeItem());
+      await db.deleteItem(id);
+      expect(await db.getAllItems(), isEmpty);
+
+      final rowsAffected = await db.restoreItem(id);
+
+      expect(rowsAffected, 1);
+      expect(await db.getAllItems(), hasLength(1));
+      expect((await db.getItemById(id))!.deletedAt, isNull);
+    });
+
+    test('getTrashedItems returns only soft-deleted items', () async {
+      await db.insertItem(makeItem(title: 'Kept'));
+      final trashedId = await db.insertItem(makeItem(title: 'Trashed'));
+      await db.deleteItem(trashedId);
+
+      final trashed = await db.getTrashedItems();
+      final live = await db.getAllItems();
+
+      expect(trashed.map((i) => i.title), ['Trashed']);
+      expect(live.map((i) => i.title), ['Kept']);
+    });
+
+    test('getAllItems and _sumPrice exclude trashed items', () async {
+      final id = await db.insertItem(makeItem(price: 30, isSaved: true));
+      await db.insertItem(makeItem(price: 20, isSaved: true));
+      await db.deleteItem(id);
+
+      expect(await db.getAllItems(), hasLength(1));
+      expect(await db.getTotalSaved(), 20);
     });
 
     test(
-      'deleteItem on a missing id deletes nothing and never touches the file system',
+      'purgeExpiredTrash only removes items past retention and cleans up their file',
       () async {
-        final rowsDeleted = await db.deleteItem(999);
+        final oldId = await db.insertItem(
+          makeItem(imagePath: 'skip_images/old.jpg'),
+        );
+        final newId = await db.insertItem(
+          makeItem(imagePath: 'skip_images/new.jpg'),
+        );
+        final oldDeletedAt = DateTime.utc(2026, 1, 1);
+        final newDeletedAt = DateTime.utc(2026, 5, 20);
+        await db.deleteItem(oldId);
+        await db.deleteItem(newId);
+        // deleteItem stamps `now` internally; overwrite deleted_at directly
+        // so the test controls exactly which side of the retention window
+        // each row falls on.
+        final rawDb = await db.database;
+        await rawDb.update(
+          'items',
+          {'deleted_at': oldDeletedAt.toIso8601String()},
+          where: 'id = ?',
+          whereArgs: [oldId],
+        );
+        await rawDb.update(
+          'items',
+          {'deleted_at': newDeletedAt.toIso8601String()},
+          where: 'id = ?',
+          whereArgs: [newId],
+        );
 
-        expect(rowsDeleted, 0);
-        verifyNever(() => mockFileHelper.deleteImage(any()));
+        final purged = await db.purgeExpiredTrash(
+          retention: const Duration(days: 30),
+          now: DateTime.utc(2026, 6, 1),
+        );
+
+        expect(purged, 1);
+        expect(await db.getItemById(oldId), isNull);
+        expect(await db.getItemById(newId), isNotNull);
+        verify(
+          () => mockFileHelper.deleteImage('skip_images/old.jpg'),
+        ).called(1);
+        verifyNever(() => mockFileHelper.deleteImage('skip_images/new.jpg'));
       },
     );
 
@@ -237,6 +318,63 @@ void main() {
         }
       },
     );
+
+    test(
+      'upgrading a v2 database adds deleted_at and keeps existing rows',
+      () async {
+        final tempDir = await Directory.systemTemp.createTemp(
+          'skip_migration_test_',
+        );
+        final dbPath = p.join(tempDir.path, 'migration.db');
+        try {
+          final v2Db = await databaseFactory.openDatabase(
+            dbPath,
+            options: OpenDatabaseOptions(
+              version: 2,
+              onCreate: (rawDb, version) async {
+                await rawDb.execute('''
+                  CREATE TABLE items (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    title TEXT,
+                    price REAL NOT NULL,
+                    image_path TEXT NOT NULL,
+                    is_saved INTEGER NOT NULL,
+                    category TEXT,
+                    created_at TEXT NOT NULL,
+                    purchase_url TEXT
+                  )
+                ''');
+              },
+            ),
+          );
+          final id = await v2Db.insert('items', {
+            'title': 'Pre-migration item',
+            'price': 42.0,
+            'image_path': 'a.jpg',
+            'is_saved': 1,
+            'created_at': DateTime.utc(2026, 1, 1).toIso8601String(),
+            'purchase_url': 'https://example.com',
+          });
+          await v2Db.close();
+
+          final upgraded = DatabaseHelper(
+            fileHelper: mockFileHelper,
+            testDbPath: dbPath,
+          );
+          final item = await upgraded.getItemById(id);
+
+          expect(item, isNotNull);
+          expect(item!.title, 'Pre-migration item');
+          expect(item.purchaseUrl, 'https://example.com');
+          expect(item.deletedAt, isNull);
+          expect(await upgraded.getAllItems(), hasLength(1));
+
+          await upgraded.close();
+        } finally {
+          await tempDir.delete(recursive: true);
+        }
+      },
+    );
   });
 
   group('DatabaseHelper schema', () {
@@ -256,6 +394,7 @@ void main() {
           'category',
           'created_at',
           'purchase_url',
+          'deleted_at',
         });
       },
     );

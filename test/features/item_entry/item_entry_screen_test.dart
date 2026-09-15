@@ -8,6 +8,8 @@ import 'package:skip/core/localization/app_currency.dart';
 import 'package:skip/core/localization/app_locale.dart';
 import 'package:skip/core/localization/currency_provider.dart';
 import 'package:skip/core/localization/locale_provider.dart';
+import 'package:skip/core/settings/sfx_provider.dart';
+import 'package:skip/core/settings/wage_provider.dart';
 import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/data/items_provider.dart';
 import 'package:skip/features/item_entry/item_entry_screen.dart';
@@ -75,6 +77,7 @@ void main() {
     ItemsProvider itemsProvider, {
     AppLocale locale = AppLocale.en,
     AppCurrency currency = AppCurrency.usd,
+    double? hourlyWage,
   }) async {
     fakePicker = _FakeImagePicker(sourceImage);
     await tester.pumpWidget(
@@ -86,6 +89,10 @@ void main() {
           ),
           ChangeNotifierProvider(
             create: (_) => CurrencyProvider(initial: currency),
+          ),
+          ChangeNotifierProvider(create: (_) => SfxProvider()),
+          ChangeNotifierProvider(
+            create: (_) => WageProvider(initial: hourlyWage),
           ),
         ],
         child: MaterialApp(
@@ -292,6 +299,24 @@ void main() {
       expect(find.text('Prezzo'), findsOneWidget);
       expect(find.text('\$ '), findsOneWidget);
       expect(find.text('€'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'shows a live hours-of-work preview under the price when an hourly wage is set',
+    (tester) async {
+      final itemsProvider = buildTestItemsProvider();
+      await pumpEntryScreen(tester, itemsProvider, hourlyWage: 20);
+
+      expect(find.textContaining('hrs of work'), findsNothing);
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Price'),
+        '100',
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('≈ 5.0 hrs of work'), findsOneWidget);
     },
   );
 

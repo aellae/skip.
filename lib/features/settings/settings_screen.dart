@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_spacing.dart';
@@ -7,14 +8,18 @@ import '../../core/localization/app_locale.dart';
 import '../../core/localization/app_strings.dart';
 import '../../core/localization/currency_provider.dart';
 import '../../core/localization/locale_provider.dart';
+import '../../core/settings/sfx_provider.dart';
+import '../../core/settings/wage_provider.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/theme/theme_provider.dart';
+import '../../core/utils/currency_formatter.dart';
 import '../../core/widgets/animated_count_up.dart';
 import '../../core/widgets/entrance_fade.dart';
 import '../../core/widgets/skip_app_bar.dart';
 import '../../core/widgets/skip_card.dart';
 import '../../core/widgets/tap_scale.dart';
 import '../../data/items_provider.dart';
+import '../trash/trash_screen.dart';
 import 'support_screen.dart';
 import 'widgets/backup_section.dart';
 
@@ -29,6 +34,8 @@ class SettingsScreen extends StatelessWidget {
     final themeProvider = context.watch<ThemeProvider>();
     final localeProvider = context.watch<LocaleProvider>();
     final currencyProvider = context.watch<CurrencyProvider>();
+    final sfxProvider = context.watch<SfxProvider>();
+    final wageProvider = context.watch<WageProvider>();
     final itemsProvider = context.watch<ItemsProvider>();
     final strings = localeProvider.strings;
 
@@ -64,6 +71,28 @@ class SettingsScreen extends StatelessWidget {
                 strings: strings,
               ),
               const SizedBox(height: AppSpacing.sectionGap),
+              Text(strings.costInHours, style: theme.textTheme.labelLarge),
+              const SizedBox(height: 12),
+              _WageSection(
+                hourlyWage: wageProvider.hourlyWage,
+                currency: currencyProvider.currency,
+                strings: strings,
+                onTap: () => _editHourlyWage(
+                  context,
+                  currentWage: wageProvider.hourlyWage,
+                  currency: currencyProvider.currency,
+                  strings: strings,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sectionGap),
+              Text(strings.sound, style: theme.textTheme.labelLarge),
+              const SizedBox(height: 12),
+              _SoundToggle(
+                enabled: sfxProvider.enabled,
+                onChanged: sfxProvider.setEnabled,
+                strings: strings,
+              ),
+              const SizedBox(height: AppSpacing.sectionGap),
               Text(strings.summary, style: theme.textTheme.labelLarge),
               const SizedBox(height: 12),
               _StatTile(
@@ -82,6 +111,28 @@ class SettingsScreen extends StatelessWidget {
               Text(strings.data, style: theme.textTheme.labelLarge),
               const SizedBox(height: 12),
               const BackupSection(),
+              const SizedBox(height: 12),
+              SkipCard(
+                onTap: () => Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const TrashScreen())),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.delete_outline,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        strings.trashSectionLabel,
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
               const SizedBox(height: AppSpacing.sectionGap),
               Text(
                 strings.supportSectionLabel,
@@ -443,6 +494,199 @@ class _StatTile extends StatelessWidget {
             formatter: formatter,
             style: theme.textTheme.titleLarge?.copyWith(color: color),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Opens the hourly-wage dialog and persists the result — `null` means the
+/// dialog was cancelled (no change); a [_WageResult] with a `null` wage
+/// means "Remove" was tapped.
+Future<void> _editHourlyWage(
+  BuildContext context, {
+  required double? currentWage,
+  required AppCurrency currency,
+  required AppStrings strings,
+}) async {
+  final result = await showDialog<_WageResult>(
+    context: context,
+    builder: (dialogContext) => _HourlyWageDialog(
+      currentWage: currentWage,
+      currency: currency,
+      strings: strings,
+    ),
+  );
+  if (!context.mounted || result == null) return;
+  await context.read<WageProvider>().setHourlyWage(result.hourlyWage);
+}
+
+/// Entry point for the optional "cost in hours worked" reframe — tapping
+/// opens [_HourlyWageDialog] to set or clear the hourly wage, mirroring
+/// [SettingsScreen]'s "Support SKIP" row shape.
+class _WageSection extends StatelessWidget {
+  final double? hourlyWage;
+  final AppCurrency currency;
+  final AppStrings strings;
+  final VoidCallback onTap;
+
+  const _WageSection({
+    required this.hourlyWage,
+    required this.currency,
+    required this.strings,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SkipCard(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(strings.hourlyWageLabel, style: theme.textTheme.bodyLarge),
+                const SizedBox(height: 2),
+                Text(
+                  hourlyWage == null
+                      ? strings.hourlyWageNotSet
+                      : strings.hourlyWageValue(
+                          formatCurrency(hourlyWage!, currency: currency),
+                        ),
+                  style: theme.textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right),
+        ],
+      ),
+    );
+  }
+}
+
+/// Result of [_HourlyWageDialog]: `null` overall means cancelled; a
+/// non-null result with a `null` [hourlyWage] means "Remove" was tapped.
+class _WageResult {
+  final double? hourlyWage;
+
+  const _WageResult(this.hourlyWage);
+}
+
+/// Add/edit dialog for the optional hourly wage, structurally identical to
+/// item_detail_screen's `_PurchaseLinkDialog`/`_EditDetailsDialog` — a
+/// dedicated StatefulWidget so its TextEditingController is disposed by
+/// Flutter itself at the right point in the dialog's exit transition.
+class _HourlyWageDialog extends StatefulWidget {
+  final double? currentWage;
+  final AppCurrency currency;
+  final AppStrings strings;
+
+  const _HourlyWageDialog({
+    required this.currentWage,
+    required this.currency,
+    required this.strings,
+  });
+
+  @override
+  State<_HourlyWageDialog> createState() => _HourlyWageDialogState();
+}
+
+class _HourlyWageDialogState extends State<_HourlyWageDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final _controller = TextEditingController(
+    text: widget.currentWage == null
+        ? ''
+        : widget.currentWage!.toStringAsFixed(2),
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  String? _validate(String? value) {
+    if (value == null || value.trim().isEmpty) return widget.strings.enterPrice;
+    final parsed = double.tryParse(value);
+    if (parsed == null) return widget.strings.enterValidNumber;
+    if (parsed <= 0) return widget.strings.priceGreaterThanZero;
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEuro = isEuroCurrency(widget.currency);
+    return AlertDialog(
+      title: Text(widget.strings.hourlyWageDialogTitle),
+      content: Form(
+        key: _formKey,
+        child: TextFormField(
+          controller: _controller,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+          ],
+          decoration: InputDecoration(
+            labelText: widget.strings.hourlyWageLabel,
+            prefixText: isEuro ? null : '\$ ',
+            suffixText: isEuro ? '€' : null,
+          ),
+          validator: _validate,
+        ),
+      ),
+      actions: [
+        if (widget.currentWage != null)
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(const _WageResult(null)),
+            child: Text(widget.strings.remove),
+          ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(widget.strings.cancel),
+        ),
+        TextButton(
+          onPressed: () {
+            if (!(_formKey.currentState?.validate() ?? false)) return;
+            Navigator.of(
+              context,
+            ).pop(_WageResult(double.parse(_controller.text)));
+          },
+          child: Text(widget.strings.save),
+        ),
+      ],
+    );
+  }
+}
+
+/// A single switch row muting/unmuting Y2K's sound effects, independent of
+/// the active theme so the choice sticks even after switching aesthetics.
+class _SoundToggle extends StatelessWidget {
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+  final AppStrings strings;
+
+  const _SoundToggle({
+    required this.enabled,
+    required this.onChanged,
+    required this.strings,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SkipCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(strings.soundEffects, style: theme.textTheme.bodyLarge),
+          ),
+          Switch(value: enabled, onChanged: onChanged),
         ],
       ),
     );

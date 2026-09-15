@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:skip/core/localization/app_currency.dart';
 import 'package:skip/core/localization/currency_provider.dart';
 import 'package:skip/core/localization/locale_provider.dart';
+import 'package:skip/core/settings/sfx_provider.dart';
+import 'package:skip/core/settings/wage_provider.dart';
 import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/core/utils/file_helper.dart';
 import 'package:skip/data/database_helper.dart';
@@ -38,6 +40,7 @@ void main() {
     String? purchaseUrl,
     Future<bool> Function(Uri url)? launchUrlOverride,
     AppCurrency currency = AppCurrency.usd,
+    double? hourlyWage,
   }) async {
     await itemsProvider.addItem(
       title: 'Jacket',
@@ -56,6 +59,10 @@ void main() {
           ChangeNotifierProvider(
             create: (_) => CurrencyProvider(initial: currency),
           ),
+          ChangeNotifierProvider(create: (_) => SfxProvider()),
+          ChangeNotifierProvider(
+            create: (_) => WageProvider(initial: hourlyWage),
+          ),
         ],
         child: MaterialApp(
           theme: AppThemes.minimal,
@@ -70,7 +77,7 @@ void main() {
   }
 
   testWidgets(
-    'delete removes the item from the DB and deletes its image file',
+    'delete soft-deletes the item: hidden from items, moved to trash, image untouched',
     (tester) async {
       await pumpDetail(tester);
 
@@ -80,11 +87,27 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(itemsProvider.items, isEmpty);
-      verify(
-        () => mockFileHelper.deleteImage('skip_images/to_delete.jpg'),
-      ).called(1);
+      expect(itemsProvider.trashedItems, hasLength(1));
+      verifyNever(() => mockFileHelper.deleteImage(any()));
     },
   );
+
+  testWidgets(
+    'shows hours of work under the price when an hourly wage is set',
+    (tester) async {
+      await pumpDetail(tester, hourlyWage: 20);
+
+      expect(find.text('≈ 6.0 hrs of work'), findsOneWidget);
+    },
+  );
+
+  testWidgets('shows no hours-of-work line when no hourly wage is set', (
+    tester,
+  ) async {
+    await pumpDetail(tester);
+
+    expect(find.textContaining('hrs of work'), findsNothing);
+  });
 
   testWidgets('cancelling the delete dialog deletes nothing', (tester) async {
     await pumpDetail(tester);

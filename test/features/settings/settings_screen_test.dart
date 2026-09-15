@@ -5,6 +5,8 @@ import 'package:skip/core/localization/app_currency.dart';
 import 'package:skip/core/localization/app_locale.dart';
 import 'package:skip/core/localization/currency_provider.dart';
 import 'package:skip/core/localization/locale_provider.dart';
+import 'package:skip/core/settings/sfx_provider.dart';
+import 'package:skip/core/settings/wage_provider.dart';
 import 'package:skip/core/theme/theme_provider.dart';
 import 'package:skip/core/utils/currency_formatter.dart';
 import 'package:skip/data/items_provider.dart';
@@ -23,6 +25,8 @@ void main() {
     required ItemsProvider itemsProvider,
     LocaleProvider? localeProvider,
     CurrencyProvider? currencyProvider,
+    SfxProvider? sfxProvider,
+    WageProvider? wageProvider,
   }) async {
     await tester.pumpWidget(
       MultiProvider(
@@ -35,6 +39,8 @@ void main() {
           ChangeNotifierProvider.value(
             value: currencyProvider ?? CurrencyProvider(),
           ),
+          ChangeNotifierProvider.value(value: sfxProvider ?? SfxProvider()),
+          ChangeNotifierProvider.value(value: wageProvider ?? WageProvider()),
         ],
         child: Consumer<ThemeProvider>(
           builder: (context, provider, _) => MaterialApp(
@@ -205,4 +211,93 @@ void main() {
       expect(find.text('Dollaro USA'), findsOneWidget);
     },
   );
+
+  testWidgets('toggling the sound switch mutes/unmutes and persists it', (
+    tester,
+  ) async {
+    final sfxProvider = SfxProvider();
+    await pumpSettings(
+      tester,
+      themeProvider: ThemeProvider(),
+      itemsProvider: buildTestItemsProvider(),
+      sfxProvider: sfxProvider,
+    );
+
+    await tester.scrollUntilVisible(find.byType(Switch), 200);
+    expect(sfxProvider.enabled, isTrue);
+
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(sfxProvider.enabled, isFalse);
+  });
+
+  testWidgets('shows "Not set" for the hourly wage until one is configured', (
+    tester,
+  ) async {
+    await pumpSettings(
+      tester,
+      themeProvider: ThemeProvider(),
+      itemsProvider: buildTestItemsProvider(),
+    );
+
+    await tester.scrollUntilVisible(find.text('Hourly wage'), 200);
+    expect(find.text('Not set — prices shown as-is'), findsOneWidget);
+  });
+
+  testWidgets('setting an hourly wage persists it and updates the summary', (
+    tester,
+  ) async {
+    final wageProvider = WageProvider();
+    await pumpSettings(
+      tester,
+      themeProvider: ThemeProvider(),
+      itemsProvider: buildTestItemsProvider(),
+      wageProvider: wageProvider,
+    );
+
+    await tester.scrollUntilVisible(find.text('Hourly wage'), 200);
+    await tester.tap(find.text('Hourly wage'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField), '20');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(wageProvider.hourlyWage, 20);
+    expect(find.text('\$20.00 / hr'), findsOneWidget);
+  });
+
+  testWidgets('removing a set hourly wage clears it', (tester) async {
+    final wageProvider = WageProvider(initial: 20);
+    await pumpSettings(
+      tester,
+      themeProvider: ThemeProvider(),
+      itemsProvider: buildTestItemsProvider(),
+      wageProvider: wageProvider,
+    );
+
+    await tester.scrollUntilVisible(find.text('Hourly wage'), 200);
+    await tester.tap(find.text('Hourly wage'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Remove'));
+    await tester.pumpAndSettle();
+
+    expect(wageProvider.hourlyWage, isNull);
+  });
+
+  testWidgets('tapping Trash opens the trash screen', (tester) async {
+    await pumpSettings(
+      tester,
+      themeProvider: ThemeProvider(),
+      itemsProvider: buildTestItemsProvider(),
+    );
+
+    await tester.scrollUntilVisible(find.text('Trash'), 200);
+    await tester.ensureVisible(find.text('Trash'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Trash'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Trash is empty.'), findsOneWidget);
+  });
 }

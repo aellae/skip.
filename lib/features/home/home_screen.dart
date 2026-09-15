@@ -28,8 +28,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ItemsProvider>().load();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final provider = context.read<ItemsProvider>();
+      await provider.load();
+      await provider.purgeExpiredTrash();
     });
   }
 

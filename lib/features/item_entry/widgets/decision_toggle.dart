@@ -8,6 +8,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../core/audio/sfx_player.dart';
 import '../../../core/localization/locale_provider.dart';
+import '../../../core/settings/sfx_provider.dart';
 import '../../../core/theme/app_themes.dart';
 import '../../../core/theme/contrast.dart';
 import '../../../core/widgets/tap_scale.dart';
@@ -37,7 +38,9 @@ class _DecisionToggleState extends State<DecisionToggle> {
   late final ConfettiController _confettiController = ConfettiController(
     duration: const Duration(milliseconds: 400),
   );
-  late final SkipSfxPlayer _sfx = widget.sfxPlayer ?? SkipSfxPlayer();
+  late final SkipSfxPlayer _sfx =
+      widget.sfxPlayer ??
+      SkipSfxPlayer(isEnabled: () => context.read<SfxProvider>().enabled);
 
   // Y2K shimmer sweep: on for a bounded window after "Resisted!", then off
   // again — Shimmer.fromColors loops forever while enabled, so this must be
@@ -131,13 +134,9 @@ class _DecisionToggleState extends State<DecisionToggle> {
             // rest of the Bratz/Y2K aesthetic (circular badges, pill buttons).
             createParticlePath: (size) {
               final radius = size.width / 2;
-              return Path()
-                ..addOval(
-                  Rect.fromCircle(
-                    center: Offset(radius, radius),
-                    radius: radius,
-                  ),
-                );
+              return Path()..addOval(
+                Rect.fromCircle(center: Offset(radius, radius), radius: radius),
+              );
             },
             colors: [
               theme.colorScheme.primary,

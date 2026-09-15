@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/localization/currency_provider.dart';
+import '../../../core/localization/locale_provider.dart';
+import '../../../core/settings/wage_provider.dart';
 import '../../../core/theme/app_themes.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/file_helper.dart';
+import '../../../core/utils/wage_formatter.dart';
 import '../../../core/widgets/skip_card.dart';
 import '../../../core/widgets/status_indicator.dart';
 import '../../../data/models/item_model.dart';
@@ -36,6 +39,9 @@ class ItemGridCard extends StatelessWidget {
     final theme = Theme.of(context);
     final skipTheme = theme.extension<SkipThemeExtension>()!;
     final currency = context.watch<CurrencyProvider>().currency;
+    final strings = context.watch<LocaleProvider>().strings;
+    final hourlyWage = context.watch<WageProvider>().hourlyWage;
+    final hours = hoursOfWork(item.price, hourlyWage);
     final statusColor = item.isSaved
         ? skipTheme.savedColor
         : skipTheme.spentColor;
@@ -108,6 +114,13 @@ class ItemGridCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (hours != null)
+                  Text(
+                    strings.hoursOfWork(hours),
+                    style: theme.textTheme.bodySmall,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
               ],
             ),
           ),

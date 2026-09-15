@@ -9,10 +9,12 @@ import '../../core/constants/app_spacing.dart';
 import '../../core/localization/app_strings.dart';
 import '../../core/localization/currency_provider.dart';
 import '../../core/localization/locale_provider.dart';
+import '../../core/settings/wage_provider.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../core/utils/file_helper.dart';
 import '../../core/utils/url_validator.dart';
+import '../../core/utils/wage_formatter.dart';
 import '../../core/widgets/skip_app_bar.dart';
 import '../../core/widgets/skip_card.dart';
 import '../../core/widgets/tap_scale.dart';
@@ -165,6 +167,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     final strings = context.watch<LocaleProvider>().strings;
     final currency = context.watch<CurrencyProvider>().currency;
     final isEuro = isEuroCurrency(currency);
+    final hourlyWage = context.watch<WageProvider>().hourlyWage;
 
     return Scaffold(
       appBar: SkipAppBar(title: Text(strings.logAnItem)),
@@ -248,6 +251,24 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                     validator: (value) => _validatePrice(value, strings),
                   ),
                 ),
+                if (hourlyWage != null)
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _priceController,
+                    builder: (context, value, _) {
+                      final price = double.tryParse(value.text);
+                      final hours = price == null
+                          ? null
+                          : hoursOfWork(price, hourlyWage);
+                      if (hours == null) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 4, left: 4),
+                        child: Text(
+                          strings.hoursOfWork(hours),
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      );
+                    },
+                  ),
                 const SizedBox(height: AppSpacing.md),
                 _ThemedFocusField(
                   focusNode: _titleFocus,

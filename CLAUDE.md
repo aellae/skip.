@@ -69,8 +69,10 @@ Table Name: `items`
 | `price` | `REAL` | `NOT NULL` | Monetary value of the item |
 | `image_path` | `TEXT` | `NOT NULL` | Local device absolute file path |
 | `is_saved` | `INTEGER` | `NOT NULL` | `1` = Resisted/Saved, `0` = Bought/Spent |
+| `category` | `TEXT` | `NULLABLE` | Optional category tag |
 | `created_at` | `TEXT` | `NOT NULL` | ISO8601 Timestamp string |
 | `purchase_url` | `TEXT` | `NULLABLE` | Optional link to the product's page, opened via the OS |
+| `deleted_at` | `TEXT` | `NULLABLE` | ISO8601 soft-delete timestamp; the row is hard-deleted (with its image) once past the retention window |
 
 ---
 
@@ -102,4 +104,4 @@ flutter test
 
 - **Adding a new feature UI:** Ensure both Minimal (`skip.`) and Y2K (`SKIP!`) variants render properly. Test switching themes live while the screen is open.
 - **Form Inputs:** Money fields must enforce double/float numerical inputs with proper currency formatting.
-- **Deleting Items:** Always clean up local stored image files when an item record is deleted from SQLite to prevent orphaned files.
+- **Deleting Items:** Deletion is soft — an item is moved to Trash (`deleted_at` set) and stays recoverable from Settings. Local image files are cleaned up only when Trash is purged past its retention window, not at the moment of deletion, so orphaned files still never persist indefinitely.

@@ -175,19 +175,53 @@ void main() {
     expect(provider.items.single.purchaseUrl, isNull);
   });
 
-  test('deleteItem removes it from state and deletes its image file', () async {
+  test(
+    'deleteItem soft-deletes: removes it from state, moves it to trash, leaves the image file alone',
+    () async {
+      await provider.addItem(
+        price: 50,
+        imagePath: 'to_delete.jpg',
+        isSaved: true,
+      );
+      final id = provider.items.single.id!;
+
+      await provider.deleteItem(id);
+
+      expect(provider.items, isEmpty);
+      expect(provider.trashedItems, hasLength(1));
+      expect(provider.trashedItems.single.id, id);
+      verifyNever(() => mockFileHelper.deleteImage(any()));
+    },
+  );
+
+  test('restoreItem moves a trashed item back into items', () async {
     await provider.addItem(
       price: 50,
-      imagePath: 'to_delete.jpg',
+      imagePath: 'to_restore.jpg',
       isSaved: true,
     );
     final id = provider.items.single.id!;
-
     await provider.deleteItem(id);
 
-    expect(provider.items, isEmpty);
-    verify(() => mockFileHelper.deleteImage('to_delete.jpg')).called(1);
+    await provider.restoreItem(id);
+
+    expect(provider.items, hasLength(1));
+    expect(provider.trashedItems, isEmpty);
   });
+
+  test(
+    'purgeExpiredTrash removes only items past retention and cleans up their file',
+    () async {
+      await provider.addItem(price: 50, imagePath: 'old.jpg', isSaved: true);
+      final id = provider.items.single.id!;
+      await provider.deleteItem(id);
+
+      await provider.purgeExpiredTrash(retention: Duration.zero);
+
+      expect(provider.trashedItems, isEmpty);
+      verify(() => mockFileHelper.deleteImage('old.jpg')).called(1);
+    },
+  );
 
   test('items list is unmodifiable', () async {
     await provider.addItem(price: 50, imagePath: 'x.jpg', isSaved: true);
