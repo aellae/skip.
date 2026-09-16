@@ -93,6 +93,9 @@ lib/
 
 ---
 
+## 🔒 Privacy Policy
+[Read the privacy policy](PRIVACY_POLICY.md). SKIP is 100% offline — no servers, no accounts, no analytics; everything stays on your device.
+
 ## 📄 License
 MIT License. Created for mindful spenders and dopamine shoppers worldwide.
 
