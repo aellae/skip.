@@ -1,4 +1,4 @@
-package com.elenatarantino.skip
+package com.skip.finance
 
 import io.flutter.embedding.android.FlutterActivity
 
