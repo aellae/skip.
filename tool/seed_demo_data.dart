@@ -20,12 +20,17 @@
 //   cp tool/demo_images/*.jpg /tmp/skip_demo_images/
 //   flutter run -t tool/seed_demo_data.dart -d <device> \
 //     --dart-define=SKIP_DEMO_THEME=minimal \    # or y2k
-//     --dart-define=SKIP_DEMO_SCREEN=home        # or insights
+//     --dart-define=SKIP_DEMO_SCREEN=home \      # or insights
+//     --dart-define=SKIP_DEMO_LOCALE=en          # or it
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
+import 'package:skip/core/localization/app_currency.dart';
+import 'package:skip/core/localization/app_locale.dart';
+import 'package:skip/core/localization/currency_provider.dart';
+import 'package:skip/core/localization/locale_provider.dart';
 import 'package:skip/core/theme/theme_provider.dart';
 import 'package:skip/core/utils/file_helper.dart';
 import 'package:skip/data/database_helper.dart';
@@ -42,6 +47,11 @@ const _themeArg = String.fromEnvironment(
 // launch — there's no tap-driven UI automation available for this
 // simulator, so this is the only way to screenshot a screen other than Home.
 const _screenArg = String.fromEnvironment('SKIP_DEMO_SCREEN', defaultValue: 'home');
+
+// Currency follows locale here the same way main.dart defaults it on a
+// fresh install (EUR for Italian, USD for English) so the seeded amounts
+// read naturally in either screenshot set.
+const _localeArg = String.fromEnvironment('SKIP_DEMO_LOCALE', defaultValue: 'en');
 
 final _navigatorKey = GlobalKey<NavigatorState>();
 
@@ -251,12 +261,17 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _reseed();
 
+  final locale = _localeArg == 'it' ? AppLocale.it : AppLocale.en;
   runApp(
     SkipApp(
       themeProviderOverride: ThemeProvider(
         initial: _themeArg == 'y2k'
             ? SkipAesthetic.y2k
             : SkipAesthetic.minimal,
+      ),
+      localeProviderOverride: LocaleProvider(initial: locale),
+      currencyProviderOverride: CurrencyProvider(
+        initial: locale == AppLocale.it ? AppCurrency.eur : AppCurrency.usd,
       ),
       navigatorKeyOverride: _navigatorKey,
     ),
