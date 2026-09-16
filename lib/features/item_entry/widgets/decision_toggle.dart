@@ -97,31 +97,42 @@ class _DecisionToggleState extends State<DecisionToggle> {
       clipBehavior: Clip.none,
       alignment: Alignment.topCenter,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _ToggleOption(
-                label: strings.resisted,
-                selected: widget.isSaved,
-                color: skipTheme.savedColor,
-                onTap: () => _selectResisted(skipTheme.isY2K),
-                shimmer: skipTheme.isY2K && widget.isSaved && _shimmering,
-                pulseKey: _showMinimalPulse ? _pulseKey : null,
-                onPulseDone: () {
-                  if (mounted) setState(() => _showMinimalPulse = false);
-                },
+        DecoratedBox(
+          // Matches the scaffold background (not skipTheme.cardBackground,
+          // which is a visibly different tone) so the 12px gap between the
+          // two pills — and the unselected pill's own idle fill below —
+          // reads as part of the page instead of a mismatched block sitting
+          // on top of it.
+          decoration: BoxDecoration(
+            color: theme.scaffoldBackgroundColor,
+            borderRadius: BorderRadius.circular(skipTheme.buttonRadius),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _ToggleOption(
+                  label: strings.resisted,
+                  selected: widget.isSaved,
+                  color: skipTheme.savedColor,
+                  onTap: () => _selectResisted(skipTheme.isY2K),
+                  shimmer: skipTheme.isY2K && widget.isSaved && _shimmering,
+                  pulseKey: _showMinimalPulse ? _pulseKey : null,
+                  onPulseDone: () {
+                    if (mounted) setState(() => _showMinimalPulse = false);
+                  },
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _ToggleOption(
-                label: strings.boughtIt,
-                selected: !widget.isSaved,
-                color: skipTheme.spentColor,
-                onTap: _selectBought,
+              const SizedBox(width: 12),
+              Expanded(
+                child: _ToggleOption(
+                  label: strings.boughtIt,
+                  selected: !widget.isSaved,
+                  color: skipTheme.spentColor,
+                  onTap: _selectBought,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         if (skipTheme.isY2K)
           ConfettiWidget(
@@ -176,46 +187,75 @@ class _ToggleOption extends StatelessWidget {
     final skipTheme = theme.extension<SkipThemeExtension>()!;
     final glossy = selected && skipTheme.isY2K;
 
+    final radius = BorderRadius.circular(skipTheme.buttonRadius);
+
+    // The glow shadow is painted on its own outer layer, separate from the
+    // gradient fill below. On-device (Impeller) rendering was observed to
+    // paint the gradient as a plain rectangle — ignoring borderRadius —
+    // whenever a gradient and a boxShadow live in the same BoxDecoration;
+    // the border still drew rounded, so the corners showed background
+    // instead of the fill color. Splitting them, plus an explicit ClipRRect
+    // on the fill, avoids that combination entirely.
     Widget fill = AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeOutCubic,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: glossy ? null : (selected ? color : skipTheme.cardBackground),
-        gradient: glossy
-            ? LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.white.withValues(alpha: 0.35), color],
-                stops: const [0.0, 0.65],
-              )
-            : null,
-        borderRadius: BorderRadius.circular(skipTheme.buttonRadius),
-        border: Border.all(
-          color: skipTheme.isY2K
-              ? theme.colorScheme.onSurface
-              : (selected
-                    ? color
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.2)),
-          width: skipTheme.isY2K ? 2 : 1.5,
-        ),
+        borderRadius: radius,
         boxShadow: selected ? skipTheme.glowShadow : null,
       ),
-      child: Text(
-        label,
-        style: theme.textTheme.titleMedium?.copyWith(
-          color: selected ? bestOnColor(color) : theme.colorScheme.onSurface,
+      child: ClipRRect(
+        borderRadius: radius,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: glossy
+                ? null
+                : (selected ? color : theme.scaffoldBackgroundColor),
+            gradient: glossy
+                ? LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.white.withValues(alpha: 0.35), color],
+                    stops: const [0.0, 0.65],
+                  )
+                : null,
+            borderRadius: radius,
+            border: Border.all(
+              color: skipTheme.isY2K
+                  ? theme.colorScheme.onSurface
+                  : (selected
+                        ? color
+                        : theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+              width: skipTheme.isY2K ? 2 : 1.5,
+            ),
+          ),
+          child: Text(
+            label,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: selected
+                  ? bestOnColor(color)
+                  : theme.colorScheme.onSurface,
+            ),
+          ),
         ),
       ),
     );
 
     if (shimmer) {
-      fill = Shimmer.fromColors(
-        baseColor: color,
-        highlightColor: skipTheme.accentHighlight,
-        period: const Duration(milliseconds: 1100),
-        child: fill,
+      // Same reasoning as the ClipRRect above: Shimmer's ShaderMask sweep is
+      // an extra paint layer on top of the already-clipped fill, and needs
+      // its own explicit clip or it can paint over the rounded corners too.
+      fill = ClipRRect(
+        borderRadius: radius,
+        child: Shimmer.fromColors(
+          baseColor: color,
+          highlightColor: skipTheme.accentHighlight,
+          period: const Duration(milliseconds: 1100),
+          child: fill,
+        ),
       );
     }
 

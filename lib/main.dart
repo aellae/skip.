@@ -50,6 +50,7 @@ class SkipApp extends StatelessWidget {
   final CurrencyProvider? currencyProviderOverride;
   final SfxProvider? sfxProviderOverride;
   final WageProvider? wageProviderOverride;
+  final GlobalKey<NavigatorState>? navigatorKeyOverride;
 
   const SkipApp({
     super.key,
@@ -59,6 +60,7 @@ class SkipApp extends StatelessWidget {
     this.currencyProviderOverride,
     this.sfxProviderOverride,
     this.wageProviderOverride,
+    this.navigatorKeyOverride,
   });
 
   @override
@@ -89,6 +91,7 @@ class SkipApp extends StatelessWidget {
           return MaterialApp(
             title: 'SKIP',
             debugShowCheckedModeBanner: false,
+            navigatorKey: navigatorKeyOverride,
             theme: themeProvider.themeData,
             builder: (context, child) => AnimatedTheme(
               duration: const Duration(milliseconds: 400),
