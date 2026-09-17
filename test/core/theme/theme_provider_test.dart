@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skip/core/theme/theme_provider.dart';
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
+
   group('ThemeProvider', () {
     test('defaults to the minimal aesthetic', () {
       final provider = ThemeProvider();

@@ -75,7 +75,6 @@ class _DecisionToggleState extends State<DecisionToggle> {
       });
     } else {
       HapticFeedback.selectionClick();
-      _confettiController.play();
       setState(() {
         _pulseKey++;
         _showMinimalPulse = true;
@@ -153,47 +152,31 @@ class _DecisionToggleState extends State<DecisionToggle> {
             ],
           ),
         ),
-        ConfettiWidget(
-          confettiController: _confettiController,
-          blastDirectionality: BlastDirectionality.explosive,
-          shouldLoop: false,
-          numberOfParticles: skipTheme.isY2K ? 18 : 12,
-          gravity: 0.25,
-          particleDrag: 0.08,
-          minimumSize: skipTheme.isY2K
-              ? const Size(5, 5)
-              : const Size(4, 4),
-          maximumSize: skipTheme.isY2K
-              ? const Size(10, 10)
-              : const Size(6, 6),
-          // Y2K gets round particles to match its circular badges/pills;
-          // Minimal keeps confetti's default square particles, just smaller
-          // and quieter to match its restrained aesthetic.
-          createParticlePath: skipTheme.isY2K
-              ? (size) {
-                  final radius = size.width / 2;
-                  return Path()..addOval(
-                    Rect.fromCircle(
-                      center: Offset(radius, radius),
-                      radius: radius,
-                    ),
-                  );
-                }
-              : null,
-          colors: skipTheme.isY2K
-              ? [
-                  theme.colorScheme.primary,
-                  theme.colorScheme.secondary,
-                  skipTheme.savedColor,
-                  skipTheme.accentHighlight,
-                  Colors.white,
-                ]
-              : [
-                  skipTheme.savedColor,
-                  skipTheme.accentHighlight,
-                  theme.colorScheme.primary,
-                ],
-        ),
+        if (skipTheme.isY2K)
+          ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirectionality: BlastDirectionality.explosive,
+            shouldLoop: false,
+            numberOfParticles: 18,
+            gravity: 0.25,
+            particleDrag: 0.08,
+            minimumSize: const Size(5, 5),
+            maximumSize: const Size(10, 10),
+            // Round particles to match Y2K's circular badges/pills.
+            createParticlePath: (size) {
+              final radius = size.width / 2;
+              return Path()..addOval(
+                Rect.fromCircle(center: Offset(radius, radius), radius: radius),
+              );
+            },
+            colors: [
+              theme.colorScheme.primary,
+              theme.colorScheme.secondary,
+              skipTheme.savedColor,
+              skipTheme.accentHighlight,
+              Colors.white,
+            ],
+          ),
       ],
     );
   }
