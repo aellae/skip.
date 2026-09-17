@@ -15,6 +15,7 @@ class AppColors {
   static const minimalSoftWhite = Color(0xFFFDFBF7);
   static const minimalSaved = Color(0xFF5C7A5A);
   static const minimalSpent = Color(0xFFA35656);
+  static const minimalPondering = Color(0xFFB8863A);
 
   // Bratz Y2K ("SKIP!")
   static const y2kHotMagenta = Color(0xFFFF007F);
@@ -24,5 +25,6 @@ class AppColors {
   static const y2kBlack = Color(0xFF181022);
   static const y2kSaved = Color(0xFF00E5A0);
   static const y2kSpent = Color(0xFFFF6B4A);
+  static const y2kPondering = Color(0xFFFFC400);
   static const y2kDeepSurface = Color(0xFF241A33);
 }

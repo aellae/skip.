@@ -122,6 +122,33 @@ class _BackupSectionState extends State<BackupSection> {
     }
   }
 
+  Future<void> _restoreFromAutoBackup() async {
+    setState(() => _isBusy = true);
+    final strings = context.read<LocaleProvider>().strings;
+    try {
+      final count = await context
+          .read<ItemsProvider>()
+          .restoreFromAutoBackup();
+      if (!mounted) return;
+      if (count == null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(strings.noAutoBackupFound)));
+        return;
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.importedItems(count))));
+    } on BackupFormatException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(strings.backupErrorMessage(e.code))),
+      );
+    } finally {
+      if (mounted) setState(() => _isBusy = false);
+    }
+  }
+
   void _showExportSheet() {
     final accent = Theme.of(context).colorScheme.primary;
     final strings = context.read<LocaleProvider>().strings;
@@ -174,6 +201,12 @@ class _BackupSectionState extends State<BackupSection> {
             onPressed: _isBusy ? null : _import,
             icon: const Icon(Icons.file_upload_outlined),
             label: Text(strings.importBackup),
+          ),
+          const SizedBox(height: 8),
+          TextButton.icon(
+            onPressed: _isBusy ? null : _restoreFromAutoBackup,
+            icon: const Icon(Icons.settings_backup_restore),
+            label: Text(strings.restoreAutoBackup),
           ),
           if (_isBusy) ...[
             const SizedBox(height: 12),

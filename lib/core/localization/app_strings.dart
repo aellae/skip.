@@ -289,6 +289,12 @@ class AppStrings {
     AppLocale.fr => 'Acheté',
     AppLocale.de => 'Gekauft',
   };
+  String get pondering => switch (locale) {
+    AppLocale.en => 'Pondering',
+    AppLocale.it => 'In sospeso',
+    AppLocale.fr => 'En réflexion',
+    AppLocale.de => 'Am Überlegen',
+  };
 
   // Backup section
   String get photosStayOnDevice => switch (locale) {
@@ -336,6 +342,18 @@ class AppStrings {
     AppLocale.it => 'Impossibile leggere il file.',
     AppLocale.fr => 'Impossible de lire ce fichier.',
     AppLocale.de => 'Die Datei konnte nicht gelesen werden.',
+  };
+  String get restoreAutoBackup => switch (locale) {
+    AppLocale.en => 'Restore last automatic backup',
+    AppLocale.it => "Ripristina l'ultimo backup automatico",
+    AppLocale.fr => 'Restaurer la dernière sauvegarde automatique',
+    AppLocale.de => 'Letztes automatisches Backup wiederherstellen',
+  };
+  String get noAutoBackupFound => switch (locale) {
+    AppLocale.en => 'No automatic backup found yet.',
+    AppLocale.it => 'Nessun backup automatico trovato.',
+    AppLocale.fr => 'Aucune sauvegarde automatique trouvée.',
+    AppLocale.de => 'Noch kein automatisches Backup gefunden.',
   };
 
   String importedItems(int count) {
@@ -596,5 +614,49 @@ class AppStrings {
     AppLocale.it => 'Apre PayPal nel browser.',
     AppLocale.fr => 'Ouvre PayPal dans votre navigateur.',
     AppLocale.de => 'Öffnet PayPal in deinem Browser.',
+  };
+
+  // Coin flip
+  String get coinFlipTooltip => switch (locale) {
+    AppLocale.en => 'Flip a coin',
+    AppLocale.it => 'Lancia una moneta',
+    AppLocale.fr => 'Lancer une pièce',
+    AppLocale.de => 'Münze werfen',
+  };
+  String get coinFlipTitle => switch (locale) {
+    AppLocale.en => 'Coin Flip',
+    AppLocale.it => 'Lancio della moneta',
+    AppLocale.fr => 'Pile ou face',
+    AppLocale.de => 'Münzwurf',
+  };
+  String get coinFlipSubtitle => switch (locale) {
+    AppLocale.en => "Still can't decide? Let chance settle it.",
+    AppLocale.it => 'Ancora indeciso? Lascia decidere il caso.',
+    AppLocale.fr => "Toujours indécis ? Laissez le hasard trancher.",
+    AppLocale.de => 'Immer noch unentschlossen? Lass den Zufall entscheiden.',
+  };
+  String get flipButtonLabel => switch (locale) {
+    AppLocale.en => 'Flip',
+    AppLocale.it => 'Lancia',
+    AppLocale.fr => 'Lancer',
+    AppLocale.de => 'Werfen',
+  };
+  String get coinFlipYes => switch (locale) {
+    AppLocale.en => 'Get it.',
+    AppLocale.it => 'Prendilo.',
+    AppLocale.fr => 'Prends-le.',
+    AppLocale.de => 'Kauf es.',
+  };
+  String get coinFlipNo => switch (locale) {
+    AppLocale.en => 'Skip it.',
+    AppLocale.it => 'Lascialo.',
+    AppLocale.fr => 'Laisse-le.',
+    AppLocale.de => 'Lass es.',
+  };
+  String get flipAgainLabel => switch (locale) {
+    AppLocale.en => 'Flip again',
+    AppLocale.it => 'Lancia di nuovo',
+    AppLocale.fr => 'Relancer',
+    AppLocale.de => 'Nochmal werfen',
   };
 }

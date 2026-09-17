@@ -14,6 +14,7 @@ import '../constants/app_colors.dart';
 class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
   final Color savedColor;
   final Color spentColor;
+  final Color ponderingColor;
   final Color cardBackground;
   final String logoText;
   final bool isY2K;
@@ -40,6 +41,7 @@ class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
   const SkipThemeExtension({
     required this.savedColor,
     required this.spentColor,
+    required this.ponderingColor,
     required this.cardBackground,
     required this.logoText,
     required this.isY2K,
@@ -55,6 +57,7 @@ class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
   SkipThemeExtension copyWith({
     Color? savedColor,
     Color? spentColor,
+    Color? ponderingColor,
     Color? cardBackground,
     String? logoText,
     bool? isY2K,
@@ -68,6 +71,7 @@ class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
     return SkipThemeExtension(
       savedColor: savedColor ?? this.savedColor,
       spentColor: spentColor ?? this.spentColor,
+      ponderingColor: ponderingColor ?? this.ponderingColor,
       cardBackground: cardBackground ?? this.cardBackground,
       logoText: logoText ?? this.logoText,
       isY2K: isY2K ?? this.isY2K,
@@ -86,6 +90,7 @@ class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
     return SkipThemeExtension(
       savedColor: Color.lerp(savedColor, other.savedColor, t)!,
       spentColor: Color.lerp(spentColor, other.spentColor, t)!,
+      ponderingColor: Color.lerp(ponderingColor, other.ponderingColor, t)!,
       cardBackground: Color.lerp(cardBackground, other.cardBackground, t)!,
       logoText: t < 0.5 ? logoText : other.logoText,
       isY2K: t < 0.5 ? isY2K : other.isY2K,
@@ -363,6 +368,7 @@ class AppThemes {
       SkipThemeExtension(
         savedColor: AppColors.minimalSaved,
         spentColor: AppColors.minimalSpent,
+        ponderingColor: AppColors.minimalPondering,
         cardBackground: AppColors.minimalSilkBeige,
         logoText: 'skip.',
         isY2K: false,
@@ -499,6 +505,7 @@ class AppThemes {
       SkipThemeExtension(
         savedColor: AppColors.y2kSaved,
         spentColor: AppColors.y2kSpent,
+        ponderingColor: AppColors.y2kPondering,
         cardBackground: AppColors.y2kDeepSurface,
         logoText: 'SKIP!',
         isY2K: true,

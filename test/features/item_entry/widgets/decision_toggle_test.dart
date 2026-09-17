@@ -22,8 +22,8 @@ void main() {
   Future<void> pumpToggle(
     WidgetTester tester, {
     required ThemeData theme,
-    required bool isSaved,
-    required ValueChanged<bool> onChanged,
+    required bool? isSaved,
+    required ValueChanged<bool?> onChanged,
   }) {
     return tester.pumpWidget(
       ChangeNotifierProvider(
@@ -107,5 +107,20 @@ void main() {
 
     expect(lastValue, isFalse);
     verifyNever(() => mockSfx.playResisted());
+  });
+
+  testWidgets('tapping Pondering reports null', (tester) async {
+    bool? lastValue = true;
+    await pumpToggle(
+      tester,
+      theme: AppThemes.minimal,
+      isSaved: true,
+      onChanged: (value) => lastValue = value,
+    );
+
+    await tester.tap(find.text('Pondering'));
+    await tester.pumpAndSettle();
+
+    expect(lastValue, isNull);
   });
 }

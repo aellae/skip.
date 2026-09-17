@@ -51,7 +51,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       (uri) => launchUrl(uri, mode: LaunchMode.externalApplication);
   bool _isBusy = false;
 
-  Future<void> _changeStatus(bool isSaved, bool currentIsSaved) async {
+  Future<void> _changeStatus(bool? isSaved, bool? currentIsSaved) async {
     if (widget.item.id == null || isSaved == currentIsSaved) return;
     setState(() => _isBusy = true);
     await context.read<ItemsProvider>().setSavedStatus(
@@ -164,9 +164,14 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         orElse: () => widget.item,
       ),
     );
-    final statusColor = item.isSaved
-        ? skipTheme.savedColor
-        : skipTheme.spentColor;
+    // TODO(debug): remove once the "link not saved on first try" report is
+    // reproduced and diagnosed.
+    debugPrint('[SKIP][detail] id=${item.id} purchase_url="${item.purchaseUrl}"');
+    final statusColor = switch (item.isSaved) {
+      true => skipTheme.savedColor,
+      false => skipTheme.spentColor,
+      null => skipTheme.ponderingColor,
+    };
 
     return Scaffold(
       appBar: SkipAppBar(

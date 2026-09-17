@@ -25,9 +25,9 @@ List<MonthlyTotal> computeMonthlyTotals(
           item.createdAt.month != month.month) {
         continue;
       }
-      if (item.isSaved) {
+      if (item.isSaved == true) {
         saved += item.price;
-      } else {
+      } else if (item.isSaved == false) {
         spent += item.price;
       }
     }

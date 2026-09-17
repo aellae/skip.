@@ -22,7 +22,7 @@ void main() {
   ItemModel makeItem({
     String title = 'Item',
     double price = 10.0,
-    bool isSaved = true,
+    bool? isSaved = true,
     String imagePath = 'skip_images/photo.jpg',
     String? category,
     DateTime? createdAt,
@@ -93,6 +93,24 @@ void main() {
 
       expect(saved.map((i) => i.title), ['Resisted']);
       expect(spent.map((i) => i.title), ['Bought']);
+    });
+
+    test('is_saved is nullable: pondering items round-trip and filter', () async {
+      await db.insertItem(makeItem(title: 'Resisted', isSaved: true));
+      await db.insertItem(makeItem(title: 'Bought', isSaved: false));
+      await db.insertItem(makeItem(title: 'Undecided', isSaved: null));
+
+      final fetched = await db.getAllItems();
+      final undecided = fetched.firstWhere((i) => i.title == 'Undecided');
+      expect(undecided.isSaved, isNull);
+      expect(undecided.isPondering, isTrue);
+
+      final pondering = await db.getAllItems(pondering: true);
+      expect(pondering.map((i) => i.title), ['Undecided']);
+
+      // Pondering items count toward neither saved nor spent totals.
+      expect(await db.getTotalSaved(), 10);
+      expect(await db.getTotalSpent(), 10);
     });
 
     test('updateItem persists changed fields', () async {
@@ -368,6 +386,88 @@ void main() {
           expect(item.purchaseUrl, 'https://example.com');
           expect(item.deletedAt, isNull);
           expect(await upgraded.getAllItems(), hasLength(1));
+
+          await upgraded.close();
+        } finally {
+          await tempDir.delete(recursive: true);
+        }
+      },
+    );
+
+    test(
+      'upgrading a v3 database makes is_saved nullable and keeps existing rows/indexes',
+      () async {
+        final tempDir = await Directory.systemTemp.createTemp(
+          'skip_migration_test_',
+        );
+        final dbPath = p.join(tempDir.path, 'migration.db');
+        try {
+          final v3Db = await databaseFactory.openDatabase(
+            dbPath,
+            options: OpenDatabaseOptions(
+              version: 3,
+              onCreate: (rawDb, version) async {
+                await rawDb.execute('''
+                  CREATE TABLE items (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    title TEXT,
+                    price REAL NOT NULL,
+                    image_path TEXT NOT NULL,
+                    is_saved INTEGER NOT NULL,
+                    category TEXT,
+                    created_at TEXT NOT NULL,
+                    purchase_url TEXT,
+                    deleted_at TEXT
+                  )
+                ''');
+                await rawDb.execute(
+                  'CREATE INDEX idx_items_created_at ON items(created_at)',
+                );
+                await rawDb.execute(
+                  'CREATE INDEX idx_items_is_saved ON items(is_saved)',
+                );
+              },
+            ),
+          );
+          final id = await v3Db.insert('items', {
+            'title': 'Pre-migration item',
+            'price': 42.0,
+            'image_path': 'a.jpg',
+            'is_saved': 1,
+            'created_at': DateTime.utc(2026, 1, 1).toIso8601String(),
+            'purchase_url': 'https://example.com',
+          });
+          await v3Db.close();
+
+          final upgraded = DatabaseHelper(
+            fileHelper: mockFileHelper,
+            testDbPath: dbPath,
+          );
+          final item = await upgraded.getItemById(id);
+          expect(item, isNotNull);
+          expect(item!.title, 'Pre-migration item');
+          expect(item.isSaved, isTrue);
+
+          // The column is now nullable — inserting a pondering item must
+          // no longer violate a NOT NULL constraint.
+          final ponderingId = await upgraded.insertItem(
+            ItemModel(
+              title: 'Undecided',
+              price: 5,
+              imagePath: 'b.jpg',
+              isSaved: null,
+              createdAt: DateTime.utc(2026, 1, 2),
+            ),
+          );
+          final pondering = await upgraded.getItemById(ponderingId);
+          expect(pondering!.isSaved, isNull);
+
+          final rawDb = await upgraded.database;
+          final indexes = await rawDb.rawQuery('PRAGMA index_list(items)');
+          expect(
+            indexes.map((i) => i['name']).toSet(),
+            containsAll(['idx_items_created_at', 'idx_items_is_saved']),
+          );
 
           await upgraded.close();
         } finally {

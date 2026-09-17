@@ -9,6 +9,7 @@ import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/entrance_fade.dart';
 import '../../core/widgets/skip_app_bar.dart';
 import '../../data/items_provider.dart';
+import '../coin_flip/coin_flip_screen.dart';
 import '../insights/insights_screen.dart';
 import '../item_entry/item_entry_screen.dart';
 import '../settings/settings_screen.dart';
@@ -46,6 +47,15 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: SkipAppBar(
         title: Text(skipTheme.logoText),
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const CoinFlipScreen()),
+              );
+            },
+            icon: const Icon(Icons.monetization_on_outlined),
+            tooltip: strings.coinFlipTooltip,
+          ),
           IconButton(
             onPressed: () {
               Navigator.of(

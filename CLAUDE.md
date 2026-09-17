@@ -68,7 +68,7 @@ Table Name: `items`
 | `title` | `TEXT` | `NULLABLE` | Optional product description |
 | `price` | `REAL` | `NOT NULL` | Monetary value of the item |
 | `image_path` | `TEXT` | `NOT NULL` | Local device absolute file path |
-| `is_saved` | `INTEGER` | `NOT NULL` | `1` = Resisted/Saved, `0` = Bought/Spent |
+| `is_saved` | `INTEGER` | `NULLABLE` | `1` = Resisted/Saved, `0` = Bought/Spent, `NULL` = Pondering/Deciding (undecided) |
 | `category` | `TEXT` | `NULLABLE` | Optional category tag |
 | `created_at` | `TEXT` | `NOT NULL` | ISO8601 Timestamp string |
 | `purchase_url` | `TEXT` | `NULLABLE` | Optional link to the product's page, opened via the OS |

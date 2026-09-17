@@ -42,9 +42,11 @@ class ItemGridCard extends StatelessWidget {
     final strings = context.watch<LocaleProvider>().strings;
     final hourlyWage = context.watch<WageProvider>().hourlyWage;
     final hours = hoursOfWork(item.price, hourlyWage);
-    final statusColor = item.isSaved
-        ? skipTheme.savedColor
-        : skipTheme.spentColor;
+    final statusColor = switch (item.isSaved) {
+      true => skipTheme.savedColor,
+      false => skipTheme.spentColor,
+      null => skipTheme.ponderingColor,
+    };
 
     return SkipCard(
       padding: EdgeInsets.zero,
@@ -79,9 +81,11 @@ class ItemGridCard extends StatelessWidget {
                       boxShadow: skipTheme.glowShadow,
                     ),
                     child: Icon(
-                      item.isSaved
-                          ? Icons.bolt_rounded
-                          : Icons.shopping_bag_rounded,
+                      switch (item.isSaved) {
+                        true => Icons.bolt_rounded,
+                        false => Icons.shopping_bag_rounded,
+                        null => Icons.hourglass_top_rounded,
+                      },
                       size: 16,
                       color: Colors.white,
                     ),

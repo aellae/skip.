@@ -13,14 +13,15 @@ import '../../../core/theme/app_themes.dart';
 import '../../../core/theme/contrast.dart';
 import '../../../core/widgets/tap_scale.dart';
 
-/// "Resisted! / Skip" vs. "Bought It / Spent" decision toggle.
+/// "Resisted! / Pondering / Bought It" decision toggle. `isSaved`/`onChanged`
+/// are `null` for the undecided "Pondering" state.
 ///
 /// Selecting "Resisted!" in the Y2K aesthetic triggers a confetti burst, a
 /// stronger haptic impact, and an SFX cue; every other selection just gets
 /// the shared [TapScale] press animation and a light haptic tick.
 class DecisionToggle extends StatefulWidget {
-  final bool isSaved;
-  final ValueChanged<bool> onChanged;
+  final bool? isSaved;
+  final ValueChanged<bool?> onChanged;
   final SkipSfxPlayer? sfxPlayer;
 
   const DecisionToggle({
@@ -87,6 +88,11 @@ class _DecisionToggleState extends State<DecisionToggle> {
     widget.onChanged(false);
   }
 
+  void _selectPondering() {
+    HapticFeedback.selectionClick();
+    widget.onChanged(null);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -112,10 +118,13 @@ class _DecisionToggleState extends State<DecisionToggle> {
               Expanded(
                 child: _ToggleOption(
                   label: strings.resisted,
-                  selected: widget.isSaved,
+                  selected: widget.isSaved == true,
                   color: skipTheme.savedColor,
                   onTap: () => _selectResisted(skipTheme.isY2K),
-                  shimmer: skipTheme.isY2K && widget.isSaved && _shimmering,
+                  shimmer:
+                      skipTheme.isY2K &&
+                      widget.isSaved == true &&
+                      _shimmering,
                   pulseKey: _showMinimalPulse ? _pulseKey : null,
                   onPulseDone: () {
                     if (mounted) setState(() => _showMinimalPulse = false);
@@ -125,8 +134,17 @@ class _DecisionToggleState extends State<DecisionToggle> {
               const SizedBox(width: 12),
               Expanded(
                 child: _ToggleOption(
+                  label: strings.pondering,
+                  selected: widget.isSaved == null,
+                  color: skipTheme.ponderingColor,
+                  onTap: _selectPondering,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _ToggleOption(
                   label: strings.boughtIt,
-                  selected: !widget.isSaved,
+                  selected: widget.isSaved == false,
                   color: skipTheme.spentColor,
                   onTap: _selectBought,
                 ),

@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:csv/csv.dart';
+import 'package:path/path.dart' as p;
 
+import '../core/utils/file_helper.dart';
 import 'database_helper.dart';
 import 'models/item_model.dart';
 
@@ -42,10 +45,34 @@ class BackupFormatException implements Exception {
 class BackupService {
   static const int formatVersion = 1;
 
-  final DatabaseHelper _db;
+  /// File name for the automatic local safety-net backup (distinct from
+  /// user-triggered exports, which get a timestamped name).
+  static const String autoBackupFileName = 'skip_autobackup.json';
 
-  BackupService({DatabaseHelper? databaseHelper})
-    : _db = databaseHelper ?? DatabaseHelper.instance;
+  final DatabaseHelper _db;
+  final FileHelper _fileHelper;
+
+  BackupService({DatabaseHelper? databaseHelper, FileHelper? fileHelper})
+    : _db = databaseHelper ?? DatabaseHelper.instance,
+      _fileHelper = fileHelper ?? FileHelper();
+
+  /// Overwrites the local safety-net backup with the current item set.
+  /// 100% offline — written to Application Documents via [FileHelper], never
+  /// sent anywhere. Not a substitute for a user-triggered export: this is
+  /// only meant to recover from an unexplained empty/corrupt database.
+  Future<void> writeAutoBackup() async {
+    final content = await buildJsonBackup();
+    await _fileHelper.writeExportFile(autoBackupFileName, content);
+  }
+
+  /// Reads the local safety-net backup written by [writeAutoBackup], or
+  /// `null` if none exists yet.
+  Future<String?> readAutoBackup() async {
+    final dir = await _fileHelper.exportsDirectory();
+    final file = File(p.join(dir.path, autoBackupFileName));
+    if (!file.existsSync()) return null;
+    return file.readAsStringSync();
+  }
 
   Future<String> buildJsonBackup() async {
     final items = await _db.getAllItems();
@@ -74,7 +101,7 @@ class BackupService {
           item.title ?? '',
           item.price,
           item.imagePath,
-          item.isSaved ? 1 : 0,
+          item.isSaved == null ? '' : (item.isSaved! ? 1 : 0),
           item.category ?? '',
           item.createdAt.toIso8601String(),
           item.purchaseUrl ?? '',

@@ -12,7 +12,7 @@ import 'models/item_model.dart';
 /// files when an item record is deleted from SQLite").
 class DatabaseHelper {
   static const String dbName = 'skip.db';
-  static const int dbVersion = 3;
+  static const int dbVersion = 4;
   static const String tableItems = 'items';
 
   static final DatabaseHelper instance = DatabaseHelper();
@@ -49,13 +49,15 @@ class DatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    // is_saved is nullable: NULL means "pondering" (not decided yet), 1 is
+    // Resisted/saved, 0 is Bought/spent.
     await db.execute('''
       CREATE TABLE $tableItems (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT,
         price REAL NOT NULL,
         image_path TEXT NOT NULL,
-        is_saved INTEGER NOT NULL,
+        is_saved INTEGER,
         category TEXT,
         created_at TEXT NOT NULL,
         purchase_url TEXT,
@@ -77,11 +79,52 @@ class DatabaseHelper {
     if (oldVersion < 3) {
       await db.execute('ALTER TABLE $tableItems ADD COLUMN deleted_at TEXT');
     }
+    if (oldVersion < 4) {
+      // SQLite can't relax a column's NOT NULL with ALTER TABLE, so rebuild
+      // the table to make is_saved nullable (NULL = pondering/deciding).
+      await db.execute('DROP INDEX IF EXISTS idx_items_is_saved');
+      await db.execute('DROP INDEX IF EXISTS idx_items_created_at');
+      await db.execute('ALTER TABLE $tableItems RENAME TO ${tableItems}_old');
+      await db.execute('''
+        CREATE TABLE $tableItems (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT,
+          price REAL NOT NULL,
+          image_path TEXT NOT NULL,
+          is_saved INTEGER,
+          category TEXT,
+          created_at TEXT NOT NULL,
+          purchase_url TEXT,
+          deleted_at TEXT
+        )
+      ''');
+      await db.execute('''
+        INSERT INTO $tableItems (
+          id, title, price, image_path, is_saved, category, created_at,
+          purchase_url, deleted_at
+        )
+        SELECT id, title, price, image_path, is_saved, category, created_at,
+          purchase_url, deleted_at
+        FROM ${tableItems}_old
+      ''');
+      await db.execute('DROP TABLE ${tableItems}_old');
+      await db.execute(
+        'CREATE INDEX idx_items_created_at ON $tableItems(created_at)',
+      );
+      await db.execute(
+        'CREATE INDEX idx_items_is_saved ON $tableItems(is_saved)',
+      );
+    }
   }
 
   Future<int> insertItem(ItemModel item) async {
     final db = await database;
-    return db.insert(tableItems, item.toMap()..remove('id'));
+    final map = item.toMap()..remove('id');
+    // TODO(debug): remove once the "link not saved on first try" report is
+    // reproduced and diagnosed.
+    // ignore: avoid_print
+    print('[SKIP][db] insertItem purchase_url="${map['purchase_url']}"');
+    return db.insert(tableItems, map);
   }
 
   Future<int> updateItem(ItemModel item) async {
@@ -110,12 +153,18 @@ class DatabaseHelper {
   }
 
   /// Returns all non-trashed items, most recent first. Pass [isSaved] to
-  /// filter to only resisted (`true`) or purchased (`false`) items.
-  Future<List<ItemModel>> getAllItems({bool? isSaved}) async {
+  /// filter to only resisted (`true`) or purchased (`false`) items, or
+  /// [pondering] to filter to undecided items (`is_saved IS NULL`).
+  Future<List<ItemModel>> getAllItems({
+    bool? isSaved,
+    bool pondering = false,
+  }) async {
     final db = await database;
     final conditions = ['deleted_at IS NULL'];
     final args = <Object?>[];
-    if (isSaved != null) {
+    if (pondering) {
+      conditions.add('is_saved IS NULL');
+    } else if (isSaved != null) {
       conditions.add('is_saved = ?');
       args.add(isSaved ? 1 : 0);
     }

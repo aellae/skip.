@@ -14,10 +14,12 @@ import 'monthly_totals.dart';
 /// and only re-fetches from SQLite when something actually changed.
 class ItemsProvider extends ChangeNotifier {
   final DatabaseHelper _db;
-  late final BackupService _backupService = BackupService(databaseHelper: _db);
+  late final BackupService _backupService;
 
-  ItemsProvider({DatabaseHelper? databaseHelper})
-    : _db = databaseHelper ?? DatabaseHelper.instance;
+  ItemsProvider({DatabaseHelper? databaseHelper, BackupService? backupService})
+    : _db = databaseHelper ?? DatabaseHelper.instance {
+    _backupService = backupService ?? BackupService(databaseHelper: _db);
+  }
 
   List<ItemModel> _items = [];
   List<ItemModel> _trashedItems = [];
@@ -25,13 +27,20 @@ class ItemsProvider extends ChangeNotifier {
   double _totalSpent = 0;
   bool _isLoading = false;
 
+  // Throttles the local safety-net backup so it writes at most this often,
+  // rather than after every single load() call.
+  static const Duration _autoBackupInterval = Duration(minutes: 10);
+  DateTime? _lastAutoBackupAt;
+
   List<ItemModel> get items => List.unmodifiable(_items);
   List<ItemModel> get trashedItems => List.unmodifiable(_trashedItems);
   double get totalSaved => _totalSaved;
   double get totalSpent => _totalSpent;
   bool get isLoading => _isLoading;
 
-  int get resistedCount => _items.where((item) => item.isSaved).length;
+  int get resistedCount => _items.where((item) => item.isSaved == true).length;
+
+  int get ponderingCount => _items.where((item) => item.isPondering).length;
 
   double get averageSavedPerItem =>
       resistedCount == 0 ? 0 : _totalSaved / resistedCount;
@@ -47,13 +56,29 @@ class ItemsProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+
+    final now = DateTime.now();
+    if (_lastAutoBackupAt == null ||
+        now.difference(_lastAutoBackupAt!) >= _autoBackupInterval) {
+      _lastAutoBackupAt = now;
+      await _backupService.writeAutoBackup();
+    }
+  }
+
+  /// Restores from the local safety-net backup (see [BackupService.
+  /// writeAutoBackup]) — additive, existing data is kept. Returns the number
+  /// of items restored, or `null` if no auto-backup exists yet.
+  Future<int?> restoreFromAutoBackup() async {
+    final content = await _backupService.readAutoBackup();
+    if (content == null) return null;
+    return importJsonBackup(content);
   }
 
   Future<void> addItem({
     String? title,
     required double price,
     required String imagePath,
-    required bool isSaved,
+    required bool? isSaved,
     String? category,
     String? purchaseUrl,
   }) async {
@@ -71,10 +96,14 @@ class ItemsProvider extends ChangeNotifier {
     await load();
   }
 
-  Future<void> setSavedStatus(int id, bool isSaved) async {
+  /// Sets the decision on an existing item — pass `null` to move it back to
+  /// "pondering" (undecided).
+  Future<void> setSavedStatus(int id, bool? isSaved) async {
     final index = _items.indexWhere((item) => item.id == id);
     if (index == -1) return;
-    await _db.updateItem(_items[index].copyWith(isSaved: isSaved));
+    await _db.updateItem(
+      _items[index].copyWith(isSaved: isSaved, clearIsSaved: isSaved == null),
+    );
     await load();
   }
 

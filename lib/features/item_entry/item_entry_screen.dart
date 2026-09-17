@@ -119,7 +119,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     );
   }
 
-  Future<void> _saveWithDecision(bool isSaved) async {
+  Future<void> _saveWithDecision(bool? isSaved) async {
     if (_isSaving) return;
     if (_relativeImagePath == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -129,12 +129,20 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
       );
       return;
     }
+    // Force any in-flight IME edit (e.g. a paste still being committed) to
+    // land in the controllers before reading their text below.
+    FocusScope.of(context).unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     setState(() => _isSaving = true);
     final price = double.parse(_priceController.text);
     final title = _titleController.text.trim();
     final purchaseUrl = parseHttpUrl(_purchaseUrlController.text)?.toString();
+    // TODO(debug): remove once the "link not saved on first try" report is
+    // reproduced and diagnosed.
+    debugPrint(
+      '[SKIP][entry] raw="${_purchaseUrlController.text}" parsed="$purchaseUrl"',
+    );
     await context.read<ItemsProvider>().addItem(
       title: title.isEmpty ? null : title,
       price: price,
@@ -307,7 +315,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                   child: Opacity(
                     opacity: _isSaving ? 0.5 : 1,
                     child: DecisionToggle(
-                      isSaved: true,
+                      isSaved: null,
                       onChanged: _saveWithDecision,
                     ),
                   ),

@@ -10,7 +10,7 @@ import '../theme/app_themes.dart';
 /// weight difference carry the distinction even for a viewer who can't
 /// easily tell the two tones apart.
 class StatusIndicator extends StatelessWidget {
-  final bool isSaved;
+  final bool? isSaved;
   final String? label;
   final TextStyle? labelStyle;
 
@@ -25,23 +25,28 @@ class StatusIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final skipTheme = theme.extension<SkipThemeExtension>()!;
-    final color = isSaved ? skipTheme.savedColor : skipTheme.spentColor;
+    final color = switch (isSaved) {
+      true => skipTheme.savedColor,
+      false => skipTheme.spentColor,
+      null => skipTheme.ponderingColor,
+    };
+    final icon = switch (isSaved) {
+      true => Icons.check_circle_rounded,
+      false => Icons.shopping_bag_rounded,
+      null => Icons.hourglass_top_rounded,
+    };
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          isSaved ? Icons.check_circle_rounded : Icons.shopping_bag_rounded,
-          size: 14,
-          color: color,
-        ),
+        Icon(icon, size: 14, color: color),
         if (label != null) ...[
           const SizedBox(width: 6),
           Text(
             label!,
             style: (labelStyle ?? theme.textTheme.bodyMedium)?.copyWith(
               color: color,
-              fontWeight: isSaved ? FontWeight.w600 : FontWeight.w700,
+              fontWeight: isSaved == false ? FontWeight.w700 : FontWeight.w600,
             ),
           ),
         ],

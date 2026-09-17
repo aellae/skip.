@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -17,15 +18,24 @@ void main() {
   });
 
   late _MockFileHelper mockFileHelper;
+  late DatabaseHelper databaseHelper;
   late ItemsProvider provider;
 
   setUp(() {
     mockFileHelper = _MockFileHelper();
     when(() => mockFileHelper.deleteImage(any())).thenAnswer((_) async {});
+    when(
+      () => mockFileHelper.writeExportFile(any(), any()),
+    ).thenAnswer((_) async => File(''));
+    databaseHelper = DatabaseHelper(
+      fileHelper: mockFileHelper,
+      testDbPath: inMemoryDatabasePath,
+    );
     provider = ItemsProvider(
-      databaseHelper: DatabaseHelper(
+      databaseHelper: databaseHelper,
+      backupService: BackupService(
+        databaseHelper: databaseHelper,
         fileHelper: mockFileHelper,
-        testDbPath: inMemoryDatabasePath,
       ),
     );
   });
@@ -257,10 +267,15 @@ void main() {
 
         final json = await provider.buildJsonBackup();
 
+        final freshDb = DatabaseHelper(
+          fileHelper: mockFileHelper,
+          testDbPath: inMemoryDatabasePath,
+        );
         final fresh = ItemsProvider(
-          databaseHelper: DatabaseHelper(
+          databaseHelper: freshDb,
+          backupService: BackupService(
+            databaseHelper: freshDb,
             fileHelper: mockFileHelper,
-            testDbPath: inMemoryDatabasePath,
           ),
         );
         final count = await fresh.importJsonBackup(json);
