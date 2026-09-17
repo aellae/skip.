@@ -66,8 +66,9 @@ Table Name: `items`
 | :--- | :--- | :--- | :--- |
 | `id` | `INTEGER` | `PRIMARY KEY AUTOINCREMENT` | Unique identifier |
 | `title` | `TEXT` | `NULLABLE` | Optional product description |
-| `price` | `REAL` | `NOT NULL` | Monetary value of the item |
-| `image_path` | `TEXT` | `NOT NULL` | Local device absolute file path |
+| `price` | `REAL` | `NOT NULL` | Unit price of the item |
+| `quantity` | `INTEGER` | `NOT NULL DEFAULT 1` | Number of units; total saved/spent for the item is `price * quantity` |
+| `image_path` | `TEXT` | `NULLABLE` | Local device relative file path; `NULL` = item logged without a photo |
 | `is_saved` | `INTEGER` | `NULLABLE` | `1` = Resisted/Saved, `0` = Bought/Spent, `NULL` = Pondering/Deciding (undecided) |
 | `category` | `TEXT` | `NULLABLE` | Optional category tag |
 | `created_at` | `TEXT` | `NOT NULL` | ISO8601 Timestamp string |

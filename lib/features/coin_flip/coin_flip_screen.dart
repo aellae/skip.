@@ -29,9 +29,10 @@ class _CoinFlipScreenState extends State<CoinFlipScreen>
     with SingleTickerProviderStateMixin {
   final _random = Random();
 
-  late final AnimationController _controller =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 900))
-        ..addStatusListener(_onFlipStatus);
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..addStatusListener(_onFlipStatus);
   late final Animation<double> _curve = CurvedAnimation(
     parent: _controller,
     curve: Curves.easeOutCubic,
@@ -125,68 +126,76 @@ class _CoinFlipScreenState extends State<CoinFlipScreen>
                   ),
                 ),
                 const SizedBox(height: 48),
-                Stack(
-                  alignment: Alignment.topCenter,
-                  clipBehavior: Clip.none,
-                  children: [
-                    AnimatedBuilder(
-                      animation: _curve,
-                      builder: (context, _) {
-                        final angle = _curve.value * pi * _totalHalfFlips;
-                        return Transform(
-                          alignment: Alignment.center,
-                          transform: Matrix4.identity()
-                            ..setEntry(3, 2, 0.0015)
-                            ..rotateY(angle),
-                          child: _CoinDisc(
-                            skipTheme: skipTheme,
-                            theme: theme,
-                            shimmering: skipTheme.isY2K && _shimmering,
-                          ),
-                        );
-                      },
-                    ),
-                    ConfettiWidget(
-                      confettiController: _confettiController,
-                      blastDirectionality: BlastDirectionality.explosive,
-                      shouldLoop: false,
-                      numberOfParticles: skipTheme.isY2K ? 18 : 12,
-                      gravity: 0.25,
-                      particleDrag: 0.08,
-                      minimumSize: skipTheme.isY2K
-                          ? const Size(5, 5)
-                          : const Size(4, 4),
-                      maximumSize: skipTheme.isY2K
-                          ? const Size(10, 10)
-                          : const Size(6, 6),
-                      // Same split as DecisionToggle's confetti: round for
-                      // Y2K, confetti's default (smaller) squares for
-                      // Minimal.
-                      createParticlePath: skipTheme.isY2K
-                          ? (size) {
-                              final radius = size.width / 2;
-                              return Path()..addOval(
-                                Rect.fromCircle(
-                                  center: Offset(radius, radius),
-                                  radius: radius,
-                                ),
-                              );
-                            }
-                          : null,
-                      colors: skipTheme.isY2K
-                          ? [
-                              theme.colorScheme.primary,
-                              theme.colorScheme.secondary,
-                              skipTheme.accentHighlight,
-                              Colors.white,
-                            ]
-                          : [
-                              skipTheme.savedColor,
-                              skipTheme.accentHighlight,
-                              theme.colorScheme.primary,
-                            ],
-                    ),
-                  ],
+                GestureDetector(
+                  onTap: _controller.isAnimating ? null : _flip,
+                  child: Stack(
+                    alignment: Alignment.topCenter,
+                    clipBehavior: Clip.none,
+                    children: [
+                      AnimatedBuilder(
+                        animation: _curve,
+                        builder: (context, _) {
+                          final angle = _curve.value * pi * _totalHalfFlips;
+                          // The "yes" (thumbs up) face is the disc's front at
+                          // rest; cos(angle) tells us which face is currently
+                          // turned toward the viewer as it spins through Y.
+                          final showYesFace = cos(angle) >= 0;
+                          return Transform(
+                            alignment: Alignment.center,
+                            transform: Matrix4.identity()
+                              ..setEntry(3, 2, 0.0015)
+                              ..rotateY(angle),
+                            child: _CoinDisc(
+                              skipTheme: skipTheme,
+                              theme: theme,
+                              shimmering: skipTheme.isY2K && _shimmering,
+                              showYesFace: showYesFace,
+                            ),
+                          );
+                        },
+                      ),
+                      ConfettiWidget(
+                        confettiController: _confettiController,
+                        blastDirectionality: BlastDirectionality.explosive,
+                        shouldLoop: false,
+                        numberOfParticles: skipTheme.isY2K ? 18 : 12,
+                        gravity: 0.25,
+                        particleDrag: 0.08,
+                        minimumSize: skipTheme.isY2K
+                            ? const Size(5, 5)
+                            : const Size(4, 4),
+                        maximumSize: skipTheme.isY2K
+                            ? const Size(10, 10)
+                            : const Size(6, 6),
+                        // Same split as DecisionToggle's confetti: round for
+                        // Y2K, confetti's default (smaller) squares for
+                        // Minimal.
+                        createParticlePath: skipTheme.isY2K
+                            ? (size) {
+                                final radius = size.width / 2;
+                                return Path()..addOval(
+                                  Rect.fromCircle(
+                                    center: Offset(radius, radius),
+                                    radius: radius,
+                                  ),
+                                );
+                              }
+                            : null,
+                        colors: skipTheme.isY2K
+                            ? [
+                                theme.colorScheme.primary,
+                                theme.colorScheme.secondary,
+                                skipTheme.accentHighlight,
+                                Colors.white,
+                              ]
+                            : [
+                                skipTheme.savedColor,
+                                skipTheme.accentHighlight,
+                                theme.colorScheme.primary,
+                              ],
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 40),
                 SizedBox(
@@ -208,15 +217,6 @@ class _CoinFlipScreenState extends State<CoinFlipScreen>
                           ),
                   ),
                 ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _controller.isAnimating ? null : _flip,
-                  child: Text(
-                    _result == null
-                        ? strings.flipButtonLabel
-                        : strings.flipAgainLabel,
-                  ),
-                ),
               ],
             ),
           ),
@@ -226,58 +226,81 @@ class _CoinFlipScreenState extends State<CoinFlipScreen>
   }
 }
 
-/// The decorative disc itself — purely presentational, no text on its face.
-/// The actual yes/no wording is revealed separately by [_ResultReveal] once
-/// the coin lands, so a fast Y-axis spin never has to render (and
-/// un-mirror) text mid-flip.
+/// The disc itself, with two real faces: a green thumbs-up ("yes") on the
+/// front and a red thumbs-down ("no") on the back. [showYesFace] tells us
+/// which one is currently turned toward the viewer as the disc spins through
+/// Y; the back face gets an extra counter-rotation so its icon reads
+/// right-way-round instead of mirrored.
 class _CoinDisc extends StatelessWidget {
   final SkipThemeExtension skipTheme;
   final ThemeData theme;
   final bool shimmering;
+  final bool showYesFace;
 
   const _CoinDisc({
     required this.skipTheme,
     required this.theme,
     required this.shimmering,
+    required this.showYesFace,
   });
 
   @override
   Widget build(BuildContext context) {
     const diameter = 140.0;
 
+    final faceColor = showYesFace ? skipTheme.savedColor : skipTheme.spentColor;
+
     Widget disc = Container(
       width: diameter,
       height: diameter,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: skipTheme.isY2K ? null : skipTheme.cardBackground,
+        color: skipTheme.isY2K ? null : faceColor,
         gradient: skipTheme.isY2K ? skipTheme.accentGradient : null,
         border: Border.all(
           color: skipTheme.isY2K
               ? theme.colorScheme.onSurface
-              : theme.colorScheme.onSurface.withValues(alpha: 0.2),
+              : faceColor.withValues(alpha: 0.6),
           width: skipTheme.isY2K ? 2 : 1.5,
         ),
         boxShadow: skipTheme.cardShadow,
       ),
       alignment: Alignment.center,
-      child: Icon(
-        Icons.monetization_on_rounded,
-        size: 56,
-        color: skipTheme.isY2K
-            ? Colors.white
-            : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+      // Counter-rotate the back face so its icon isn't mirrored when seen
+      // through the disc's own Y-axis spin.
+      child: Transform(
+        alignment: Alignment.center,
+        transform: showYesFace ? Matrix4.identity() : Matrix4.rotationY(pi),
+        child: Icon(
+          showYesFace ? Icons.thumb_up_rounded : Icons.thumb_down_rounded,
+          size: 56,
+          color: skipTheme.isY2K ? faceColor : Colors.white,
+        ),
       ),
     );
 
     if (shimmering) {
-      disc = ClipOval(
-        child: Shimmer.fromColors(
-          baseColor: skipTheme.accentHighlight,
-          highlightColor: Colors.white,
-          period: const Duration(milliseconds: 1100),
-          child: disc,
-        ),
+      // A shimmering glow ring behind the disc, not over it — the previous
+      // approach shimmered the disc itself, which washed out the face color
+      // and icon into an indistinct white blob during the celebration.
+      const ringDiameter = diameter + 16;
+      disc = Stack(
+        alignment: Alignment.center,
+        children: [
+          ClipOval(
+            child: Shimmer.fromColors(
+              baseColor: skipTheme.accentHighlight,
+              highlightColor: Colors.white,
+              period: const Duration(milliseconds: 1100),
+              child: Container(
+                width: ringDiameter,
+                height: ringDiameter,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          disc,
+        ],
       );
     }
 

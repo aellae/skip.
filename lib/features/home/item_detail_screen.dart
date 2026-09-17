@@ -17,6 +17,8 @@ import '../../core/utils/date_formatter.dart';
 import '../../core/utils/file_helper.dart';
 import '../../core/utils/url_validator.dart';
 import '../../core/utils/wage_formatter.dart';
+import '../../core/widgets/item_image_placeholder.dart';
+import '../../core/widgets/quantity_stepper.dart';
 import '../../core/widgets/skip_app_bar.dart';
 import '../../data/items_provider.dart';
 import '../../data/models/item_model.dart';
@@ -135,6 +137,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       builder: (dialogContext) => _EditDetailsDialog(
         currentTitle: item.title,
         currentPrice: item.price,
+        currentQuantity: item.quantity,
         currency: currency,
         strings: strings,
       ),
@@ -147,6 +150,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       widget.item.id!,
       title: result.title,
       price: result.price,
+      quantity: result.quantity,
     );
     if (!mounted) return;
     setState(() => _isBusy = false);
@@ -167,7 +171,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     );
     // TODO(debug): remove once the "link not saved on first try" report is
     // reproduced and diagnosed.
-    debugPrint('[SKIP][detail] id=${item.id} purchase_url="${item.purchaseUrl}"');
+    debugPrint(
+      '[SKIP][detail] id=${item.id} purchase_url="${item.purchaseUrl}"',
+    );
     final statusColor = switch (item.isSaved) {
       true => skipTheme.savedColor,
       false => skipTheme.spentColor,
@@ -177,15 +183,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     return Scaffold(
       appBar: SkipAppBar(
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const CoinFlipScreen()),
-              );
-            },
-            icon: const Icon(Icons.monetization_on_outlined),
-            tooltip: strings.coinFlipTooltip,
-          ),
           IconButton(
             onPressed: _isBusy ? null : _confirmDelete,
             icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
@@ -200,36 +197,44 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Hero(
-                tag: 'item-image-${item.imagePath}',
+                tag: 'item-image-${item.id}',
                 child: AspectRatio(
                   aspectRatio: 1,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(skipTheme.cardRadius),
-                    child: FutureBuilder<File>(
-                      future: _fileHelper.resolveImageFile(item.imagePath),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return Container(color: theme.colorScheme.surface);
-                        }
-                        return Image.file(
-                          snapshot.data!,
-                          fit: BoxFit.cover,
-                          cacheWidth: 1200,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                color: theme.colorScheme.surface,
-                                alignment: Alignment.center,
-                                child: Icon(
-                                  Icons.broken_image_outlined,
-                                  color: theme.colorScheme.onSurface.withValues(
-                                    alpha: 0.4,
-                                  ),
-                                  size: 48,
-                                ),
-                              ),
-                        );
-                      },
-                    ),
+                    child: item.imagePath == null
+                        ? ItemImagePlaceholder(
+                            showLabel: true,
+                            label: strings.noPhotoLabel,
+                          )
+                        : FutureBuilder<File>(
+                            future: _fileHelper.resolveImageFile(
+                              item.imagePath!,
+                            ),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return Container(
+                                  color: theme.colorScheme.surface,
+                                );
+                              }
+                              return Image.file(
+                                snapshot.data!,
+                                fit: BoxFit.cover,
+                                cacheWidth: 1200,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                      color: theme.colorScheme.surface,
+                                      alignment: Alignment.center,
+                                      child: Icon(
+                                        Icons.broken_image_outlined,
+                                        color: theme.colorScheme.onSurface
+                                            .withValues(alpha: 0.4),
+                                        size: 48,
+                                      ),
+                                    ),
+                              );
+                            },
+                          ),
                   ),
                 ),
               ),
@@ -248,13 +253,29 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                           ),
                           const SizedBox(height: 4),
                         ],
-                        Text(
-                          formatCurrency(item.price, currency: currency),
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            color: statusColor,
-                          ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              formatCurrency(
+                                item.totalPrice,
+                                currency: currency,
+                              ),
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                color: statusColor,
+                              ),
+                            ),
+                            if (item.quantity > 1) ...[
+                              const SizedBox(width: 6),
+                              Text(
+                                '(${formatCurrency(item.price, currency: currency)} × ${item.quantity})',
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ],
+                          ],
                         ),
-                        if (hoursOfWork(item.price, hourlyWage)
+                        if (hoursOfWork(item.totalPrice, hourlyWage)
                             case final hours?)
                           Text(
                             strings.hoursOfWork(hours),
@@ -283,6 +304,18 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 onChanged: _isBusy
                     ? (_) {}
                     : (newValue) => _changeStatus(newValue, item.isSaved),
+              ),
+              const SizedBox(height: 8),
+              Center(
+                child: TextButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const CoinFlipScreen()),
+                    );
+                  },
+                  icon: const Icon(Icons.monetization_on_outlined, size: 18),
+                  label: Text(strings.coinFlipTooltip),
+                ),
               ),
               const SizedBox(height: AppSpacing.sectionGap),
               Text(strings.productLink, style: theme.textTheme.labelLarge),
@@ -411,25 +444,32 @@ class _PurchaseLinkDialogState extends State<_PurchaseLinkDialog> {
   }
 }
 
-/// Result of [_EditDetailsDialog]: the title/price to persist.
+/// Result of [_EditDetailsDialog]: the title/price/quantity to persist.
 class _ItemDetailsEdit {
   final String? title;
   final double price;
+  final int quantity;
 
-  const _ItemDetailsEdit({required this.title, required this.price});
+  const _ItemDetailsEdit({
+    required this.title,
+    required this.price,
+    required this.quantity,
+  });
 }
 
-/// Edit dialog for an item's title and price — the two fields that
+/// Edit dialog for an item's title, price, and quantity — the fields that
 /// otherwise require deleting and re-adding the item to fix a typo.
 class _EditDetailsDialog extends StatefulWidget {
   final String? currentTitle;
   final double currentPrice;
+  final int currentQuantity;
   final AppCurrency currency;
   final AppStrings strings;
 
   const _EditDetailsDialog({
     required this.currentTitle,
     required this.currentPrice,
+    required this.currentQuantity,
     required this.currency,
     required this.strings,
   });
@@ -446,6 +486,7 @@ class _EditDetailsDialogState extends State<_EditDetailsDialog> {
   late final _titleController = TextEditingController(
     text: widget.currentTitle ?? '',
   );
+  late int _quantity = widget.currentQuantity;
 
   @override
   void dispose() {
@@ -472,21 +513,35 @@ class _EditDetailsDialogState extends State<_EditDetailsDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextFormField(
-              controller: _priceController,
-              autofocus: true,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _priceController,
+                    autofocus: true,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d*\.?\d{0,2}'),
+                      ),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: widget.strings.priceLabel,
+                      prefixText: isEuro ? null : '\$ ',
+                      suffixText: isEuro ? '€' : null,
+                    ),
+                    validator: _validatePrice,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                QuantityStepper(
+                  value: _quantity,
+                  onChanged: (value) => setState(() => _quantity = value),
+                ),
               ],
-              decoration: InputDecoration(
-                labelText: widget.strings.priceLabel,
-                prefixText: isEuro ? null : '\$ ',
-                suffixText: isEuro ? '€' : null,
-              ),
-              validator: _validatePrice,
             ),
             const SizedBox(height: AppSpacing.md),
             TextFormField(
@@ -512,6 +567,7 @@ class _EditDetailsDialogState extends State<_EditDetailsDialog> {
               _ItemDetailsEdit(
                 title: title.isEmpty ? null : title,
                 price: double.parse(_priceController.text),
+                quantity: _quantity,
               ),
             );
           },

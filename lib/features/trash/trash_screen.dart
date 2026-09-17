@@ -13,6 +13,7 @@ import '../../core/utils/date_formatter.dart';
 import '../../core/utils/file_helper.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/entrance_fade.dart';
+import '../../core/widgets/item_image_placeholder.dart';
 import '../../core/widgets/skip_app_bar.dart';
 import '../../core/widgets/skip_card.dart';
 import '../../data/items_provider.dart';
@@ -118,8 +119,13 @@ class _TrashedItemTile extends StatelessWidget {
               width: 56,
               height: 56,
               child: FutureBuilder<File>(
-                future: helper.resolveImageFile(item.imagePath),
+                future: item.imagePath == null
+                    ? null
+                    : helper.resolveImageFile(item.imagePath!),
                 builder: (context, snapshot) {
+                  if (item.imagePath == null) {
+                    return const ItemImagePlaceholder();
+                  }
                   if (!snapshot.hasData) {
                     return Container(color: skipTheme.cardBackground);
                   }
@@ -128,7 +134,7 @@ class _TrashedItemTile extends StatelessWidget {
                     fit: BoxFit.cover,
                     cacheWidth: 112,
                     errorBuilder: (context, error, stackTrace) =>
-                        Container(color: skipTheme.cardBackground),
+                        const ItemImagePlaceholder(),
                   );
                 },
               ),

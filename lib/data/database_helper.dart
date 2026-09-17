@@ -12,7 +12,7 @@ import 'models/item_model.dart';
 /// files when an item record is deleted from SQLite").
 class DatabaseHelper {
   static const String dbName = 'skip.db';
-  static const int dbVersion = 4;
+  static const int dbVersion = 6;
   static const String tableItems = 'items';
 
   static final DatabaseHelper instance = DatabaseHelper();
@@ -56,7 +56,8 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT,
         price REAL NOT NULL,
-        image_path TEXT NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        image_path TEXT,
         is_saved INTEGER,
         category TEXT,
         created_at TEXT NOT NULL,
@@ -105,6 +106,49 @@ class DatabaseHelper {
         )
         SELECT id, title, price, image_path, is_saved, category, created_at,
           purchase_url, deleted_at
+        FROM ${tableItems}_old
+      ''');
+      await db.execute('DROP TABLE ${tableItems}_old');
+      await db.execute(
+        'CREATE INDEX idx_items_created_at ON $tableItems(created_at)',
+      );
+      await db.execute(
+        'CREATE INDEX idx_items_is_saved ON $tableItems(is_saved)',
+      );
+    }
+    if (oldVersion < 5) {
+      await db.execute(
+        'ALTER TABLE $tableItems ADD COLUMN quantity INTEGER NOT NULL DEFAULT 1',
+      );
+    }
+    if (oldVersion < 6) {
+      // SQLite can't relax a column's NOT NULL with ALTER TABLE, so rebuild
+      // the table to make image_path nullable — a photo is now optional at
+      // entry time.
+      await db.execute('DROP INDEX IF EXISTS idx_items_is_saved');
+      await db.execute('DROP INDEX IF EXISTS idx_items_created_at');
+      await db.execute('ALTER TABLE $tableItems RENAME TO ${tableItems}_old');
+      await db.execute('''
+        CREATE TABLE $tableItems (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT,
+          price REAL NOT NULL,
+          quantity INTEGER NOT NULL DEFAULT 1,
+          image_path TEXT,
+          is_saved INTEGER,
+          category TEXT,
+          created_at TEXT NOT NULL,
+          purchase_url TEXT,
+          deleted_at TEXT
+        )
+      ''');
+      await db.execute('''
+        INSERT INTO $tableItems (
+          id, title, price, quantity, image_path, is_saved, category,
+          created_at, purchase_url, deleted_at
+        )
+        SELECT id, title, price, quantity, image_path, is_saved, category,
+          created_at, purchase_url, deleted_at
         FROM ${tableItems}_old
       ''');
       await db.execute('DROP TABLE ${tableItems}_old');
@@ -233,7 +277,9 @@ class DatabaseHelper {
         whereArgs: [item.id],
       );
       if (rowsDeleted > 0) {
-        await fileHelper.deleteImage(item.imagePath);
+        if (item.imagePath != null) {
+          await fileHelper.deleteImage(item.imagePath!);
+        }
         purged++;
       }
     }
@@ -247,7 +293,7 @@ class DatabaseHelper {
   Future<double> _sumPrice({required bool isSaved}) async {
     final db = await database;
     final result = await db.rawQuery(
-      'SELECT SUM(price) as total FROM $tableItems '
+      'SELECT SUM(price * quantity) as total FROM $tableItems '
       'WHERE is_saved = ? AND deleted_at IS NULL',
       [isSaved ? 1 : 0],
     );

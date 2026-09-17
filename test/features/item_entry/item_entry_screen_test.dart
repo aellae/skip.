@@ -185,7 +185,7 @@ void main() {
     expect(itemsProvider.items, isEmpty);
   });
 
-  testWidgets('requires a photo before saving even with a valid price', (
+  testWidgets('saves without a photo — it is optional at entry time', (
     tester,
   ) async {
     final itemsProvider = buildTestItemsProvider();
@@ -197,8 +197,8 @@ void main() {
     );
     await tapText(tester, 'Resisted!');
 
-    expect(find.text('Add a photo first.'), findsOneWidget);
-    expect(itemsProvider.items, isEmpty);
+    expect(itemsProvider.items, hasLength(1));
+    expect(itemsProvider.items.single.imagePath, isNull);
   });
 
   testWidgets('tapping Resisted! saves immediately as Resisted', (

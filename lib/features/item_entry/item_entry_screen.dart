@@ -15,6 +15,7 @@ import '../../core/utils/currency_formatter.dart';
 import '../../core/utils/file_helper.dart';
 import '../../core/utils/url_validator.dart';
 import '../../core/utils/wage_formatter.dart';
+import '../../core/widgets/quantity_stepper.dart';
 import '../../core/widgets/skip_app_bar.dart';
 import '../../core/widgets/skip_card.dart';
 import '../../core/widgets/tap_scale.dart';
@@ -48,6 +49,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
   File? _previewFile;
   bool _isPickingImage = false;
   bool _isSaving = false;
+  int _quantity = 1;
 
   @override
   void dispose() {
@@ -121,14 +123,6 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
 
   Future<void> _saveWithDecision(bool? isSaved) async {
     if (_isSaving) return;
-    if (_relativeImagePath == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.read<LocaleProvider>().strings.addPhotoFirst),
-        ),
-      );
-      return;
-    }
     // Force any in-flight IME edit (e.g. a paste still being committed) to
     // land in the controllers before reading their text below.
     FocusScope.of(context).unfocus();
@@ -146,7 +140,8 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     await context.read<ItemsProvider>().addItem(
       title: title.isEmpty ? null : title,
       price: price,
-      imagePath: _relativeImagePath!,
+      quantity: _quantity,
+      imagePath: _relativeImagePath,
       isSaved: isSaved,
       purchaseUrl: purchaseUrl,
     );
@@ -238,26 +233,38 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                _ThemedFocusField(
-                  focusNode: _priceFocus,
-                  child: TextFormField(
-                    controller: _priceController,
-                    focusNode: _priceFocus,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d*\.?\d{0,2}'),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: _ThemedFocusField(
+                        focusNode: _priceFocus,
+                        child: TextFormField(
+                          controller: _priceController,
+                          focusNode: _priceFocus,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d{0,2}'),
+                            ),
+                          ],
+                          decoration: InputDecoration(
+                            labelText: strings.priceLabel,
+                            prefixText: isEuro ? null : '\$ ',
+                            suffixText: isEuro ? '€' : null,
+                          ),
+                          validator: (value) => _validatePrice(value, strings),
+                        ),
                       ),
-                    ],
-                    decoration: InputDecoration(
-                      labelText: strings.priceLabel,
-                      prefixText: isEuro ? null : '\$ ',
-                      suffixText: isEuro ? '€' : null,
                     ),
-                    validator: (value) => _validatePrice(value, strings),
-                  ),
+                    const SizedBox(width: AppSpacing.sm),
+                    QuantityStepper(
+                      value: _quantity,
+                      onChanged: (value) => setState(() => _quantity = value),
+                    ),
+                  ],
                 ),
                 if (hourlyWage != null)
                   ValueListenableBuilder<TextEditingValue>(

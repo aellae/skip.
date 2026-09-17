@@ -77,7 +77,8 @@ class ItemsProvider extends ChangeNotifier {
   Future<void> addItem({
     String? title,
     required double price,
-    required String imagePath,
+    int quantity = 1,
+    String? imagePath,
     required bool? isSaved,
     String? category,
     String? purchaseUrl,
@@ -86,6 +87,7 @@ class ItemsProvider extends ChangeNotifier {
       ItemModel(
         title: title,
         price: price,
+        quantity: quantity,
         imagePath: imagePath,
         isSaved: isSaved,
         category: category,
@@ -116,6 +118,7 @@ class ItemsProvider extends ChangeNotifier {
     int id, {
     required String? title,
     required double price,
+    int? quantity,
   }) async {
     final index = _items.indexWhere((item) => item.id == id);
     if (index == -1) return;
@@ -125,6 +128,7 @@ class ItemsProvider extends ChangeNotifier {
         id: current.id,
         title: title,
         price: price,
+        quantity: quantity ?? current.quantity,
         imagePath: current.imagePath,
         isSaved: current.isSaved,
         category: current.category,

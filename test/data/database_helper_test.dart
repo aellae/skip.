@@ -95,23 +95,26 @@ void main() {
       expect(spent.map((i) => i.title), ['Bought']);
     });
 
-    test('is_saved is nullable: pondering items round-trip and filter', () async {
-      await db.insertItem(makeItem(title: 'Resisted', isSaved: true));
-      await db.insertItem(makeItem(title: 'Bought', isSaved: false));
-      await db.insertItem(makeItem(title: 'Undecided', isSaved: null));
+    test(
+      'is_saved is nullable: pondering items round-trip and filter',
+      () async {
+        await db.insertItem(makeItem(title: 'Resisted', isSaved: true));
+        await db.insertItem(makeItem(title: 'Bought', isSaved: false));
+        await db.insertItem(makeItem(title: 'Undecided', isSaved: null));
 
-      final fetched = await db.getAllItems();
-      final undecided = fetched.firstWhere((i) => i.title == 'Undecided');
-      expect(undecided.isSaved, isNull);
-      expect(undecided.isPondering, isTrue);
+        final fetched = await db.getAllItems();
+        final undecided = fetched.firstWhere((i) => i.title == 'Undecided');
+        expect(undecided.isSaved, isNull);
+        expect(undecided.isPondering, isTrue);
 
-      final pondering = await db.getAllItems(pondering: true);
-      expect(pondering.map((i) => i.title), ['Undecided']);
+        final pondering = await db.getAllItems(pondering: true);
+        expect(pondering.map((i) => i.title), ['Undecided']);
 
-      // Pondering items count toward neither saved nor spent totals.
-      expect(await db.getTotalSaved(), 10);
-      expect(await db.getTotalSpent(), 10);
-    });
+        // Pondering items count toward neither saved nor spent totals.
+        expect(await db.getTotalSaved(), 10);
+        expect(await db.getTotalSpent(), 10);
+      },
+    );
 
     test('updateItem persists changed fields', () async {
       final id = await db.insertItem(makeItem(price: 10, isSaved: true));
@@ -489,6 +492,7 @@ void main() {
           'id',
           'title',
           'price',
+          'quantity',
           'image_path',
           'is_saved',
           'category',
@@ -510,7 +514,7 @@ void main() {
       );
     });
 
-    test('price and image_path are NOT NULL', () async {
+    test('price is NOT NULL, image_path is nullable', () async {
       final rawDb = await db.database;
       expect(
         () => rawDb.rawInsert(
@@ -518,11 +522,10 @@ void main() {
         ),
         throwsA(isA<DatabaseException>()),
       );
-      expect(
-        () => rawDb.rawInsert(
-          "INSERT INTO items (price, is_saved, created_at) VALUES (10, 1, '2026-01-01')",
-        ),
-        throwsA(isA<DatabaseException>()),
+      // A photo is optional at entry time — omitting image_path must not
+      // throw.
+      await rawDb.rawInsert(
+        "INSERT INTO items (price, is_saved, created_at) VALUES (10, 1, '2026-01-01')",
       );
     });
   });

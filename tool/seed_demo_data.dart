@@ -236,7 +236,9 @@ Future<void> _reseed() async {
   final rawDb = await db.database;
   await rawDb.delete(DatabaseHelper.tableItems);
   for (final item in everything) {
-    await fileHelper.deleteImage(item.imagePath);
+    if (item.imagePath != null) {
+      await fileHelper.deleteImage(item.imagePath!);
+    }
   }
 
   final now = DateTime.now();

@@ -26,9 +26,9 @@ List<MonthlyTotal> computeMonthlyTotals(
         continue;
       }
       if (item.isSaved == true) {
-        saved += item.price;
+        saved += item.totalPrice;
       } else if (item.isSaved == false) {
-        spent += item.price;
+        spent += item.totalPrice;
       }
     }
     return MonthlyTotal(

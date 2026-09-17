@@ -90,6 +90,7 @@ class BackupService {
       [
         'title',
         'price',
+        'quantity',
         'image_path',
         'is_saved',
         'category',
@@ -100,7 +101,8 @@ class BackupService {
         [
           item.title ?? '',
           item.price,
-          item.imagePath,
+          item.quantity,
+          item.imagePath ?? '',
           item.isSaved == null ? '' : (item.isSaved! ? 1 : 0),
           item.category ?? '',
           item.createdAt.toIso8601String(),

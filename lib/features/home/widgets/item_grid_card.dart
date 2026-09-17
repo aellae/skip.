@@ -10,6 +10,7 @@ import '../../../core/theme/app_themes.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/file_helper.dart';
 import '../../../core/utils/wage_formatter.dart';
+import '../../../core/widgets/item_image_placeholder.dart';
 import '../../../core/widgets/skip_card.dart';
 import '../../../core/widgets/status_indicator.dart';
 import '../../../data/models/item_model.dart';
@@ -41,7 +42,7 @@ class ItemGridCard extends StatelessWidget {
     final currency = context.watch<CurrencyProvider>().currency;
     final strings = context.watch<LocaleProvider>().strings;
     final hourlyWage = context.watch<WageProvider>().hourlyWage;
-    final hours = hoursOfWork(item.price, hourlyWage);
+    final hours = hoursOfWork(item.totalPrice, hourlyWage);
     final statusColor = switch (item.isSaved) {
       true => skipTheme.savedColor,
       false => skipTheme.spentColor,
@@ -58,7 +59,7 @@ class ItemGridCard extends StatelessWidget {
           Stack(
             children: [
               Hero(
-                tag: 'item-image-${item.imagePath}',
+                tag: 'item-image-${item.id}',
                 child: AspectRatio(
                   aspectRatio: 1,
                   child: _buildImage(skipTheme),
@@ -110,10 +111,19 @@ class ItemGridCard extends StatelessWidget {
                   children: [
                     StatusIndicator(isSaved: item.isSaved),
                     const SizedBox(width: 6),
-                    Text(
-                      formatCurrency(item.price, currency: currency),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: statusColor,
+                    Flexible(
+                      child: Text(
+                        item.quantity > 1
+                            ? '${formatCurrency(item.totalPrice, currency: currency)} (×${item.quantity})'
+                            : formatCurrency(
+                                item.totalPrice,
+                                currency: currency,
+                              ),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: statusColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -134,9 +144,12 @@ class ItemGridCard extends StatelessWidget {
   }
 
   Widget _buildImage(SkipThemeExtension skipTheme) {
+    final imagePath = item.imagePath;
+    if (imagePath == null) return const ItemImagePlaceholder();
+
     final helper = fileHelper ?? FileHelper();
     return FutureBuilder<File>(
-      future: helper.resolveImageFile(item.imagePath),
+      future: helper.resolveImageFile(imagePath),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Container(color: skipTheme.cardBackground);
@@ -146,7 +159,7 @@ class ItemGridCard extends StatelessWidget {
           fit: BoxFit.cover,
           cacheWidth: _cacheWidth,
           errorBuilder: (context, error, stackTrace) =>
-              Container(color: skipTheme.cardBackground),
+              const ItemImagePlaceholder(),
         );
       },
     );

@@ -5,7 +5,8 @@ class ItemModel {
   final int? id;
   final String? title;
   final double price;
-  final String imagePath;
+  final int quantity;
+  final String? imagePath;
   final bool? isSaved;
   final String? category;
   final DateTime createdAt;
@@ -16,7 +17,8 @@ class ItemModel {
     this.id,
     this.title,
     required this.price,
-    required this.imagePath,
+    this.quantity = 1,
+    this.imagePath,
     required this.isSaved,
     this.category,
     required this.createdAt,
@@ -27,10 +29,15 @@ class ItemModel {
   /// Whether this item is still undecided (neither Resisted nor Bought).
   bool get isPondering => isSaved == null;
 
+  /// Total price across all units — [price] is per unit, so this is what
+  /// actually got saved or spent.
+  double get totalPrice => price * quantity;
+
   ItemModel copyWith({
     int? id,
     String? title,
     double? price,
+    int? quantity,
     String? imagePath,
     bool? isSaved,
     bool clearIsSaved = false,
@@ -43,6 +50,7 @@ class ItemModel {
       id: id ?? this.id,
       title: title ?? this.title,
       price: price ?? this.price,
+      quantity: quantity ?? this.quantity,
       imagePath: imagePath ?? this.imagePath,
       isSaved: clearIsSaved ? null : (isSaved ?? this.isSaved),
       category: category ?? this.category,
@@ -57,6 +65,7 @@ class ItemModel {
       if (id != null) 'id': id,
       'title': title,
       'price': price,
+      'quantity': quantity,
       'image_path': imagePath,
       'is_saved': isSaved == null ? null : (isSaved! ? 1 : 0),
       'category': category,
@@ -71,7 +80,8 @@ class ItemModel {
       id: map['id'] as int?,
       title: map['title'] as String?,
       price: (map['price'] as num).toDouble(),
-      imagePath: map['image_path'] as String,
+      quantity: map['quantity'] == null ? 1 : (map['quantity'] as num).toInt(),
+      imagePath: map['image_path'] as String?,
       isSaved: map['is_saved'] == null ? null : (map['is_saved'] as int) == 1,
       category: map['category'] as String?,
       createdAt: DateTime.parse(map['created_at'] as String),
@@ -89,6 +99,7 @@ class ItemModel {
         other.id == id &&
         other.title == title &&
         other.price == price &&
+        other.quantity == quantity &&
         other.imagePath == imagePath &&
         other.isSaved == isSaved &&
         other.category == category &&
@@ -102,6 +113,7 @@ class ItemModel {
     id,
     title,
     price,
+    quantity,
     imagePath,
     isSaved,
     category,
@@ -112,5 +124,5 @@ class ItemModel {
 
   @override
   String toString() =>
-      'ItemModel(id: $id, title: $title, price: $price, isSaved: $isSaved, category: $category)';
+      'ItemModel(id: $id, title: $title, price: $price, quantity: $quantity, isSaved: $isSaved, category: $category)';
 }

@@ -215,12 +215,6 @@ class AppStrings {
     AppLocale.fr => 'Galerie',
     AppLocale.de => 'Galerie',
   };
-  String get addPhotoFirst => switch (locale) {
-    AppLocale.en => 'Add a photo first.',
-    AppLocale.it => 'Aggiungi prima una foto.',
-    AppLocale.fr => "Ajoutez d'abord une photo.",
-    AppLocale.de => 'Füge zuerst ein Foto hinzu.',
-  };
   String get enterPrice => switch (locale) {
     AppLocale.en => 'Enter a price.',
     AppLocale.it => 'Inserisci un prezzo.',
@@ -239,6 +233,12 @@ class AppStrings {
     AppLocale.fr => 'Le prix doit être supérieur à zéro.',
     AppLocale.de => 'Der Preis muss größer als null sein.',
   };
+  String get quantityLabel => switch (locale) {
+    AppLocale.en => 'Quantity',
+    AppLocale.it => 'Quantità',
+    AppLocale.fr => 'Quantité',
+    AppLocale.de => 'Menge',
+  };
   String get logAnItem => switch (locale) {
     AppLocale.en => 'Log an item',
     AppLocale.it => 'Registra un articolo',
@@ -246,10 +246,16 @@ class AppStrings {
     AppLocale.de => 'Artikel erfassen',
   };
   String get tapToAddPhoto => switch (locale) {
-    AppLocale.en => 'Tap to add a photo',
-    AppLocale.it => 'Tocca per aggiungere una foto',
-    AppLocale.fr => 'Appuyez pour ajouter une photo',
-    AppLocale.de => 'Tippen, um ein Foto hinzuzufügen',
+    AppLocale.en => 'Tap to add a photo (optional)',
+    AppLocale.it => 'Tocca per aggiungere una foto (facoltativo)',
+    AppLocale.fr => 'Appuyez pour ajouter une photo (facultatif)',
+    AppLocale.de => 'Tippen, um ein Foto hinzuzufügen (optional)',
+  };
+  String get noPhotoLabel => switch (locale) {
+    AppLocale.en => 'No photo',
+    AppLocale.it => 'Nessuna foto',
+    AppLocale.fr => 'Pas de photo',
+    AppLocale.de => 'Kein Foto',
   };
   String get priceLabel => switch (locale) {
     AppLocale.en => 'Price',
@@ -635,12 +641,6 @@ class AppStrings {
     AppLocale.fr => "Toujours indécis ? Laissez le hasard trancher.",
     AppLocale.de => 'Immer noch unentschlossen? Lass den Zufall entscheiden.',
   };
-  String get flipButtonLabel => switch (locale) {
-    AppLocale.en => 'Flip',
-    AppLocale.it => 'Lancia',
-    AppLocale.fr => 'Lancer',
-    AppLocale.de => 'Werfen',
-  };
   String get coinFlipYes => switch (locale) {
     AppLocale.en => 'Get it.',
     AppLocale.it => 'Prendilo.',
@@ -652,11 +652,5 @@ class AppStrings {
     AppLocale.it => 'Lascialo.',
     AppLocale.fr => 'Laisse-le.',
     AppLocale.de => 'Lass es.',
-  };
-  String get flipAgainLabel => switch (locale) {
-    AppLocale.en => 'Flip again',
-    AppLocale.it => 'Lancia di nuovo',
-    AppLocale.fr => 'Relancer',
-    AppLocale.de => 'Nochmal werfen',
   };
 }
