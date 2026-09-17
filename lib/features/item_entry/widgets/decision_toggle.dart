@@ -37,7 +37,7 @@ class DecisionToggle extends StatefulWidget {
 
 class _DecisionToggleState extends State<DecisionToggle> {
   late final ConfettiController _confettiController = ConfettiController(
-    duration: const Duration(milliseconds: 400),
+    duration: const Duration(milliseconds: 1200),
   );
   late final SkipSfxPlayer _sfx =
       widget.sfxPlayer ??
@@ -75,6 +75,7 @@ class _DecisionToggleState extends State<DecisionToggle> {
       });
     } else {
       HapticFeedback.selectionClick();
+      _confettiController.play();
       setState(() {
         _pulseKey++;
         _showMinimalPulse = true;
@@ -152,29 +153,47 @@ class _DecisionToggleState extends State<DecisionToggle> {
             ],
           ),
         ),
-        if (skipTheme.isY2K)
-          ConfettiWidget(
-            confettiController: _confettiController,
-            blastDirectionality: BlastDirectionality.explosive,
-            shouldLoop: false,
-            numberOfParticles: 18,
-            gravity: 0.4,
-            // Default confetti particles are square — round ones match the
-            // rest of the Bratz/Y2K aesthetic (circular badges, pill buttons).
-            createParticlePath: (size) {
-              final radius = size.width / 2;
-              return Path()..addOval(
-                Rect.fromCircle(center: Offset(radius, radius), radius: radius),
-              );
-            },
-            colors: [
-              theme.colorScheme.primary,
-              theme.colorScheme.secondary,
-              skipTheme.savedColor,
-              skipTheme.accentHighlight,
-              Colors.white,
-            ],
-          ),
+        ConfettiWidget(
+          confettiController: _confettiController,
+          blastDirectionality: BlastDirectionality.explosive,
+          shouldLoop: false,
+          numberOfParticles: skipTheme.isY2K ? 18 : 12,
+          gravity: 0.25,
+          particleDrag: 0.08,
+          minimumSize: skipTheme.isY2K
+              ? const Size(5, 5)
+              : const Size(4, 4),
+          maximumSize: skipTheme.isY2K
+              ? const Size(10, 10)
+              : const Size(6, 6),
+          // Y2K gets round particles to match its circular badges/pills;
+          // Minimal keeps confetti's default square particles, just smaller
+          // and quieter to match its restrained aesthetic.
+          createParticlePath: skipTheme.isY2K
+              ? (size) {
+                  final radius = size.width / 2;
+                  return Path()..addOval(
+                    Rect.fromCircle(
+                      center: Offset(radius, radius),
+                      radius: radius,
+                    ),
+                  );
+                }
+              : null,
+          colors: skipTheme.isY2K
+              ? [
+                  theme.colorScheme.primary,
+                  theme.colorScheme.secondary,
+                  skipTheme.savedColor,
+                  skipTheme.accentHighlight,
+                  Colors.white,
+                ]
+              : [
+                  skipTheme.savedColor,
+                  skipTheme.accentHighlight,
+                  theme.colorScheme.primary,
+                ],
+        ),
       ],
     );
   }
@@ -215,8 +234,8 @@ class _ToggleOption extends StatelessWidget {
     // instead of the fill color. Splitting them, plus an explicit ClipRRect
     // on the fill, avoids that combination entirely.
     Widget fill = AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOutCubic,
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutQuart,
       decoration: BoxDecoration(
         borderRadius: radius,
         boxShadow: selected ? skipTheme.glowShadow : null,
@@ -224,8 +243,8 @@ class _ToggleOption extends StatelessWidget {
       child: ClipRRect(
         borderRadius: radius,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeOutQuart,
           padding: const EdgeInsets.symmetric(vertical: 16),
           alignment: Alignment.center,
           decoration: BoxDecoration(

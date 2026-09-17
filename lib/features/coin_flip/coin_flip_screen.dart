@@ -52,7 +52,7 @@ class _CoinFlipScreenState extends State<CoinFlipScreen>
   // burst plus a bounded shimmer sweep over the coin that switches itself
   // back off (Shimmer.fromColors loops forever while mounted).
   late final ConfettiController _confettiController = ConfettiController(
-    duration: const Duration(milliseconds: 400),
+    duration: const Duration(milliseconds: 1200),
   );
   Timer? _shimmerTimer;
   bool _shimmering = false;
@@ -97,6 +97,7 @@ class _CoinFlipScreenState extends State<CoinFlipScreen>
       });
     } else {
       HapticFeedback.selectionClick();
+      _confettiController.play();
     }
   }
 
@@ -145,29 +146,46 @@ class _CoinFlipScreenState extends State<CoinFlipScreen>
                         );
                       },
                     ),
-                    if (skipTheme.isY2K)
-                      ConfettiWidget(
-                        confettiController: _confettiController,
-                        blastDirectionality: BlastDirectionality.explosive,
-                        shouldLoop: false,
-                        numberOfParticles: 18,
-                        gravity: 0.4,
-                        createParticlePath: (size) {
-                          final radius = size.width / 2;
-                          return Path()..addOval(
-                            Rect.fromCircle(
-                              center: Offset(radius, radius),
-                              radius: radius,
-                            ),
-                          );
-                        },
-                        colors: [
-                          theme.colorScheme.primary,
-                          theme.colorScheme.secondary,
-                          skipTheme.accentHighlight,
-                          Colors.white,
-                        ],
-                      ),
+                    ConfettiWidget(
+                      confettiController: _confettiController,
+                      blastDirectionality: BlastDirectionality.explosive,
+                      shouldLoop: false,
+                      numberOfParticles: skipTheme.isY2K ? 18 : 12,
+                      gravity: 0.25,
+                      particleDrag: 0.08,
+                      minimumSize: skipTheme.isY2K
+                          ? const Size(5, 5)
+                          : const Size(4, 4),
+                      maximumSize: skipTheme.isY2K
+                          ? const Size(10, 10)
+                          : const Size(6, 6),
+                      // Same split as DecisionToggle's confetti: round for
+                      // Y2K, confetti's default (smaller) squares for
+                      // Minimal.
+                      createParticlePath: skipTheme.isY2K
+                          ? (size) {
+                              final radius = size.width / 2;
+                              return Path()..addOval(
+                                Rect.fromCircle(
+                                  center: Offset(radius, radius),
+                                  radius: radius,
+                                ),
+                              );
+                            }
+                          : null,
+                      colors: skipTheme.isY2K
+                          ? [
+                              theme.colorScheme.primary,
+                              theme.colorScheme.secondary,
+                              skipTheme.accentHighlight,
+                              Colors.white,
+                            ]
+                          : [
+                              skipTheme.savedColor,
+                              skipTheme.accentHighlight,
+                              theme.colorScheme.primary,
+                            ],
+                    ),
                   ],
                 ),
                 const SizedBox(height: 40),

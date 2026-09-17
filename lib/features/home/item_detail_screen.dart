@@ -20,6 +20,7 @@ import '../../core/utils/wage_formatter.dart';
 import '../../core/widgets/skip_app_bar.dart';
 import '../../data/items_provider.dart';
 import '../../data/models/item_model.dart';
+import '../coin_flip/coin_flip_screen.dart';
 import '../item_entry/widgets/decision_toggle.dart';
 
 /// Full detail view for a single logged item: full image, date, price,
@@ -176,6 +177,15 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     return Scaffold(
       appBar: SkipAppBar(
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const CoinFlipScreen()),
+              );
+            },
+            icon: const Icon(Icons.monetization_on_outlined),
+            tooltip: strings.coinFlipTooltip,
+          ),
           IconButton(
             onPressed: _isBusy ? null : _confirmDelete,
             icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),

@@ -1,4 +1,4 @@
-# 💸 SKIP. / SKIP!
+# 💸 Skip!
 
 > **Visual Financial Resistance & Impulsive Spend Tracker**  
 > *100% Offline • Dual Aesthetic Engine (Quiet Luxury vs. Bratz Y2K)*
@@ -7,7 +7,7 @@
 
 ## 🌟 Concept
 
-**SKIP** turns the traditional wishlist upside down. Instead of encouraging endless consumption, SKIP uses visual reinforcement to show you **how much money you've saved by choosing NOT to buy items**, alongside the reality of what you've actually spent.
+**Skip!** turns the traditional wishlist upside down. Instead of encouraging endless consumption, Skip! uses visual reinforcement to show you **how much money you've saved by choosing NOT to buy items**, alongside the reality of what you've actually spent.
 
 Take a quick picture of something you're tempted to buy, input the price, and choose your action:
 * **Resisted! (Saved)** — Victory! The money stays in your pocket, and the item enters your savings visual trophy case.
@@ -94,7 +94,7 @@ lib/
 ---
 
 ## 🔒 Privacy Policy
-[Read the privacy policy](PRIVACY_POLICY.md). SKIP is 100% offline — no servers, no accounts, no analytics; everything stays on your device.
+[Read the privacy policy](PRIVACY_POLICY.md). Skip! is 100% offline — no servers, no accounts, no analytics; everything stays on your device.
 
 ## 📄 License
 MIT License. Created for mindful spenders and dopamine shoppers worldwide.

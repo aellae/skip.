@@ -13,6 +13,10 @@ import 'features/home/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final themeProvider = ThemeProvider();
+  // Awaited before runApp so the persisted aesthetic is already active on
+  // the very first frame — no flash of the default aesthetic.
+  await themeProvider.loadSaved();
   final localeProvider = LocaleProvider();
   // Awaited before runApp so the persisted language is already active on
   // the very first frame — no flash of the default language.
@@ -32,6 +36,7 @@ void main() async {
   await wageProvider.loadSaved();
   runApp(
     SkipApp(
+      themeProviderOverride: themeProvider,
       localeProviderOverride: localeProvider,
       currencyProviderOverride: currencyProvider,
       sfxProviderOverride: sfxProvider,
@@ -94,8 +99,8 @@ class SkipApp extends StatelessWidget {
             navigatorKey: navigatorKeyOverride,
             theme: themeProvider.themeData,
             builder: (context, child) => AnimatedTheme(
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeInOutCubic,
+              duration: const Duration(milliseconds: 450),
+              curve: Curves.easeInOutCubicEmphasized,
               data: themeProvider.themeData,
               child: child!,
             ),

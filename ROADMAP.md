@@ -1,6 +1,6 @@
-# 🗺️ SKIP. / SKIP! — Product & Technical Roadmap
+# 🗺️ Skip! — Product & Technical Roadmap
 
-A privacy-first, 100% offline mobile app built with Flutter and SQLite. SKIP allows users to track financial decisions visually by logging items they resisted buying (money saved) vs. items they purchased (money spent), wrapped in a dual-theme UI experience (Minimal Luxury vs. Bratz/Y2K Explosive).
+A privacy-first, 100% offline mobile app built with Flutter and SQLite. Skip! allows users to track financial decisions visually by logging items they resisted buying (money saved) vs. items they purchased (money spent), wrapped in a dual-theme UI experience (Minimal Luxury vs. Bratz/Y2K Explosive).
 
 ---
 
@@ -99,4 +99,4 @@ A privacy-first, 100% offline mobile app built with Flutter and SQLite. SKIP all
 ## 💡 Future Ideas / Backlog
 > Not scheduled into a phase yet — captured here for later triage.
 
-- [x] **Purchase Link on Items:** Let an item optionally store a URL for where to buy it, so a "Bought It" (or still-tempted "Resisted!") entry can link back to the product page. `items.purchase_url TEXT` migration lands via `DatabaseHelper`'s `onUpgrade` (v1→v2, additive `ALTER TABLE`) so existing installs keep their data; `ItemModel`/`ItemsProvider` (`addItem`'s optional `purchaseUrl`, plus a dedicated `setPurchaseUrl` for retroactive edits) and the JSON/CSV backup formats carry it through. Entered as an optional field on the quick-add form and add/edit/remove-able from the item detail screen, both validated by a small `parseHttpUrl` helper (`lib/core/utils/url_validator.dart`) that only accepts well-formed `http(s)` links. Opening it uses the new `url_launcher` dependency (`LaunchMode.externalApplication`, injectable for tests) — still 100% offline, since SKIP never fetches or previews the link's content itself, only stores and hands it to the OS.
+- [x] **Purchase Link on Items:** Let an item optionally store a URL for where to buy it, so a "Bought It" (or still-tempted "Resisted!") entry can link back to the product page. `items.purchase_url TEXT` migration lands via `DatabaseHelper`'s `onUpgrade` (v1→v2, additive `ALTER TABLE`) so existing installs keep their data; `ItemModel`/`ItemsProvider` (`addItem`'s optional `purchaseUrl`, plus a dedicated `setPurchaseUrl` for retroactive edits) and the JSON/CSV backup formats carry it through. Entered as an optional field on the quick-add form and add/edit/remove-able from the item detail screen, both validated by a small `parseHttpUrl` helper (`lib/core/utils/url_validator.dart`) that only accepts well-formed `http(s)` links. Opening it uses the new `url_launcher` dependency (`LaunchMode.externalApplication`, injectable for tests) — still 100% offline, since Skip! never fetches or previews the link's content itself, only stores and hands it to the OS.

@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="skip"
+        android:label="Skip!"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity

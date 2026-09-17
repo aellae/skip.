@@ -1,4 +1,4 @@
-# SKIP. / SKIP! — Build & Test Execution Prompt
+# Skip! — Build & Test Execution Prompt
 
 Paste this entire file as your first message in a **fresh Claude Code session opened in this repo folder**. It is self-contained: read the three referenced docs yourself before acting.
 
@@ -6,7 +6,7 @@ Paste this entire file as your first message in a **fresh Claude Code session op
 
 ## 0. Context
 
-You are building **SKIP** (`skip.` / `SKIP!`), a 100% offline Flutter app that lets users log items they resisted buying (money "saved") vs. items they bought (money "spent"), with a photo, a price, and a dual-theme UI (Minimal Luxury vs. Bratz Y2K).
+You are building **Skip!**, a 100% offline Flutter app that lets users log items they resisted buying (money "saved") vs. items they bought (money "spent"), with a photo, a price, and a dual-theme UI (Minimal Luxury vs. Bratz Y2K).
 
 Read these three files first, in full — they are the source of truth for product intent, architecture, and coding rules:
 - `README.md` — concept, dual-theme spec, tech stack, project structure.

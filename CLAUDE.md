@@ -1,6 +1,6 @@
-# CLAUDE.md — Developer Guidelines & Instructions for SKIP
+# CLAUDE.md — Developer Guidelines & Instructions for Skip!
 
-This document provides guidelines, technical conventions, and architectural rules for AI assistants (like Claude) and developers contributing to **SKIP** (`skip.` / `SKIP!`).
+This document provides guidelines, technical conventions, and architectural rules for AI assistants (like Claude) and developers contributing to **Skip!**.
 
 ---
 

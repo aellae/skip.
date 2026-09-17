@@ -1,4 +1,4 @@
-# SKIP — Store Listing Draft (App Store Connect / Google Play Console)
+# Skip! — Store Listing Draft (App Store Connect / Google Play Console)
 
 Bozza dei contenuti testuali per le schede store, in EN e IT (le due lingue già coperte da [`lib/core/localization/app_strings.dart`](../lib/core/localization/app_strings.dart), che supporta anche FR/DE se in futuro si vorrà espandere anche lì).
 
@@ -14,9 +14,9 @@ I conteggi caratteri sotto ogni campo con limite sono già verificati.
 
 ### App Store Connect
 
-**App Name** (30 char max) — 19/30
+**App Name** (30 char max) — 20/30
 ```
-SKIP: Resist & Save
+Skip!: Resist & Save
 ```
 
 **Subtitle** (30 char max) — 26/30
@@ -24,9 +24,9 @@ SKIP: Resist & Save
 Snap it. Skip it. Save it.
 ```
 
-**Promotional Text** (170 char max, editable anytime without review) — 153/170
+**Promotional Text** (170 char max, editable anytime without review) — 154/170
 ```
-SKIP turns willpower into a visual trophy case. Snap what tempts you, then watch your Resisted total grow. 100% offline — no accounts, no tracking, ever.
+Skip! turns willpower into a visual trophy case. Snap what tempts you, then watch your Resisted total grow. 100% offline — no accounts, no tracking, ever.
 ```
 
 **Keywords** (100 char max, comma-separated, no spaces) — 94/100
@@ -36,9 +36,9 @@ budget,savings,impulse,spending,tracker,wishlist,money,finance,mindful,shopping,
 
 **Description** (4000 char max)
 ```
-SKIP flips the wishlist upside down.
+Skip! flips the wishlist upside down.
 
-Before you buy something you don't need, open SKIP, snap a photo, type the price, and make a call: resist it, or admit you bought it. Either way, you see the truth about your spending — visually, instantly, without judgment.
+Before you buy something you don't need, open Skip!, snap a photo, type the price, and make a call: resist it, or admit you bought it. Either way, you see the truth about your spending — visually, instantly, without judgment.
 
 HOW IT WORKS
 • Snap a photo of anything tempting you
@@ -57,7 +57,7 @@ SEE THE FULL PICTURE
 • Optional categories and product links so you remember what you skipped and why
 
 YOUR DATA STAYS YOURS
-• 100% offline — SKIP has no servers, no account, no analytics, no ads
+• 100% offline — Skip! has no servers, no account, no analytics, no ads
 • Everything lives in a local database and your device's own storage
 • Export and import your data anytime as a portable backup file
 • Deleted items go to a recoverable Trash, not straight to the void
@@ -82,9 +82,9 @@ First release! Snap what tempts you, choose to resist or buy, and watch your sav
 
 ### Google Play Console
 
-**App name** (30 char max) — 19/30
+**App name** (30 char max) — 20/30
 ```
-SKIP: Resist & Save
+Skip!: Resist & Save
 ```
 
 **Short description** (80 char max) — 75/80
@@ -94,9 +94,9 @@ The anti-wishlist: snap what tempts you, then resist it or track the spend.
 
 **Full description** (4000 char max)
 ```
-SKIP flips the wishlist upside down.
+Skip! flips the wishlist upside down.
 
-Before you buy something you don't need, open SKIP, snap a photo, type the price, and make a call: resist it, or admit you bought it. Either way, you see the truth about your spending — visually, instantly, without judgment.
+Before you buy something you don't need, open Skip!, snap a photo, type the price, and make a call: resist it, or admit you bought it. Either way, you see the truth about your spending — visually, instantly, without judgment.
 
 HOW IT WORKS
 • Snap a photo of anything tempting you
@@ -115,7 +115,7 @@ SEE THE FULL PICTURE
 • Optional categories and product links so you remember what you skipped and why
 
 YOUR DATA STAYS YOURS
-• 100% offline — SKIP has no servers, no account, no analytics, no ads
+• 100% offline — Skip! has no servers, no account, no analytics, no ads
 • Everything lives in a local database and your device's own storage
 • Export and import your data anytime as a portable backup file
 • Deleted items go to a recoverable Trash, not straight to the void
@@ -132,9 +132,9 @@ Choose your aesthetic. Snap the temptation. Skip it or don't — either way, see
 
 ### App Store Connect
 
-**Nome app** (max 30 caratteri) — 25/30
+**Nome app** (max 30 caratteri) — 26/30
 ```
-SKIP: Resisti e Risparmia
+Skip!: Resisti e Risparmia
 ```
 
 **Sottotitolo** (max 30 caratteri) — 29/30
@@ -142,9 +142,9 @@ SKIP: Resisti e Risparmia
 Scattala. Resisti. Risparmia.
 ```
 
-**Testo promozionale** (max 170 caratteri, modificabile in qualsiasi momento senza revisione) — 153/170
+**Testo promozionale** (max 170 caratteri, modificabile in qualsiasi momento senza revisione) — 154/170
 ```
-SKIP trasforma la forza di volontà in una bacheca visiva. Fotografa ciò che ti tenta e guarda crescere il tuo totale Resistito. 100% offline, per sempre.
+Skip! trasforma la forza di volontà in una bacheca visiva. Fotografa ciò che ti tenta e guarda crescere il tuo totale Resistito. 100% offline, per sempre.
 ```
 
 **Parole chiave** (max 100 caratteri, separate da virgola, senza spazi) — 89/100
@@ -154,9 +154,9 @@ budget,risparmio,spese,impulsivi,shopping,finanza,desideri,soldi,tracker,resisti
 
 **Descrizione** (max 4000 caratteri)
 ```
-SKIP capovolge la wishlist.
+Skip! capovolge la wishlist.
 
-Prima di comprare qualcosa di cui non hai bisogno, apri SKIP, scatta una foto, inserisci il prezzo e scegli: resisti, oppure ammetti di averlo comprato. In entrambi i casi vedi la verità sulle tue spese — in modo visivo, immediato, senza giudizio.
+Prima di comprare qualcosa di cui non hai bisogno, apri Skip!, scatta una foto, inserisci il prezzo e scegli: resisti, oppure ammetti di averlo comprato. In entrambi i casi vedi la verità sulle tue spese — in modo visivo, immediato, senza giudizio.
 
 COME FUNZIONA
 • Scatta una foto di qualcosa che ti tenta
@@ -175,7 +175,7 @@ VEDI IL QUADRO COMPLETO
 • Categorie opzionali e link al prodotto per ricordare cosa hai resistito e perché
 
 I TUOI DATI RESTANO TUOI
-• 100% offline — SKIP non ha server, account, analisi o pubblicità
+• 100% offline — Skip! non ha server, account, analisi o pubblicità
 • Tutto vive in un database locale e nella memoria del tuo dispositivo
 • Esporta e importa i tuoi dati quando vuoi come backup portatile
 • Gli articoli eliminati finiscono in un Cestino recuperabile, non spariscono subito
@@ -200,9 +200,9 @@ Prima versione! Fotografa ciò che ti tenta, scegli se resistere o comprare, e g
 
 ### Google Play Console
 
-**Nome app** (max 30 caratteri) — 25/30
+**Nome app** (max 30 caratteri) — 26/30
 ```
-SKIP: Resisti e Risparmia
+Skip!: Resisti e Risparmia
 ```
 
 **Descrizione breve** (max 80 caratteri) — 73/80
@@ -212,9 +212,9 @@ L'anti-wishlist: fotografa le tentazioni, poi resisti o traccia la spesa.
 
 **Descrizione completa** (max 4000 caratteri)
 ```
-SKIP capovolge la wishlist.
+Skip! capovolge la wishlist.
 
-Prima di comprare qualcosa di cui non hai bisogno, apri SKIP, scatta una foto, inserisci il prezzo e scegli: resisti, oppure ammetti di averlo comprato. In entrambi i casi vedi la verità sulle tue spese — in modo visivo, immediato, senza giudizio.
+Prima di comprare qualcosa di cui non hai bisogno, apri Skip!, scatta una foto, inserisci il prezzo e scegli: resisti, oppure ammetti di averlo comprato. In entrambi i casi vedi la verità sulle tue spese — in modo visivo, immediato, senza giudizio.
 
 COME FUNZIONA
 • Scatta una foto di qualcosa che ti tenta
@@ -233,7 +233,7 @@ VEDI IL QUADRO COMPLETO
 • Categorie opzionali e link al prodotto per ricordare cosa hai resistito e perché
 
 I TUOI DATI RESTANO TUOI
-• 100% offline — SKIP non ha server, account, analisi o pubblicità
+• 100% offline — Skip! non ha server, account, analisi o pubblicità
 • Tutto vive in un database locale e nella memoria del tuo dispositivo
 • Esporta e importa i tuoi dati quando vuoi come backup portatile
 • Gli articoli eliminati finiscono in un Cestino recuperabile, non spariscono subito

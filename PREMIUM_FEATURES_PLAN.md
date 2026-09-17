@@ -1,8 +1,8 @@
-# SKIP — Feature Plan v3 (23 Features)
+# Skip! — Feature Plan v3 (23 Features)
 
 ## Context
 
-SKIP currently ships all 5 roadmap phases plus a purchase-link add-on: home dashboard, quick-add, item detail, JSON/CSV backup (JSON round-trips on import today, CSV is export-only by design — confirmed in `lib/data/backup_service.dart:36-41`), monthly insights, EN/IT localization, dual theme. This plan grows the app with 22 new features/fixes plus the entitlement layer they sit behind, and monetizes a subset:
+Skip! currently ships all 5 roadmap phases plus a purchase-link add-on: home dashboard, quick-add, item detail, JSON/CSV backup (JSON round-trips on import today, CSV is export-only by design — confirmed in `lib/data/backup_service.dart:36-41`), monthly insights, EN/IT localization, dual theme. This plan grows the app with 22 new features/fixes plus the entitlement layer they sit behind, and monetizes a subset:
 
 - **Free:** cooling-off timer + reminder notifications (the app's core impulse-control mechanic — kept out of the paywall on purpose), item notes/reflection, search/filter/sort, bulk select & actions, a soft-delete trash bin ✅ + undo snackbar, CSV import (flagged for sign-off, see Risks), editing an item's price/title after creation ✅, locale-aware currency entry + an independent currency picker ✅, "cost in hours worked" ✅, a sound-effects mute toggle ✅. (✅ = delivered, see Round 4 below and each item's own section.)
 - **Premium** (behind one paywall): categories/tags, savings goals, streaks/badges, extra theme packs, a shareable "I saved $X" image card, a category breakdown chart on Insights, a spending activity heatmap, milestone celebrations, an annual "Year in Skip" wrap-up, a home screen widget.
