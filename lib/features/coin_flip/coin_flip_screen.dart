@@ -274,7 +274,10 @@ class _CoinDisc extends StatelessWidget {
         child: Icon(
           showYesFace ? Icons.thumb_up_rounded : Icons.thumb_down_rounded,
           size: 56,
-          color: skipTheme.isY2K ? faceColor : Colors.white,
+          // Y2K's disc face is the magenta/violet accentGradient, not
+          // faceColor, so the icon stays white for contrast — same
+          // convention as EmptyState's gradient badge.
+          color: Colors.white,
         ),
       ),
     );
