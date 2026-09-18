@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -17,9 +18,11 @@ import '../../core/utils/date_formatter.dart';
 import '../../core/utils/file_helper.dart';
 import '../../core/utils/url_validator.dart';
 import '../../core/utils/wage_formatter.dart';
+import '../../core/widgets/image_source_sheet.dart';
 import '../../core/widgets/item_image_placeholder.dart';
 import '../../core/widgets/quantity_stepper.dart';
 import '../../core/widgets/skip_app_bar.dart';
+import '../../core/widgets/tap_scale.dart';
 import '../../data/items_provider.dart';
 import '../../data/models/item_model.dart';
 import '../coin_flip/coin_flip_screen.dart';
@@ -30,6 +33,7 @@ import '../item_entry/widgets/decision_toggle.dart';
 class ItemDetailScreen extends StatefulWidget {
   final ItemModel item;
   final FileHelper? fileHelper;
+  final ImagePicker? imagePicker;
 
   /// Overrides how a product link is actually opened. Defaults to
   /// `url_launcher`'s [launchUrl]; tests inject a fake so they never touch a
@@ -40,6 +44,7 @@ class ItemDetailScreen extends StatefulWidget {
     super.key,
     required this.item,
     this.fileHelper,
+    this.imagePicker,
     this.launchUrlOverride,
   });
 
@@ -49,20 +54,57 @@ class ItemDetailScreen extends StatefulWidget {
 
 class _ItemDetailScreenState extends State<ItemDetailScreen> {
   late final FileHelper _fileHelper = widget.fileHelper ?? FileHelper();
+  late final ImagePicker _picker = widget.imagePicker ?? ImagePicker();
   late final Future<bool> Function(Uri url) _launchUrl =
       widget.launchUrlOverride ??
       (uri) => launchUrl(uri, mode: LaunchMode.externalApplication);
   bool _isBusy = false;
+  bool _isPickingImage = false;
+  String? _cachedImagePath;
+  late Future<File> _imageFuture;
+
+  /// Caches the resolved-image future by path so it's only recreated when
+  /// the image actually changes, instead of on every rebuild (an inline
+  /// `future:` in [FutureBuilder] would otherwise flash back to the loading
+  /// placeholder every time this screen rebuilds, e.g. on each status/edit
+  /// change).
+  Future<File> _resolveImageFuture(String path) {
+    if (_cachedImagePath != path) {
+      _cachedImagePath = path;
+      _imageFuture = _fileHelper.resolveImageFile(path);
+    }
+    return _imageFuture;
+  }
+
+  /// Runs [action] under the busy spinner, resetting it afterwards even if
+  /// [action] throws, and surfaces a snackbar on failure instead of leaving
+  /// the screen stuck busy with no feedback.
+  Future<void> _runBusy(Future<void> Function() action) async {
+    setState(() => _isBusy = true);
+    try {
+      await action();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.read<LocaleProvider>().strings.somethingWentWrong,
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isBusy = false);
+    }
+  }
 
   Future<void> _changeStatus(bool? isSaved, bool? currentIsSaved) async {
     if (widget.item.id == null || isSaved == currentIsSaved) return;
-    setState(() => _isBusy = true);
-    await context.read<ItemsProvider>().setSavedStatus(
-      widget.item.id!,
-      isSaved,
+    await _runBusy(
+      () => context.read<ItemsProvider>().setSavedStatus(
+        widget.item.id!,
+        isSaved,
+      ),
     );
-    if (!mounted) return;
-    setState(() => _isBusy = false);
   }
 
   Future<void> _confirmDelete() async {
@@ -92,10 +134,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     if (!mounted) return;
     if (confirmed != true || widget.item.id == null) return;
 
-    setState(() => _isBusy = true);
-    await context.read<ItemsProvider>().deleteItem(widget.item.id!);
-    if (!mounted) return;
-    Navigator.of(context).pop();
+    await _runBusy(() async {
+      await context.read<ItemsProvider>().deleteItem(widget.item.id!);
+      if (mounted) Navigator.of(context).pop();
+    });
   }
 
   Future<void> _openPurchaseUrl(String rawUrl) async {
@@ -120,13 +162,54 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     if (!mounted) return;
     if (result == null || widget.item.id == null) return;
 
-    setState(() => _isBusy = true);
-    await context.read<ItemsProvider>().setPurchaseUrl(
-      widget.item.id!,
-      result.isEmpty ? null : result,
+    await _runBusy(
+      () => context.read<ItemsProvider>().setPurchaseUrl(
+        widget.item.id!,
+        result.isEmpty ? null : result,
+      ),
     );
-    if (!mounted) return;
-    setState(() => _isBusy = false);
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    if (widget.item.id == null) return;
+    setState(() => _isPickingImage = true);
+    try {
+      final picked = await _picker.pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 2000,
+        maxHeight: 2000,
+      );
+      if (picked == null) return;
+
+      // Copy into app documents immediately; never keep the picker's temp
+      // file reference (CLAUDE.md image-pipeline rule).
+      final relativePath = await _fileHelper.saveImage(File(picked.path));
+      if (!mounted) return;
+      await context.read<ItemsProvider>().setImagePath(
+        widget.item.id!,
+        relativePath,
+      );
+    } finally {
+      if (mounted) setState(() => _isPickingImage = false);
+    }
+  }
+
+  Future<void> _removeImage() async {
+    if (widget.item.id == null) return;
+    await _runBusy(
+      () => context.read<ItemsProvider>().setImagePath(widget.item.id!, null),
+    );
+  }
+
+  void _showImageSourceSheet({required bool hasImage}) {
+    final strings = context.read<LocaleProvider>().strings;
+    showImageSourceSheet(
+      context,
+      strings: strings,
+      onPick: _pickImage,
+      onRemove: hasImage ? _removeImage : null,
+    );
   }
 
   Future<void> _editDetails(ItemModel item) async {
@@ -145,15 +228,14 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     if (!mounted) return;
     if (result == null || widget.item.id == null) return;
 
-    setState(() => _isBusy = true);
-    await context.read<ItemsProvider>().updateDetails(
-      widget.item.id!,
-      title: result.title,
-      price: result.price,
-      quantity: result.quantity,
+    await _runBusy(
+      () => context.read<ItemsProvider>().updateDetails(
+        widget.item.id!,
+        title: result.title,
+        price: result.price,
+        quantity: result.quantity,
+      ),
     );
-    if (!mounted) return;
-    setState(() => _isBusy = false);
   }
 
   @override
@@ -168,11 +250,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         (i) => i.id == widget.item.id,
         orElse: () => widget.item,
       ),
-    );
-    // TODO(debug): remove once the "link not saved on first try" report is
-    // reproduced and diagnosed.
-    debugPrint(
-      '[SKIP][detail] id=${item.id} purchase_url="${item.purchaseUrl}"',
     );
     final statusColor = switch (item.isSaved) {
       true => skipTheme.savedColor,
@@ -198,43 +275,83 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             children: [
               Hero(
                 tag: 'item-image-${item.id}',
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(skipTheme.cardRadius),
-                    child: item.imagePath == null
-                        ? ItemImagePlaceholder(
-                            showLabel: true,
-                            label: strings.noPhotoLabel,
-                          )
-                        : FutureBuilder<File>(
-                            future: _fileHelper.resolveImageFile(
-                              item.imagePath!,
+                child: TapScale(
+                  onTap: _isBusy || _isPickingImage
+                      ? null
+                      : () =>
+                            _showImageSourceSheet(hasImage: item.imagePath != null),
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              skipTheme.cardRadius,
                             ),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return Container(
-                                  color: theme.colorScheme.surface,
-                                );
-                              }
-                              return Image.file(
-                                snapshot.data!,
-                                fit: BoxFit.cover,
-                                cacheWidth: 1200,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Container(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 220),
+                              child: _isPickingImage
+                                  ? Container(
+                                      key: const ValueKey('loading'),
                                       color: theme.colorScheme.surface,
-                                      alignment: Alignment.center,
-                                      child: Icon(
-                                        Icons.broken_image_outlined,
-                                        color: theme.colorScheme.onSurface
-                                            .withValues(alpha: 0.4),
-                                        size: 48,
+                                      child: const Center(
+                                        child: CircularProgressIndicator(),
                                       ),
+                                    )
+                                  : item.imagePath == null
+                                  ? ItemImagePlaceholder(
+                                      key: const ValueKey('placeholder'),
+                                      showLabel: true,
+                                      label: strings.noPhotoLabel,
+                                    )
+                                  : FutureBuilder<File>(
+                                      key: ValueKey(item.imagePath),
+                                      future: _resolveImageFuture(
+                                        item.imagePath!,
+                                      ),
+                                      builder: (context, snapshot) {
+                                        if (!snapshot.hasData) {
+                                          return Container(
+                                            color: theme.colorScheme.surface,
+                                          );
+                                        }
+                                        return Image.file(
+                                          snapshot.data!,
+                                          fit: BoxFit.cover,
+                                          cacheWidth: 1200,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Container(
+                                                    color: theme
+                                                        .colorScheme
+                                                        .surface,
+                                                    alignment: Alignment.center,
+                                                    child: Icon(
+                                                      Icons
+                                                          .broken_image_outlined,
+                                                      color: theme
+                                                          .colorScheme
+                                                          .onSurface
+                                                          .withValues(
+                                                            alpha: 0.4,
+                                                          ),
+                                                      size: 48,
+                                                    ),
+                                                  ),
+                                        );
+                                      },
                                     ),
-                              );
-                            },
+                            ),
                           ),
+                        ),
+                        Positioned(
+                          right: 8,
+                          bottom: 8,
+                          child: _PhotoEditBadge(),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -367,6 +484,41 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Small badge overlaid on the item photo signalling it can be tapped to
+/// add/change/remove the photo — otherwise nothing on the detail screen
+/// hints that the (previously add-only) photo is now editable there too.
+class _PhotoEditBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final skipTheme = theme.extension<SkipThemeExtension>()!;
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: skipTheme.cardBackground,
+        shape: BoxShape.circle,
+        border: skipTheme.isY2K
+            ? Border.all(color: theme.colorScheme.onSurface, width: 1.5)
+            : null,
+        boxShadow: skipTheme.isY2K
+            ? skipTheme.glowShadow
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+      ),
+      child: Icon(
+        Icons.camera_alt,
+        size: 18,
+        color: theme.colorScheme.primary,
       ),
     );
   }

@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'app_icon_channel.dart';
 import 'app_themes.dart';
 
 enum SkipAesthetic { minimal, y2k }
+
+/// Alternate-icon name (matches the `CFBundleAlternateIcons` key in
+/// Info.plist) to switch to for each aesthetic; `null` means the primary
+/// (minimal) icon.
+String? _alternateIconNameFor(SkipAesthetic aesthetic) => switch (aesthetic) {
+  SkipAesthetic.minimal => null,
+  SkipAesthetic.y2k => 'AppIcon-Y2K',
+};
 
 /// Manages which of the two SKIP aesthetics is active and notifies
 /// listeners so the whole app rebuilds with the new [ThemeData]. The choice
@@ -38,6 +47,9 @@ class ThemeProvider extends ChangeNotifier {
       _aesthetic = saved;
       notifyListeners();
     }
+    // Keep the home screen icon in sync even if a previous icon switch
+    // never completed (e.g. the user dismissed the system prompt).
+    AppIconChannel.setAlternateIconName(_alternateIconNameFor(_aesthetic));
   }
 
   void setAesthetic(SkipAesthetic aesthetic) {
@@ -45,6 +57,7 @@ class ThemeProvider extends ChangeNotifier {
     _aesthetic = aesthetic;
     notifyListeners();
     _save(aesthetic);
+    AppIconChannel.setAlternateIconName(_alternateIconNameFor(aesthetic));
   }
 
   void toggle() {

@@ -74,6 +74,12 @@ class AppStrings {
     AppLocale.fr => "Impossible d'ouvrir ce lien.",
     AppLocale.de => 'Der Link konnte nicht geöffnet werden.',
   };
+  String get somethingWentWrong => switch (locale) {
+    AppLocale.en => 'Something went wrong. Please try again.',
+    AppLocale.it => 'Qualcosa è andato storto. Riprova.',
+    AppLocale.fr => "Une erreur s'est produite. Veuillez réessayer.",
+    AppLocale.de => 'Etwas ist schiefgelaufen. Bitte versuche es erneut.',
+  };
   String get status => switch (locale) {
     AppLocale.en => 'Status',
     AppLocale.it => 'Stato',
@@ -256,6 +262,18 @@ class AppStrings {
     AppLocale.it => 'Nessuna foto',
     AppLocale.fr => 'Pas de photo',
     AppLocale.de => 'Kein Foto',
+  };
+  String get changePhotoTooltip => switch (locale) {
+    AppLocale.en => 'Change photo',
+    AppLocale.it => 'Cambia foto',
+    AppLocale.fr => 'Changer la photo',
+    AppLocale.de => 'Foto ändern',
+  };
+  String get removePhoto => switch (locale) {
+    AppLocale.en => 'Remove photo',
+    AppLocale.it => 'Rimuovi foto',
+    AppLocale.fr => 'Retirer la photo',
+    AppLocale.de => 'Foto entfernen',
   };
   String get priceLabel => switch (locale) {
     AppLocale.en => 'Price',
@@ -518,6 +536,12 @@ class AppStrings {
       AppLocale.de => '≈ $formatted Std. Arbeit',
     };
   }
+  String totalForQuantity(String formattedAmount) => switch (locale) {
+    AppLocale.en => 'Total: $formattedAmount',
+    AppLocale.it => 'Totale: $formattedAmount',
+    AppLocale.fr => 'Total : $formattedAmount',
+    AppLocale.de => 'Gesamt: $formattedAmount',
+  };
 
   String get sound => switch (locale) {
     AppLocale.en => 'Sound',

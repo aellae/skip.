@@ -164,10 +164,6 @@ class DatabaseHelper {
   Future<int> insertItem(ItemModel item) async {
     final db = await database;
     final map = item.toMap()..remove('id');
-    // TODO(debug): remove once the "link not saved on first try" report is
-    // reproduced and diagnosed.
-    // ignore: avoid_print
-    print('[SKIP][db] insertItem purchase_url="${map['purchase_url']}"');
     return db.insert(tableItems, map);
   }
 

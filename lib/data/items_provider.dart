@@ -139,6 +139,35 @@ class ItemsProvider extends ChangeNotifier {
     await load();
   }
 
+  /// Sets or clears (pass `null`) an existing item's photo — used when the
+  /// user adds/changes/removes a photo from the edit flow rather than at
+  /// entry time. Unlike [deleteItem]'s soft-delete, a replaced photo isn't
+  /// recoverable from Trash, so the old file is deleted immediately once the
+  /// DB write succeeds rather than deferred to [purgeExpiredTrash].
+  Future<void> setImagePath(int id, String? imagePath) async {
+    final index = _items.indexWhere((item) => item.id == id);
+    if (index == -1) return;
+    final current = _items[index];
+    final oldImagePath = current.imagePath;
+    await _db.updateItem(
+      ItemModel(
+        id: current.id,
+        title: current.title,
+        price: current.price,
+        quantity: current.quantity,
+        imagePath: imagePath,
+        isSaved: current.isSaved,
+        category: current.category,
+        createdAt: current.createdAt,
+        purchaseUrl: current.purchaseUrl,
+      ),
+    );
+    await load();
+    if (oldImagePath != null && oldImagePath != imagePath) {
+      await _db.fileHelper.deleteImage(oldImagePath);
+    }
+  }
+
   /// Sets or clears (pass `null`) the retroactive purchase link on an
   /// existing item. Uses a fresh [ItemModel] rather than [ItemModel.copyWith]
   /// because `copyWith`'s `??` pattern can't express "clear this field".

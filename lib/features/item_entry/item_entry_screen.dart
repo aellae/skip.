@@ -15,9 +15,9 @@ import '../../core/utils/currency_formatter.dart';
 import '../../core/utils/file_helper.dart';
 import '../../core/utils/url_validator.dart';
 import '../../core/utils/wage_formatter.dart';
+import '../../core/widgets/image_source_sheet.dart';
 import '../../core/widgets/quantity_stepper.dart';
 import '../../core/widgets/skip_app_bar.dart';
-import '../../core/widgets/skip_card.dart';
 import '../../core/widgets/tap_scale.dart';
 import '../../data/items_provider.dart';
 import 'widgets/decision_toggle.dart';
@@ -63,7 +63,6 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    Navigator.of(context).pop(); // close the source picker sheet
     setState(() => _isPickingImage = true);
     try {
       // Cap the stored resolution (not just the display-time decode bound
@@ -95,30 +94,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
 
   void _showImageSourceSheet() {
     final strings = context.read<LocaleProvider>().strings;
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _ImageSourceOption(
-                icon: Icons.camera_alt,
-                label: strings.camera,
-                onTap: () => _pickImage(ImageSource.camera),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              _ImageSourceOption(
-                icon: Icons.photo_library,
-                label: strings.gallery,
-                onTap: () => _pickImage(ImageSource.gallery),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    showImageSourceSheet(context, strings: strings, onPick: _pickImage);
   }
 
   Future<void> _saveWithDecision(bool? isSaved) async {
@@ -132,11 +108,6 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     final price = double.parse(_normalizedPrice(_priceController.text));
     final title = _titleController.text.trim();
     final purchaseUrl = parseHttpUrl(_purchaseUrlController.text)?.toString();
-    // TODO(debug): remove once the "link not saved on first try" report is
-    // reproduced and diagnosed.
-    debugPrint(
-      '[SKIP][entry] raw="${_purchaseUrlController.text}" parsed="$purchaseUrl"',
-    );
     await context.read<ItemsProvider>().addItem(
       title: title.isEmpty ? null : title,
       price: price,
@@ -270,26 +241,43 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                     ),
                   ],
                 ),
-                if (hourlyWage != null)
-                  ValueListenableBuilder<TextEditingValue>(
-                    valueListenable: _priceController,
-                    builder: (context, value, _) {
-                      final price = double.tryParse(
-                        _normalizedPrice(value.text),
-                      );
-                      final hours = price == null
-                          ? null
-                          : hoursOfWork(price, hourlyWage);
-                      if (hours == null) return const SizedBox.shrink();
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 4, left: 4),
-                        child: Text(
-                          strings.hoursOfWork(hours),
-                          style: theme.textTheme.bodySmall,
-                        ),
-                      );
-                    },
-                  ),
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _priceController,
+                  builder: (context, value, _) {
+                    final price = double.tryParse(
+                      _normalizedPrice(value.text),
+                    );
+                    if (price == null) return const SizedBox.shrink();
+                    final totalPrice = price * _quantity;
+                    final hours = hourlyWage == null
+                        ? null
+                        : hoursOfWork(totalPrice, hourlyWage);
+                    final showTotal = _quantity > 1;
+                    if (!showTotal && hours == null) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 4, left: 4),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (showTotal)
+                            Text(
+                              strings.totalForQuantity(
+                                formatCurrency(totalPrice, currency: currency),
+                              ),
+                              style: theme.textTheme.bodySmall,
+                            ),
+                          if (hours != null)
+                            Text(
+                              strings.hoursOfWork(hours),
+                              style: theme.textTheme.bodySmall,
+                            ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
                 const SizedBox(height: AppSpacing.md),
                 _ThemedFocusField(
                   focusNode: _titleFocus,
@@ -347,33 +335,6 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ImageSourceOption extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _ImageSourceOption({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return SkipCard(
-      onTap: onTap,
-      child: Row(
-        children: [
-          Icon(icon, color: theme.colorScheme.primary),
-          const SizedBox(width: AppSpacing.md),
-          Text(label, style: theme.textTheme.bodyLarge),
-        ],
       ),
     );
   }
