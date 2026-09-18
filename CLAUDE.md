@@ -16,7 +16,7 @@ This document provides guidelines, technical conventions, and architectural rule
    - Never hardcode visual colors, font families, or decorative styling inline unless derived from context (`Theme.of(context)`).
    - Dynamic logo naming convention:
      - Minimal Theme: lowercase `skip.`
-     - Bratz/Y2K Theme: uppercase `SKIP!`
+     - Baddie/Y2K Theme: uppercase `SKIP!`
 
 3. **Performance & Memory Rules for Images:**
    - Picked images from `image_picker` must be copied into local app documents immediately and referenced by relative file path.
@@ -42,7 +42,7 @@ lib/
 ├── main.dart                      # App entry point, Provider initialization
 ├── core/
 │   ├── theme/
-│   │   ├── app_themes.dart        # Minimal & Bratz ThemeData objects
+│   │   ├── app_themes.dart        # Minimal & Baddie ThemeData objects
 │   │   └── theme_provider.dart    # Theme state management
 │   └── constants/
 │       └── app_colors.dart        # Theme color constants

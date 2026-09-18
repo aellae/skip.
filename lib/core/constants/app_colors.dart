@@ -17,7 +17,7 @@ class AppColors {
   static const minimalSpent = Color(0xFFA35656);
   static const minimalPondering = Color(0xFFB8863A);
 
-  // Bratz Y2K ("SKIP!")
+  // Baddie Y2K ("SKIP!")
   static const y2kHotMagenta = Color(0xFFFF007F);
   static const y2kElectricViolet = Color(0xFFB026FF);
   static const y2kMetallicSilver = Color(0xFFE0E0E0);

@@ -106,7 +106,7 @@ class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
   }
 }
 
-/// The two SKIP aesthetics: Quiet Luxury (`skip.`) and Bratz Y2K (`SKIP!`).
+/// The two SKIP aesthetics: Quiet Luxury (`skip.`) and Baddie Y2K (`SKIP!`).
 class AppThemes {
   AppThemes._();
 

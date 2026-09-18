@@ -6,7 +6,7 @@ Paste this entire file as your first message in a **fresh Claude Code session op
 
 ## 0. Context
 
-You are building **Skip!**, a 100% offline Flutter app that lets users log items they resisted buying (money "saved") vs. items they bought (money "spent"), with a photo, a price, and a dual-theme UI (Minimal Luxury vs. Bratz Y2K).
+You are building **Skip!**, a 100% offline Flutter app that lets users log items they resisted buying (money "saved") vs. items they bought (money "spent"), with a photo, a price, and a dual-theme UI (Minimal Luxury vs. Baddie Y2K).
 
 Read these three files first, in full — they are the source of truth for product intent, architecture, and coding rules:
 - `README.md` — concept, dual-theme spec, tech stack, project structure.
@@ -62,7 +62,7 @@ Run `flutter doctor -v`. If Flutter/Dart isn't installed, stop and ask the user 
    - Dev: `flutter pub add --dev flutter_lints integration_test mocktail sqflite_common_ffi flutter_launcher_icons`
 
    Rationale, so you're not guessing later:
-   - `confetti` — Bratz/Y2K "Resisted!" celebration animation (Phase 3).
+   - `confetti` — Baddie/Y2K "Resisted!" celebration animation (Phase 3).
    - `audioplayers` — Y2K SFX. **Only ever play bundled local asset files, never a network URL** — that's the offline boundary; don't stream anything.
    - `fl_chart` — Phase 4 monthly savings/spend bar chart. Pure rendering, no network.
    - `csv` + `share_plus` — Phase 4 export (write file locally, hand to system share sheet).

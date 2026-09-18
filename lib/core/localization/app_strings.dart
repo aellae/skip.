@@ -430,7 +430,7 @@ class AppStrings {
     AppLocale.fr => 'Luxe discret',
     AppLocale.de => 'Leiser Luxus',
   };
-  String get bratzY2k => 'Bratz Y2K';
+  String get baddieY2k => 'Baddie Y2K';
   String get summary => switch (locale) {
     AppLocale.en => 'Summary',
     AppLocale.it => 'Riepilogo',

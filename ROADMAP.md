@@ -1,6 +1,6 @@
 # 🗺️ Skip! — Product & Technical Roadmap
 
-A privacy-first, 100% offline mobile app built with Flutter and SQLite. Skip! allows users to track financial decisions visually by logging items they resisted buying (money saved) vs. items they purchased (money spent), wrapped in a dual-theme UI experience (Minimal Luxury vs. Bratz/Y2K Explosive).
+A privacy-first, 100% offline mobile app built with Flutter and SQLite. Skip! allows users to track financial decisions visually by logging items they resisted buying (money saved) vs. items they purchased (money spent), wrapped in a dual-theme UI experience (Minimal Luxury vs. Baddie/Y2K Explosive).
 
 ---
 
@@ -30,7 +30,7 @@ A privacy-first, 100% offline mobile app built with Flutter and SQLite. Skip! al
   - `FileHelper` copies files into the app's local application documents directory (`path_provider`) under a `skip_images/` subdir and stores a *relative* path (not absolute — iOS sandbox container paths aren't stable across reinstalls).
   - `image_picker` wiring for Camera & Gallery access lands in Phase 2 alongside the quick-add UI that actually calls it.
 - [x] **Dual-Theme Engine**
-  - `ThemeProvider` managing dynamic toggle between **Minimal Luxury (`skip.`)** and **Bratz Y2K (`SKIP!`)**.
+  - `ThemeProvider` managing dynamic toggle between **Minimal Luxury (`skip.`)** and **Baddie Y2K (`SKIP!`)**.
   - Typographic sets (Playfair Display + Inter vs. Titan One + Fredoka), bundled as local variable-font assets — zero runtime network fetches (`GoogleFonts.config.allowRuntimeFetching = false`).
   - Dynamic palette tokens (Charcoal/Silk Beige/Champagne/Soft White vs. Hot Magenta/Electric Violet/Metallic Silver) exposed via `SkipThemeExtension`.
 
@@ -59,7 +59,7 @@ A privacy-first, 100% offline mobile app built with Flutter and SQLite. Skip! al
 > **Goal:** Elevate user delight with distinctive tactile feedback, sound effects, and celebratory visuals.
 
 - [x] **Theme-Specific Micro-Interactions**
-  - **Bratz / Y2K Mode:**
+  - **Baddie / Y2K Mode:**
     - Confetti explosion when tapping "Resisted!" (`confetti` package via `DecisionToggle`) — the explosive burst itself is the floating-particle celebration; no separate heart/spark animation layer was added on top of it (reasonable minimal choice, not a data/offline/schema question).
     - Retro glossy buttons with metallic silver outlines: gradient sheen + metallic-silver border on the selected Y2K toggle option.
     - Sassy audio feedback / sound effects on saving money (haptic + sound): `SkipSfxPlayer` wraps `audioplayers` and is wired into the "Resisted!" tap alongside a `HapticFeedback.mediumImpact()`. No real SFX asset is bundled yet — user chose a no-op stub for now (BUILD_PROMPT.md §9: can't fabricate real audio); playback fails silently until a real file lands at `assets/sfx/resisted.mp3`.

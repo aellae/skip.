@@ -194,7 +194,7 @@ class _AestheticSwitcher extends StatelessWidget {
           child: _AestheticOption(
             previewTheme: AppThemes.y2k,
             label: 'SKIP!',
-            description: strings.bratzY2k,
+            description: strings.baddieY2k,
             selected: aesthetic == SkipAesthetic.y2k,
             onTap: () => onChanged(SkipAesthetic.y2k),
           ),

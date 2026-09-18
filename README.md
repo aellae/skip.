@@ -1,7 +1,7 @@
 # 💸 Skip!
 
 > **Visual Financial Resistance & Impulsive Spend Tracker**  
-> *100% Offline • Dual Aesthetic Engine (Quiet Luxury vs. Bratz Y2K)*
+> *100% Offline • Dual Aesthetic Engine (Quiet Luxury vs. Baddie Y2K)*
 
 ---
 
@@ -24,7 +24,7 @@ Switch between two distinct UI personalities anytime in settings:
 | Aesthetic | Theme Name | Primary Palette | Typography | Vibe |
 | :--- | :--- | :--- | :--- | :--- |
 | **Quiet Luxury** | `skip.` | Charcoal, Silk Beige, Champagne, Soft White | *Playfair Display* & *Inter* | Minimalist, serene, disciplined financial diary. |
-| **Bratz Y2K** | `SKIP!` | Hot Magenta, Electric Violet, Metallic Silver | *Titan One* & *Fredoka* | Explosive 2000s pop, sassy, "Girl Math" victory celebration. |
+| **Baddie Y2K** | `SKIP!` | Hot Magenta, Electric Violet, Metallic Silver | *Titan One* & *Fredoka* | Explosive 2000s pop, sassy, "Girl Math" victory celebration. |
 
 ---
 
@@ -45,7 +45,7 @@ Switch between two distinct UI personalities anytime in settings:
 lib/
 ├── core/
 │   ├── theme/
-│   │   ├── app_themes.dart       # Minimal & Bratz theme declarations
+│   │   ├── app_themes.dart       # Minimal & Baddie theme declarations
 │   │   └── theme_provider.dart   # Theme switcher logic
 │   └── utils/
 │       └── file_helper.dart      # Local image copy utility

@@ -129,7 +129,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     setState(() => _isSaving = true);
-    final price = double.parse(_priceController.text);
+    final price = double.parse(_normalizedPrice(_priceController.text));
     final title = _titleController.text.trim();
     final purchaseUrl = parseHttpUrl(_purchaseUrlController.text)?.toString();
     // TODO(debug): remove once the "link not saved on first try" report is
@@ -149,9 +149,11 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     Navigator.of(context).pop();
   }
 
+  String _normalizedPrice(String value) => value.replaceAll(',', '.');
+
   String? _validatePrice(String? value, AppStrings strings) {
     if (value == null || value.trim().isEmpty) return strings.enterPrice;
-    final parsed = double.tryParse(value);
+    final parsed = double.tryParse(_normalizedPrice(value));
     if (parsed == null) return strings.enterValidNumber;
     if (parsed <= 0) return strings.priceGreaterThanZero;
     return null;
@@ -245,9 +247,11 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (_) => _priceFocus.unfocus(),
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d*\.?\d{0,2}'),
+                              RegExp(r'^\d*[.,]?\d{0,2}'),
                             ),
                           ],
                           decoration: InputDecoration(
@@ -270,7 +274,9 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                   ValueListenableBuilder<TextEditingValue>(
                     valueListenable: _priceController,
                     builder: (context, value, _) {
-                      final price = double.tryParse(value.text);
+                      final price = double.tryParse(
+                        _normalizedPrice(value.text),
+                      );
                       final hours = price == null
                           ? null
                           : hoursOfWork(price, hourlyWage);
