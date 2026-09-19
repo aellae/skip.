@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:csv/csv.dart';
 import 'package:path/path.dart' as p;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/utils/file_helper.dart';
 import 'database_helper.dart';
@@ -34,6 +35,34 @@ class BackupFormatException implements Exception {
   String toString() => message;
 }
 
+/// Outcome of [ItemsProvider.restoreFromAutoBackup].
+sealed class AutoBackupRestoreResult {
+  const AutoBackupRestoreResult();
+
+  const factory AutoBackupRestoreResult.restored(int count) =
+      AutoBackupRestored;
+  const factory AutoBackupRestoreResult.alreadyRestored() =
+      AutoBackupAlreadyRestored;
+  const factory AutoBackupRestoreResult.notFound() = AutoBackupNotFound;
+}
+
+/// The auto-backup snapshot was imported; [count] items were added.
+class AutoBackupRestored extends AutoBackupRestoreResult {
+  final int count;
+  const AutoBackupRestored(this.count);
+}
+
+/// This exact auto-backup snapshot was already restored previously, so it
+/// was skipped to avoid duplicating items.
+class AutoBackupAlreadyRestored extends AutoBackupRestoreResult {
+  const AutoBackupAlreadyRestored();
+}
+
+/// No auto-backup file exists yet.
+class AutoBackupNotFound extends AutoBackupRestoreResult {
+  const AutoBackupNotFound();
+}
+
 /// Builds and parses SKIP's data backups.
 ///
 /// JSON is the round-trippable format used for import; CSV is export-only,
@@ -48,6 +77,13 @@ class BackupService {
   /// File name for the automatic local safety-net backup (distinct from
   /// user-triggered exports, which get a timestamped name).
   static const String autoBackupFileName = 'skip_autobackup.json';
+
+  /// SharedPreferences key tracking the `exportedAt` of the auto-backup
+  /// snapshot last restored via [ItemsProvider.restoreFromAutoBackup], so a
+  /// repeat tap on "Restore last automatic backup" doesn't re-import the
+  /// same items and duplicate them.
+  static const String _lastRestoredAutoBackupKey =
+      'skip_last_restored_auto_backup_exported_at';
 
   final DatabaseHelper _db;
   final FileHelper _fileHelper;
@@ -72,6 +108,21 @@ class BackupService {
     final file = File(p.join(dir.path, autoBackupFileName));
     if (!file.existsSync()) return null;
     return file.readAsStringSync();
+  }
+
+  /// Whether [exportedAt] (the `exportedAt` field of an auto-backup
+  /// snapshot) was already restored via [markAutoBackupRestored].
+  Future<bool> isAutoBackupAlreadyRestored(String exportedAt) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_lastRestoredAutoBackupKey) == exportedAt;
+  }
+
+  /// Records [exportedAt] as the auto-backup snapshot most recently
+  /// restored, so a later restore of the same snapshot can be recognized
+  /// and skipped instead of duplicating items.
+  Future<void> markAutoBackupRestored(String exportedAt) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_lastRestoredAutoBackupKey, exportedAt);
   }
 
   Future<String> buildJsonBackup() async {
@@ -110,6 +161,15 @@ class BackupService {
         ],
     ];
     return Csv().encode(rows);
+  }
+
+  /// Reads the `exportedAt` field out of a SKIP JSON backup written by
+  /// [buildJsonBackup]/[writeAutoBackup], or `null` if [content] isn't
+  /// shaped like one.
+  String? readExportedAt(String content) {
+    final decoded = jsonDecode(content);
+    if (decoded is! Map) return null;
+    return decoded['exportedAt'] as String?;
   }
 
   /// Parses [content] as a SKIP JSON backup, returning the items it

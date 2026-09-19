@@ -66,12 +66,24 @@ class ItemsProvider extends ChangeNotifier {
   }
 
   /// Restores from the local safety-net backup (see [BackupService.
-  /// writeAutoBackup]) — additive, existing data is kept. Returns the number
-  /// of items restored, or `null` if no auto-backup exists yet.
-  Future<int?> restoreFromAutoBackup() async {
+  /// writeAutoBackup]) — additive, existing data is kept. Guards against
+  /// re-importing the same snapshot twice (e.g. a double tap on the restore
+  /// button), which would otherwise duplicate every item.
+  Future<AutoBackupRestoreResult> restoreFromAutoBackup() async {
     final content = await _backupService.readAutoBackup();
-    if (content == null) return null;
-    return importJsonBackup(content);
+    if (content == null) return const AutoBackupRestoreResult.notFound();
+
+    final exportedAt = _backupService.readExportedAt(content);
+    if (exportedAt != null &&
+        await _backupService.isAutoBackupAlreadyRestored(exportedAt)) {
+      return const AutoBackupRestoreResult.alreadyRestored();
+    }
+
+    final count = await importJsonBackup(content);
+    if (exportedAt != null) {
+      await _backupService.markAutoBackupRestored(exportedAt);
+    }
+    return AutoBackupRestoreResult.restored(count);
   }
 
   Future<void> addItem({

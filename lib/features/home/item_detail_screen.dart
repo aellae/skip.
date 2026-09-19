@@ -655,6 +655,18 @@ class _EditDetailsDialogState extends State<_EditDetailsDialog> {
     return null;
   }
 
+  void _save() {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final title = _titleController.text.trim();
+    Navigator.of(context).pop(
+      _ItemDetailsEdit(
+        title: title.isEmpty ? null : title,
+        price: double.parse(_priceController.text),
+        quantity: _quantity,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEuro = isEuroCurrency(widget.currency);
@@ -675,6 +687,8 @@ class _EditDetailsDialogState extends State<_EditDetailsDialog> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => _save(),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(
                         RegExp(r'^\d*\.?\d{0,2}'),
@@ -684,6 +698,15 @@ class _EditDetailsDialogState extends State<_EditDetailsDialog> {
                       labelText: widget.strings.priceLabel,
                       prefixText: isEuro ? null : '\$ ',
                       suffixText: isEuro ? '€' : null,
+                      // The decimal numeric keypad has no native return key
+                      // on iOS, so give the field its own submit affordance
+                      // instead of relying on scrolling to the dialog's
+                      // Save button below the fold.
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.check_circle_outline),
+                        tooltip: widget.strings.doneLabel,
+                        onPressed: _save,
+                      ),
                     ),
                     validator: _validatePrice,
                   ),
@@ -711,20 +734,7 @@ class _EditDetailsDialogState extends State<_EditDetailsDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: Text(widget.strings.cancel),
         ),
-        TextButton(
-          onPressed: () {
-            if (!(_formKey.currentState?.validate() ?? false)) return;
-            final title = _titleController.text.trim();
-            Navigator.of(context).pop(
-              _ItemDetailsEdit(
-                title: title.isEmpty ? null : title,
-                price: double.parse(_priceController.text),
-                quantity: _quantity,
-              ),
-            );
-          },
-          child: Text(widget.strings.save),
-        ),
+        TextButton(onPressed: _save, child: Text(widget.strings.save)),
       ],
     );
   }

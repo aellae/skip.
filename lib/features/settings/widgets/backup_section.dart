@@ -126,19 +126,18 @@ class _BackupSectionState extends State<BackupSection> {
     setState(() => _isBusy = true);
     final strings = context.read<LocaleProvider>().strings;
     try {
-      final count = await context
+      final result = await context
           .read<ItemsProvider>()
           .restoreFromAutoBackup();
       if (!mounted) return;
-      if (count == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(strings.noAutoBackupFound)));
-        return;
-      }
+      final message = switch (result) {
+        AutoBackupNotFound() => strings.noAutoBackupFound,
+        AutoBackupAlreadyRestored() => strings.autoBackupAlreadyRestored,
+        AutoBackupRestored(:final count) => strings.importedItems(count),
+      };
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(strings.importedItems(count))));
+      ).showSnackBar(SnackBar(content: Text(message)));
     } on BackupFormatException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

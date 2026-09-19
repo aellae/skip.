@@ -229,6 +229,15 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                             labelText: strings.priceLabel,
                             prefixText: isEuro ? null : '\$ ',
                             suffixText: isEuro ? '€' : null,
+                            // The decimal numeric keypad has no native
+                            // return key on iOS, so give the field its own
+                            // dismiss affordance instead of relying on
+                            // scrolling to a button below the fold.
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.check_circle_outline),
+                              tooltip: strings.doneLabel,
+                              onPressed: _priceFocus.unfocus,
+                            ),
                           ),
                           validator: (value) => _validatePrice(value, strings),
                         ),

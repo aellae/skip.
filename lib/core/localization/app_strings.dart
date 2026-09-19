@@ -281,6 +281,12 @@ class AppStrings {
     AppLocale.fr => 'Prix',
     AppLocale.de => 'Preis',
   };
+  String get doneLabel => switch (locale) {
+    AppLocale.en => 'Done',
+    AppLocale.it => 'Fatto',
+    AppLocale.fr => 'Terminé',
+    AppLocale.de => 'Fertig',
+  };
   String get titleOptionalLabel => switch (locale) {
     AppLocale.en => 'Title (optional)',
     AppLocale.it => 'Titolo (facoltativo)',
@@ -378,6 +384,12 @@ class AppStrings {
     AppLocale.it => 'Nessun backup automatico trovato.',
     AppLocale.fr => 'Aucune sauvegarde automatique trouvée.',
     AppLocale.de => 'Noch kein automatisches Backup gefunden.',
+  };
+  String get autoBackupAlreadyRestored => switch (locale) {
+    AppLocale.en => 'This backup was already restored.',
+    AppLocale.it => 'Questo backup è già stato ripristinato.',
+    AppLocale.fr => 'Cette sauvegarde a déjà été restaurée.',
+    AppLocale.de => 'Dieses Backup wurde bereits wiederhergestellt.',
   };
 
   String importedItems(int count) {
