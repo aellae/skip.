@@ -61,7 +61,9 @@
       "Bash(rm -rf ios/Pods ios/.symlinks)",
       "Bash(rm -rf ~/Library/Developer/Xcode/DerivedData/Runner-*)",
       "Bash(rm -rf /private/tmp/claude-501/-Users-elle-Desktop-Progetti-Personali-skip-/88aaf6d4-cbdf-4ba2-8ded-b0fd1f26cd60/scratchpad/*)",
-      "Read(//Users/elle/Library/Developer/Xcode/DerivedData/**)"
+      "Read(//Users/elle/Library/Developer/Xcode/DerivedData/**)",
+      "Bash(plutil -lint ios/Runner.xcodeproj/project.pbxproj)",
+      "Bash(xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Debug -showBuildSettings)"
     ],
     "additionalDirectories": [
       "/Users/elle/Desktop/Progetti Personali/skip./test/core",
