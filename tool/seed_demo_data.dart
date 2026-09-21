@@ -25,7 +25,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:path/path.dart' as p;
 
 import 'package:skip/core/localization/app_currency.dart';
@@ -264,7 +263,6 @@ Future<void> _reseed() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  debugPaintSizeEnabled = true; // TEMP: diagnosing y2k home ghost-text bug
   await _reseed();
 
   final locale = _localeArg == 'it' ? AppLocale.it : AppLocale.en;
