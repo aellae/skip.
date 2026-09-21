@@ -76,7 +76,12 @@
       "Bash(rm -f assets/sfx/resisted.m4a && rmdir assets/sfx 2>/dev/null; git status --short)",
       "Bash(/usr/libexec/PlistBuddy -c \"Print\" /tmp/apps.plist)",
       "Bash(python3 -c ' *)",
-      "Bash(pip3 install *)"
+      "Bash(pip3 install *)",
+      "Bash(rm -f android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java && flutter build appbundle --release 2>&1 | tail -60)",
+      "Bash(mkdir -p /tmp/skip_demo_images && cp /Users/elle/Desktop/skip./tool/demo_images/*.jpg /tmp/skip_demo_images/ && ls /tmp/skip_demo_images/)",
+      "Bash(sips -g pixelWidth -g pixelHeight /tmp/skip_item_entry_minimal_en.png)",
+      "Bash(pkill -f \"seed_demo_data.dart\")",
+      "Bash(sips -g pixelWidth -g pixelHeight /tmp/skip_settings_y2k_en.png)"
     ],
     "additionalDirectories": [
       "/Users/elle/Desktop/Progetti Personali/skip./test/core",
@@ -84,7 +89,9 @@
       "/Users/elle/Desktop/skip./assets",
       "/Users/elle/Desktop/skip./ios/Runner.xcodeproj",
       "/Users/elle/Desktop/skip./test/features/settings/widgets",
-      "/Users/elle/Desktop/skip./assets/sfx"
+      "/Users/elle/Desktop/skip./assets/sfx",
+      "/Users/elle/Desktop/skip./android/app/src/main/java/io/flutter/plugins",
+      "/Users/elle/Desktop/skip./tool/demo_images"
     ]
   }
 }

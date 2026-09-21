@@ -215,12 +215,15 @@ class BackupService {
 
   /// Inserts [items] as new rows. Import is additive: existing data is
   /// never cleared or overwritten. Items that already match an existing
-  /// (non-trashed) item on every field but [ItemModel.id] — which is
-  /// reassigned on insert and so can't be used to recognize a re-import —
+  /// item — trashed or not — on every field but [ItemModel.id] (which is
+  /// reassigned on insert and so can't be used to recognize a re-import)
   /// are skipped so re-importing the same backup doesn't duplicate rows.
+  /// Matching against trashed items too matters: without it, restoring a
+  /// backup snapshot taken before you deleted an item would resurrect it
+  /// as a brand-new live row alongside the one still sitting in Trash.
   /// Returns the number of items actually inserted.
   Future<int> importItems(List<ItemModel> items) async {
-    final existingSignatures = (await _db.getAllItems())
+    final existingSignatures = (await _db.getAllItemsIncludingTrashed())
         .map(_dedupeSignature)
         .toSet();
     var imported = 0;

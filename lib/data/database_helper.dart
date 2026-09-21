@@ -228,6 +228,15 @@ class DatabaseHelper {
     return rows.map(ItemModel.fromMap).toList();
   }
 
+  /// Returns every item regardless of trash status — used by backup import
+  /// dedup, which needs to recognize an already-trashed item as "already
+  /// present" rather than re-inserting it as a live duplicate.
+  Future<List<ItemModel>> getAllItemsIncludingTrashed() async {
+    final db = await database;
+    final rows = await db.query(tableItems);
+    return rows.map(ItemModel.fromMap).toList();
+  }
+
   /// Soft-deletes the item: marks it trashed (`deleted_at` set) without
   /// removing the row or its image file yet — recoverable via [restoreItem]
   /// until [purgeExpiredTrash] catches up with it. Returns the number of

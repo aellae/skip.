@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+5
+version: 1.0.0+7
 
 environment:
   sdk: ^3.12.2
@@ -62,8 +62,6 @@ dev_dependencies:
   mocktail: ^1.0.5
   sqflite_common_ffi: ^2.4.2+1
   flutter_launcher_icons: ^0.14.4
-  integration_test:
-    sdk: flutter
   path_provider_platform_interface: ^2.1.3
 
 # For information on the generic Dart part of this file, see the
@@ -130,3 +128,9 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/icon/Skip!-Logo.png"
   remove_alpha_ios: true
+  # Without an explicit adaptive icon, Android 8+ auto-generates one from the
+  # legacy square PNG by insetting it and masking to the launcher's shape,
+  # which is what made the logo look like a small shape floating inside a
+  # circle. Providing our own full-bleed foreground/background fixes that.
+  adaptive_icon_background: "#EEE0CA"
+  adaptive_icon_foreground: "assets/icon/Skip!-Logo.png"

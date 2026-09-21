@@ -202,6 +202,40 @@ void main() {
     });
 
     test(
+      'skips an item that matches one already sitting in Trash, rather '
+      'than resurrecting it as a new live row',
+      () async {
+        final id = await db.insertItem(
+          ItemModel(
+            title: 'Jacket',
+            price: 120,
+            imagePath: 'a.jpg',
+            isSaved: true,
+            category: 'Clothes',
+            createdAt: DateTime.utc(2026, 1, 1),
+          ),
+        );
+        await db.deleteItem(id);
+
+        final count = await backup.importItems([
+          ItemModel(
+            id: 999,
+            title: 'Jacket',
+            price: 120,
+            imagePath: 'a.jpg',
+            isSaved: true,
+            category: 'Clothes',
+            createdAt: DateTime.utc(2026, 1, 1),
+          ),
+        ]);
+
+        expect(count, 0);
+        expect(await db.getAllItems(), isEmpty);
+        expect(await db.getTrashedItems(), hasLength(1));
+      },
+    );
+
+    test(
       'skips duplicates within the same import batch, not just against '
       'existing data',
       () async {

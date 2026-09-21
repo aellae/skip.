@@ -57,19 +57,12 @@ run-android:
 # Requires android/key.properties (copy android/key.properties.example and
 # fill in your keystore) - falls back to debug signing otherwise, which
 # Play Store will reject.
-#
-# GeneratedPluginRegistrant.java is only rewritten to drop dev_dependency-only
-# plugins (integration_test) when it's regenerated from scratch - a stale copy
-# left over from a debug run still references them and breaks the release
-# compile ("package dev.flutter.plugins.integration_test does not exist").
-# Removing it here forces `flutter build` to regenerate it correctly.
 aab: get
 	@test -f $(KEY_PROPERTIES) || { \
 		echo "error: $(KEY_PROPERTIES) not found."; \
 		echo "Copy android/key.properties.example to $(KEY_PROPERTIES) and fill in your release keystore."; \
 		exit 1; \
 	}
-	rm -f android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
 	$(FLUTTER) build appbundle --release
 	@echo "AAB ready at build/app/outputs/bundle/release/app-release.aab"
 

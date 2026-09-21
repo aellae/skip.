@@ -20,11 +20,12 @@
 //   cp tool/demo_images/*.jpg /tmp/skip_demo_images/
 //   flutter run -t tool/seed_demo_data.dart -d <device> \
 //     --dart-define=SKIP_DEMO_THEME=minimal \    # or y2k
-//     --dart-define=SKIP_DEMO_SCREEN=home \      # or insights
+//     --dart-define=SKIP_DEMO_SCREEN=home \      # or insights, item_entry, settings
 //     --dart-define=SKIP_DEMO_LOCALE=en          # or it
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:path/path.dart' as p;
 
 import 'package:skip/core/localization/app_currency.dart';
@@ -36,6 +37,8 @@ import 'package:skip/core/utils/file_helper.dart';
 import 'package:skip/data/database_helper.dart';
 import 'package:skip/data/models/item_model.dart';
 import 'package:skip/features/insights/insights_screen.dart';
+import 'package:skip/features/item_entry/item_entry_screen.dart';
+import 'package:skip/features/settings/settings_screen.dart';
 import 'package:skip/main.dart';
 
 const _themeArg = String.fromEnvironment(
@@ -261,6 +264,7 @@ Future<void> _reseed() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  debugPaintSizeEnabled = true; // TEMP: diagnosing y2k home ghost-text bug
   await _reseed();
 
   final locale = _localeArg == 'it' ? AppLocale.it : AppLocale.en;
@@ -279,10 +283,16 @@ void main() async {
     ),
   );
 
-  if (_screenArg == 'insights') {
+  final Widget? pushedScreen = switch (_screenArg) {
+    'insights' => const InsightsScreen(),
+    'item_entry' => const ItemEntryScreen(),
+    'settings' => const SettingsScreen(),
+    _ => null,
+  };
+  if (pushedScreen != null) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _navigatorKey.currentState?.push(
-        MaterialPageRoute(builder: (_) => const InsightsScreen()),
+        MaterialPageRoute(builder: (_) => pushedScreen),
       );
     });
   }
