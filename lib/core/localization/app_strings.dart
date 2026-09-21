@@ -548,6 +548,7 @@ class AppStrings {
       AppLocale.de => '≈ $formatted Std. Arbeit',
     };
   }
+
   String totalForQuantity(String formattedAmount) => switch (locale) {
     AppLocale.en => 'Total: $formattedAmount',
     AppLocale.it => 'Totale: $formattedAmount',
@@ -656,6 +657,50 @@ class AppStrings {
     AppLocale.it => 'Apre PayPal nel browser.',
     AppLocale.fr => 'Ouvre PayPal dans votre navigateur.',
     AppLocale.de => 'Öffnet PayPal in deinem Browser.',
+  };
+
+  // Privacy policy
+  String get legalSectionLabel => switch (locale) {
+    AppLocale.en => 'Legal',
+    AppLocale.it => 'Note legali',
+    AppLocale.fr => 'Mentions légales',
+    AppLocale.de => 'Rechtliches',
+  };
+  String get privacyPolicy => switch (locale) {
+    AppLocale.en => 'Privacy Policy',
+    AppLocale.it => 'Informativa sulla privacy',
+    AppLocale.fr => 'Politique de confidentialité',
+    AppLocale.de => 'Datenschutzerklärung',
+  };
+  String get privacyPolicyBody => switch (locale) {
+    AppLocale.en =>
+      'SKIP has no servers, no accounts, and no analytics. Everything you '
+          'enter — photos, prices, titles, categories — stays only on your '
+          'device and is never uploaded anywhere.',
+    AppLocale.it =>
+      'SKIP non ha server, account o analisi statistiche. Tutto ciò che '
+          'inserisci — foto, prezzi, titoli, categorie — resta solo sul tuo '
+          'dispositivo e non viene mai caricato altrove.',
+    AppLocale.fr =>
+      "SKIP n'a ni serveurs, ni comptes, ni outils d'analyse. Tout ce que "
+          'vous saisissez — photos, prix, titres, catégories — reste '
+          "uniquement sur votre appareil et n'est jamais téléversé ailleurs.",
+    AppLocale.de =>
+      'SKIP hat keine Server, keine Konten und keine Analysetools. Alles, '
+          'was du eingibst – Fotos, Preise, Titel, Kategorien – bleibt nur '
+          'auf deinem Gerät und wird nirgendwohin hochgeladen.',
+  };
+  String get privacyPolicyButton => switch (locale) {
+    AppLocale.en => 'Read the full policy',
+    AppLocale.it => 'Leggi l\'informativa completa',
+    AppLocale.fr => 'Lire la politique complète',
+    AppLocale.de => 'Vollständige Erklärung lesen',
+  };
+  String get privacyPolicyOpensExternally => switch (locale) {
+    AppLocale.en => 'Opens on GitHub in your browser.',
+    AppLocale.it => 'Apre GitHub nel browser.',
+    AppLocale.fr => 'Ouvre GitHub dans votre navigateur.',
+    AppLocale.de => 'Öffnet GitHub in deinem Browser.',
   };
 
   // Coin flip

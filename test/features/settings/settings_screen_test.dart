@@ -157,6 +157,25 @@ void main() {
     expect(find.text('Support the developer'), findsOneWidget);
   });
 
+  testWidgets('tapping Privacy Policy opens the privacy policy screen', (
+    tester,
+  ) async {
+    await pumpSettings(
+      tester,
+      themeProvider: ThemeProvider(),
+      itemsProvider: buildTestItemsProvider(),
+    );
+
+    await tester.scrollUntilVisible(find.text('Privacy Policy'), 200);
+    await tester.ensureVisible(find.text('Privacy Policy'));
+    await tester.pumpAndSettle();
+    expect(find.text('Legal'), findsOneWidget);
+    await tester.tap(find.text('Privacy Policy'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Read the full policy'), findsOneWidget);
+  });
+
   testWidgets('tapping English switches back to English', (tester) async {
     final localeProvider = LocaleProvider(initial: AppLocale.it);
     await pumpSettings(

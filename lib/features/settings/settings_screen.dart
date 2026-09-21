@@ -20,6 +20,7 @@ import '../../core/widgets/skip_card.dart';
 import '../../core/widgets/tap_scale.dart';
 import '../../data/items_provider.dart';
 import '../trash/trash_screen.dart';
+import 'privacy_policy_screen.dart';
 import 'support_screen.dart';
 import 'widgets/backup_section.dart';
 
@@ -150,6 +151,35 @@ class SettingsScreen extends StatelessWidget {
                     Expanded(
                       child: Text(
                         strings.supportSkip,
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sectionGap),
+              Text(
+                strings.legalSectionLabel,
+                style: theme.textTheme.labelLarge,
+              ),
+              const SizedBox(height: 12),
+              SkipCard(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const PrivacyPolicyScreen(),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.privacy_tip_outlined,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        strings.privacyPolicy,
                         style: theme.textTheme.bodyLarge,
                       ),
                     ),
