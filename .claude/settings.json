@@ -65,11 +65,14 @@
       "Bash(plutil -lint ios/Runner.xcodeproj/project.pbxproj)",
       "Bash(xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Debug -showBuildSettings)",
       "Bash(open /Users/elle/Desktop/skip./ios/Runner.xcworkspace)",
-      "Bash(security find-identity *)"
+      "Bash(security find-identity *)",
+      "Bash(mkdir -p assets/images && cp \"Skip_logotrasp.png\" \"assets/images/logo_minimal.png\" && cp \"skip_logotrasp_baddie.png\" \"assets/images/logo_y2k.png\" && ls -la assets/images/)",
+      "Bash(md5 \"assets/icon/Skip!-Logo.png\" \"assets/icon/Skip!-Logo-Y2K.png\" \"Skip_logo \\(1\\).png\" \"Skip_logo \\(2\\).png\" \"Skip_logotrasp.png\" \"skip_logotrasp_baddie.png\")"
     ],
     "additionalDirectories": [
       "/Users/elle/Desktop/Progetti Personali/skip./test/core",
-      "/Users/elle/Desktop/Progetti Personali/skip./test"
+      "/Users/elle/Desktop/Progetti Personali/skip./test",
+      "/Users/elle/Desktop/skip./assets"
     ]
   }
 }

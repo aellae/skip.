@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:skip/core/theme/theme_provider.dart';
 import 'package:skip/main.dart';
@@ -21,14 +22,17 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('skip.'), findsOneWidget);
-      expect(find.text('SKIP!'), findsNothing);
+      Image logoImage() => tester.widget<Image>(find.byType(Image));
+      String logoAssetKey() => (logoImage().image as AssetImage).assetName;
+
+      expect(logoAssetKey(), 'assets/images/logo_minimal.png');
+      expect(logoImage().semanticLabel, 'skip.');
 
       themeProvider.toggle();
       await tester.pumpAndSettle();
 
-      expect(find.text('SKIP!'), findsOneWidget);
-      expect(find.text('skip.'), findsNothing);
+      expect(logoAssetKey(), 'assets/images/logo_y2k.png');
+      expect(logoImage().semanticLabel, 'SKIP!');
     },
   );
 }

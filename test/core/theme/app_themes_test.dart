@@ -12,6 +12,7 @@ void main() {
     test('exposes the lowercase skip. logo via SkipThemeExtension', () {
       expect(ext, isNotNull);
       expect(ext!.logoText, 'skip.');
+      expect(ext.logoAsset, 'assets/images/logo_minimal.png');
       expect(ext.isY2K, isFalse);
     });
 
@@ -35,6 +36,7 @@ void main() {
     test('exposes the uppercase SKIP! logo via SkipThemeExtension', () {
       expect(ext, isNotNull);
       expect(ext!.logoText, 'SKIP!');
+      expect(ext.logoAsset, 'assets/images/logo_y2k.png');
       expect(ext.isY2K, isTrue);
     });
 

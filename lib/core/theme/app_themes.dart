@@ -17,6 +17,9 @@ class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
   final Color ponderingColor;
   final Color cardBackground;
   final String logoText;
+
+  /// Transparent PNG wordmark shown in the home app bar in place of [logoText].
+  final String logoAsset;
   final bool isY2K;
 
   /// Corner radius for passive surfaces (cards, images, media containers).
@@ -44,6 +47,7 @@ class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
     required this.ponderingColor,
     required this.cardBackground,
     required this.logoText,
+    required this.logoAsset,
     required this.isY2K,
     required this.cardRadius,
     required this.buttonRadius,
@@ -60,6 +64,7 @@ class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
     Color? ponderingColor,
     Color? cardBackground,
     String? logoText,
+    String? logoAsset,
     bool? isY2K,
     double? cardRadius,
     double? buttonRadius,
@@ -74,6 +79,7 @@ class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
       ponderingColor: ponderingColor ?? this.ponderingColor,
       cardBackground: cardBackground ?? this.cardBackground,
       logoText: logoText ?? this.logoText,
+      logoAsset: logoAsset ?? this.logoAsset,
       isY2K: isY2K ?? this.isY2K,
       cardRadius: cardRadius ?? this.cardRadius,
       buttonRadius: buttonRadius ?? this.buttonRadius,
@@ -93,6 +99,7 @@ class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
       ponderingColor: Color.lerp(ponderingColor, other.ponderingColor, t)!,
       cardBackground: Color.lerp(cardBackground, other.cardBackground, t)!,
       logoText: t < 0.5 ? logoText : other.logoText,
+      logoAsset: t < 0.5 ? logoAsset : other.logoAsset,
       isY2K: t < 0.5 ? isY2K : other.isY2K,
       cardRadius: lerpDouble(cardRadius, other.cardRadius, t)!,
       buttonRadius: lerpDouble(buttonRadius, other.buttonRadius, t)!,
@@ -371,6 +378,7 @@ class AppThemes {
         ponderingColor: AppColors.minimalPondering,
         cardBackground: AppColors.minimalSilkBeige,
         logoText: 'skip.',
+        logoAsset: 'assets/images/logo_minimal.png',
         isY2K: false,
         cardRadius: 10,
         buttonRadius: 8,
@@ -508,6 +516,7 @@ class AppThemes {
         ponderingColor: AppColors.y2kPondering,
         cardBackground: AppColors.y2kDeepSurface,
         logoText: 'SKIP!',
+        logoAsset: 'assets/images/logo_y2k.png',
         isY2K: true,
         cardRadius: 20,
         buttonRadius: 28,

@@ -107,6 +107,8 @@ flutter:
 
   assets:
     - assets/sfx/resisted.m4a
+    - assets/images/logo_minimal.png
+    - assets/images/logo_y2k.png
 
   fonts:
     - family: Playfair Display

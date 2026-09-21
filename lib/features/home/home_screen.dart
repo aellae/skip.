@@ -45,7 +45,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: SkipAppBar(
-        title: Text(skipTheme.logoText),
+        title: Image.asset(
+          skipTheme.logoAsset,
+          height: 32,
+          fit: BoxFit.contain,
+          semanticLabel: skipTheme.logoText,
+        ),
         actions: [
           IconButton(
             onPressed: () {
