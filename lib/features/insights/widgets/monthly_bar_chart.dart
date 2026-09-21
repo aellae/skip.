@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -31,7 +33,13 @@ class MonthlyBarChart extends StatelessWidget {
       final localMax = m.saved > m.spent ? m.saved : m.spent;
       return localMax > max ? localMax : max;
     });
-    final maxY = maxValue <= 0 ? 10.0 : maxValue * 1.2;
+    // Pick a "nice" (1/2/5 * 10^n) axis interval instead of letting fl_chart's
+    // auto-interval fall back to raw, unrounded steps — those can land two
+    // labels (e.g. 200 and 204) close enough together to overlap.
+    final axisInterval = _niceInterval(maxValue <= 0 ? 10.0 : maxValue / 4);
+    final maxY = maxValue <= 0
+        ? 10.0
+        : (maxValue * 1.2 / axisInterval).ceil() * axisInterval;
 
     BarChartRodData rod(double value, Color statusColor) {
       return BarChartRodData(
@@ -89,10 +97,17 @@ class MonthlyBarChart extends StatelessWidget {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 40,
-              getTitlesWidget: (value, meta) => Text(
-                formatCurrencyCompact(value, currency: currency),
-                style: axisStyle,
+              reservedSize: 44,
+              interval: axisInterval,
+              getTitlesWidget: (value, meta) => SideTitleWidget(
+                meta: meta,
+                fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
+                child: Text(
+                  formatCurrencyCompact(value, currency: currency),
+                  style: axisStyle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
           ),
@@ -130,5 +145,21 @@ class MonthlyBarChart extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Rounds [rough] up to the nearest 1/2/5 * 10^n step, so Y-axis labels
+  /// land on clean, well-spaced values instead of fl_chart's raw auto-interval.
+  static double _niceInterval(double rough) {
+    if (rough <= 0) return 1.0;
+    final magnitude = pow(10, (log(rough) / ln10).floor()).toDouble();
+    final normalized = rough / magnitude;
+    final niceNormalized = normalized <= 1
+        ? 1.0
+        : normalized <= 2
+        ? 2.0
+        : normalized <= 5
+        ? 5.0
+        : 10.0;
+    return niceNormalized * magnitude;
   }
 }
