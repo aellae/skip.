@@ -37,9 +37,17 @@ class MonthlyBarChart extends StatelessWidget {
     // auto-interval fall back to raw, unrounded steps — those can land two
     // labels (e.g. 200 and 204) close enough together to overlap.
     final axisInterval = _niceInterval(maxValue <= 0 ? 10.0 : maxValue / 4);
+    // Add half a step of headroom above the top tick label: fl_chart's
+    // fitInside otherwise nudges a label sitting flush at the chart's top
+    // edge downward to avoid clipping it, which visually shrinks the gap
+    // to the tick below it and makes the axis steps look uneven. Because
+    // this pushes maxY past the last clean multiple of axisInterval,
+    // leftTitles also sets maxIncluded: false below, so fl_chart doesn't
+    // additionally force a label at this odd maxY value.
     final maxY = maxValue <= 0
         ? 10.0
-        : (maxValue * 1.2 / axisInterval).ceil() * axisInterval;
+        : (maxValue * 1.2 / axisInterval).ceil() * axisInterval +
+              axisInterval / 2;
 
     BarChartRodData rod(double value, Color statusColor) {
       return BarChartRodData(
@@ -99,6 +107,12 @@ class MonthlyBarChart extends StatelessWidget {
               showTitles: true,
               reservedSize: 44,
               interval: axisInterval,
+              // fl_chart always labels the exact chart maxY by default
+              // (maxIncluded), even when it isn't a clean multiple of
+              // interval. Since maxY here is intentionally headroom above
+              // the last real tick (see below), suppress that forced label
+              // so only evenly-spaced multiples of axisInterval are shown.
+              maxIncluded: false,
               getTitlesWidget: (value, meta) => SideTitleWidget(
                 meta: meta,
                 fitInside: SideTitleFitInsideData.fromTitleMeta(meta),

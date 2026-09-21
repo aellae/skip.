@@ -69,14 +69,22 @@
       "Bash(mkdir -p assets/images && cp \"Skip_logotrasp.png\" \"assets/images/logo_minimal.png\" && cp \"skip_logotrasp_baddie.png\" \"assets/images/logo_y2k.png\" && ls -la assets/images/)",
       "Bash(md5 \"assets/icon/Skip!-Logo.png\" \"assets/icon/Skip!-Logo-Y2K.png\" \"Skip_logo \\(1\\).png\" \"Skip_logo \\(2\\).png\" \"Skip_logotrasp.png\" \"skip_logotrasp_baddie.png\")",
       "Bash(sed -i '' 's/DEVELOPMENT_TEAM = MWTLCRUQ9F;/DEVELOPMENT_TEAM = NZU8QQX987;/g' ios/Runner.xcodeproj/project.pbxproj && grep -n \"DEVELOPMENT_TEAM\" ios/Runner.xcodeproj/project.pbxproj)",
-      "Bash(rm test/features/settings/widgets/backup_section_test.dart)"
+      "Bash(rm test/features/settings/widgets/backup_section_test.dart)",
+      "Bash(git log *)",
+      "Bash(pkill -f \"flutter_tools.snapshot\")",
+      "Bash(osascript -e ' *)",
+      "Bash(rm -f assets/sfx/resisted.m4a && rmdir assets/sfx 2>/dev/null; git status --short)",
+      "Bash(/usr/libexec/PlistBuddy -c \"Print\" /tmp/apps.plist)",
+      "Bash(python3 -c ' *)",
+      "Bash(pip3 install *)"
     ],
     "additionalDirectories": [
       "/Users/elle/Desktop/Progetti Personali/skip./test/core",
       "/Users/elle/Desktop/Progetti Personali/skip./test",
       "/Users/elle/Desktop/skip./assets",
       "/Users/elle/Desktop/skip./ios/Runner.xcodeproj",
-      "/Users/elle/Desktop/skip./test/features/settings/widgets"
+      "/Users/elle/Desktop/skip./test/features/settings/widgets",
+      "/Users/elle/Desktop/skip./assets/sfx"
     ]
   }
 }

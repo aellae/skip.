@@ -45,18 +45,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: SkipAppBar(
+        toolbarHeight: 72,
         title: Image.asset(
           skipTheme.logoAsset,
-          height: 32,
+          height: skipTheme.isY2K ? 60 : 52,
           fit: BoxFit.contain,
           semanticLabel: skipTheme.logoText,
         ),
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const CoinFlipScreen()),
-              );
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const CoinFlipScreen()));
             },
             icon: const Icon(Icons.monetization_on_outlined),
             tooltip: strings.coinFlipTooltip,

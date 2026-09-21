@@ -1,36 +1,29 @@
-import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/services.dart';
 
-/// Thin wrapper around [AudioPlayer] for SKIP's Y2K sound effects.
+/// Thin wrapper around the platform's system sound for SKIP's "Resisted!"
+/// cue.
 ///
-/// Only ever plays a bundled local asset — never a network URL — per
-/// CLAUDE.md's offline rule. The "Resisted!" cue is a user-supplied clip
-/// bundled at `assets/sfx/resisted.m4a` and declared in pubspec.yaml.
+/// Plays the OS's standard UI click sound rather than a bundled custom clip
+/// — a placeholder until a dedicated "Resisted!" sound effect is ready.
 class SkipSfxPlayer {
-  final AudioPlayer _player;
-
   /// Checked on every [playResisted] call (not just once) so a mute toggled
   /// mid-session takes effect immediately. Defaults to always-enabled when
   /// omitted, e.g. in tests that construct a bare [SkipSfxPlayer].
   final bool Function()? isEnabled;
 
-  SkipSfxPlayer({AudioPlayer? player, this.isEnabled})
-    : _player = player ?? AudioPlayer();
-
-  static const String _resistedAsset = 'sfx/resisted.m4a';
+  SkipSfxPlayer({this.isEnabled});
 
   /// Fire-and-forget: swallows any error so a platform playback failure
   /// never interrupts the interaction it's attached to.
   Future<void> playResisted() async {
     if (isEnabled != null && !isEnabled!()) return;
     try {
-      await _player.play(AssetSource(_resistedAsset));
+      await SystemSound.play(SystemSoundType.click);
     } catch (_) {
       // Playback failed — celebration continues silently via
       // confetti/haptics instead.
     }
   }
 
-  void dispose() {
-    _player.dispose();
-  }
+  void dispose() {}
 }
