@@ -75,10 +75,6 @@ class ItemGridCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: skipTheme.accentGradient,
-                      border: Border.all(
-                        color: theme.colorScheme.onSurface,
-                        width: 1.5,
-                      ),
                       boxShadow: skipTheme.glowShadow,
                     ),
                     child: Icon(

@@ -159,6 +159,72 @@ void main() {
         containsAll(['existing.jpg', 'imported.jpg']),
       );
     });
+
+    test('skips items that duplicate an existing item', () async {
+      await db.insertItem(
+        ItemModel(
+          title: 'Jacket',
+          price: 120,
+          imagePath: 'a.jpg',
+          isSaved: true,
+          category: 'Clothes',
+          createdAt: DateTime.utc(2026, 1, 1),
+          purchaseUrl: 'https://example.com/jacket',
+        ),
+      );
+
+      final count = await backup.importItems([
+        // Same field values as the existing row (just a different `id`,
+        // as a re-imported backup would carry) — should be skipped.
+        ItemModel(
+          id: 999,
+          title: 'Jacket',
+          price: 120,
+          imagePath: 'a.jpg',
+          isSaved: true,
+          category: 'Clothes',
+          createdAt: DateTime.utc(2026, 1, 1),
+          purchaseUrl: 'https://example.com/jacket',
+        ),
+        ItemModel(
+          title: 'New item',
+          price: 5,
+          imagePath: 'b.jpg',
+          isSaved: false,
+          createdAt: DateTime.utc(2026, 2, 1),
+        ),
+      ]);
+
+      final all = await db.getAllItems();
+      expect(count, 1);
+      expect(all, hasLength(2));
+      expect(all.map((i) => i.imagePath), containsAll(['a.jpg', 'b.jpg']));
+    });
+
+    test(
+      'skips duplicates within the same import batch, not just against '
+      'existing data',
+      () async {
+        final count = await backup.importItems([
+          ItemModel(
+            price: 10,
+            imagePath: 'c.jpg',
+            isSaved: true,
+            createdAt: DateTime.utc(2026, 3, 1),
+          ),
+          ItemModel(
+            price: 10,
+            imagePath: 'c.jpg',
+            isSaved: true,
+            createdAt: DateTime.utc(2026, 3, 1),
+          ),
+        ]);
+
+        final all = await db.getAllItems();
+        expect(count, 1);
+        expect(all, hasLength(1));
+      },
+    );
   });
 
   group('buildCsvBackup', () {

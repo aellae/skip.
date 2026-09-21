@@ -297,6 +297,10 @@ class AppThemes {
       elevation: 0,
       centerTitle: false,
       titleTextStyle: _minimalTextTheme.headlineSmall,
+      actionsIconTheme: const IconThemeData(
+        color: AppColors.minimalCharcoal,
+        size: 28,
+      ),
     ),
     cardTheme: CardThemeData(
       color: AppColors.minimalSilkBeige,
@@ -422,8 +426,9 @@ class AppThemes {
       backgroundColor: AppColors.y2kBlack,
       foregroundColor: Colors.white,
       elevation: 0,
-      centerTitle: true,
+      centerTitle: false,
       titleTextStyle: _y2kTextTheme.headlineSmall,
+      actionsIconTheme: const IconThemeData(color: Colors.white, size: 28),
     ),
     cardTheme: CardThemeData(
       color: AppColors.y2kDeepSurface,
@@ -431,7 +436,6 @@ class AppThemes {
       shadowColor: AppColors.y2kHotMagenta.withValues(alpha: 0.4),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppColors.y2kMetallicSilver, width: 1.5),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -439,11 +443,7 @@ class AppThemes {
         backgroundColor: AppColors.y2kHotMagenta,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
-          side: const BorderSide(
-            color: AppColors.y2kMetallicSilver,
-            width: 1.5,
-          ),
+          borderRadius: BorderRadius.circular(18),
         ),
         elevation: 6,
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
@@ -452,8 +452,8 @@ class AppThemes {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: Colors.white,
-        side: const BorderSide(color: AppColors.y2kMetallicSilver, width: 1.5),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        side: const BorderSide(color: AppColors.y2kHotMagenta, width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       ),
     ),
@@ -469,7 +469,7 @@ class AppThemes {
       fillColor: AppColors.y2kDeepSurface,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.y2kMetallicSilver),
+        borderSide: const BorderSide(color: AppColors.y2kHotMagenta),
       ),
     ),
     dialogTheme: DialogThemeData(
@@ -478,7 +478,6 @@ class AppThemes {
       shadowColor: AppColors.y2kHotMagenta.withValues(alpha: 0.4),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppColors.y2kMetallicSilver, width: 1.5),
       ),
       titleTextStyle: _y2kTextTheme.headlineSmall,
       contentTextStyle: _y2kTextTheme.bodyMedium,
@@ -499,7 +498,6 @@ class AppThemes {
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: AppColors.y2kMetallicSilver, width: 1.5),
       ),
       actionTextColor: AppColors.y2kHotMagenta,
     ),
@@ -519,17 +517,15 @@ class AppThemes {
         logoAsset: 'assets/images/logo_y2k.png',
         isY2K: true,
         cardRadius: 20,
-        buttonRadius: 28,
+        buttonRadius: 18,
+        // Ambient depth only — no color glow. The magenta/violet bloom is
+        // reserved for glowShadow so it reads as emphasis, not wallpaper.
         cardShadow: [
           BoxShadow(
-            color: AppColors.y2kHotMagenta.withValues(alpha: 0.30),
-            blurRadius: 18,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: AppColors.y2kElectricViolet.withValues(alpha: 0.20),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+            spreadRadius: -4,
           ),
         ],
         glowShadow: [

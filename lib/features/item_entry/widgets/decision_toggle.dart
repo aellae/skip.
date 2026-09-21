@@ -244,11 +244,11 @@ class _ToggleOption extends StatelessWidget {
                 : null,
             borderRadius: radius,
             border: Border.all(
-              color: skipTheme.isY2K
-                  ? theme.colorScheme.onSurface
-                  : (selected
-                        ? color
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+              color: selected
+                  ? color
+                  : theme.colorScheme.onSurface.withValues(
+                      alpha: skipTheme.isY2K ? 0.35 : 0.2,
+                    ),
               width: skipTheme.isY2K ? 2 : 1.5,
             ),
           ),

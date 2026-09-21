@@ -1,126 +1,21 @@
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../../core/localization/locale_provider.dart';
-import '../../../core/utils/file_helper.dart';
 import '../../../core/widgets/skip_card.dart';
 import '../../../data/backup_service.dart';
 import '../../../data/items_provider.dart';
 
-/// Export item records to JSON/CSV (shared via the system share sheet) and
-/// import a previously exported JSON backup (via the file picker).
-///
-/// [pickJsonFile] and [shareFile] wrap the `file_picker`/`share_plus`
-/// platform calls behind injectable functions, the same seam
-/// [ItemEntryScreen] uses for `image_picker`, so widget tests can exercise
-/// the full flow without touching real platform channels.
+/// Restore the automatic local safety-net backup.
 class BackupSection extends StatefulWidget {
-  final FileHelper? fileHelper;
-  final Future<String?> Function()? pickJsonFile;
-  final Future<void> Function(String path, String subject)? shareFile;
-
-  const BackupSection({
-    super.key,
-    this.fileHelper,
-    this.pickJsonFile,
-    this.shareFile,
-  });
+  const BackupSection({super.key});
 
   @override
   State<BackupSection> createState() => _BackupSectionState();
 }
 
 class _BackupSectionState extends State<BackupSection> {
-  late final FileHelper _fileHelper = widget.fileHelper ?? FileHelper();
   bool _isBusy = false;
-
-  Future<String?> _pickJsonFile() {
-    if (widget.pickJsonFile != null) return widget.pickJsonFile!();
-    return _defaultPickJsonFile();
-  }
-
-  Future<String?> _defaultPickJsonFile() async {
-    final file = await FilePicker.pickFile(
-      type: FileType.custom,
-      allowedExtensions: ['json'],
-    );
-    return file?.path;
-  }
-
-  Future<void> _shareFile(String path, String subject) {
-    if (widget.shareFile != null) return widget.shareFile!(path, subject);
-    return SharePlus.instance
-        .share(ShareParams(files: [XFile(path)], subject: subject))
-        .then((_) {});
-  }
-
-  Future<void> _export(String format) async {
-    setState(() => _isBusy = true);
-    try {
-      final itemsProvider = context.read<ItemsProvider>();
-      final content = format == 'json'
-          ? await itemsProvider.buildJsonBackup()
-          : await itemsProvider.buildCsvBackup();
-      final fileName =
-          'skip_backup_${DateTime.now().millisecondsSinceEpoch}.$format';
-      final file = await _fileHelper.writeExportFile(fileName, content);
-      await _shareFile(file.path, 'SKIP backup');
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.read<LocaleProvider>().strings.couldntExportBackup,
-          ),
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _isBusy = false);
-    }
-  }
-
-  Future<void> _import() async {
-    setState(() => _isBusy = true);
-    final strings = context.read<LocaleProvider>().strings;
-    try {
-      final path = await _pickJsonFile();
-      if (!mounted || path == null) return;
-
-      final String content;
-      try {
-        // Sync read, not File.readAsString() — awaited real dart:io I/O
-        // triggered from a widget's event handler never completes inside
-        // testWidgets (fake clock never pumps the real OS event loop), the
-        // same reason FileHelper uses sync calls internally.
-        content = File(path).readAsStringSync();
-      } catch (_) {
-        throw BackupFormatException(
-          BackupFormatError.fileReadError,
-          "Couldn't read that file.",
-        );
-      }
-      if (!mounted) return;
-
-      final count = await context.read<ItemsProvider>().importJsonBackup(
-        content,
-      );
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(strings.importedItems(count))));
-    } on BackupFormatException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(strings.backupErrorMessage(e.code))),
-      );
-    } finally {
-      if (mounted) setState(() => _isBusy = false);
-    }
-  }
 
   Future<void> _restoreFromAutoBackup() async {
     setState(() => _isBusy = true);
@@ -148,37 +43,6 @@ class _BackupSectionState extends State<BackupSection> {
     }
   }
 
-  void _showExportSheet() {
-    final accent = Theme.of(context).colorScheme.primary;
-    final strings = context.read<LocaleProvider>().strings;
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.data_object, color: accent),
-              title: Text(strings.exportAsJson),
-              onTap: () {
-                Navigator.of(sheetContext).pop();
-                _export('json');
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.table_chart_outlined, color: accent),
-              title: Text(strings.exportAsCsv),
-              onTap: () {
-                Navigator.of(sheetContext).pop();
-                _export('csv');
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -190,18 +54,6 @@ class _BackupSectionState extends State<BackupSection> {
         children: [
           Text(strings.photosStayOnDevice, style: theme.textTheme.bodySmall),
           const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: _isBusy ? null : _showExportSheet,
-            icon: const Icon(Icons.ios_share),
-            label: Text(strings.exportBackup),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: _isBusy ? null : _import,
-            icon: const Icon(Icons.file_upload_outlined),
-            label: Text(strings.importBackup),
-          ),
-          const SizedBox(height: 8),
           TextButton.icon(
             onPressed: _isBusy ? null : _restoreFromAutoBackup,
             icon: const Icon(Icons.settings_backup_restore),

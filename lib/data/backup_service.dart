@@ -214,11 +214,36 @@ class BackupService {
   }
 
   /// Inserts [items] as new rows. Import is additive: existing data is
-  /// never cleared or overwritten. Returns the number of items imported.
+  /// never cleared or overwritten. Items that already match an existing
+  /// (non-trashed) item on every field but [ItemModel.id] — which is
+  /// reassigned on insert and so can't be used to recognize a re-import —
+  /// are skipped so re-importing the same backup doesn't duplicate rows.
+  /// Returns the number of items actually inserted.
   Future<int> importItems(List<ItemModel> items) async {
+    final existingSignatures = (await _db.getAllItems())
+        .map(_dedupeSignature)
+        .toSet();
+    var imported = 0;
     for (final item in items) {
+      final signature = _dedupeSignature(item);
+      if (existingSignatures.contains(signature)) continue;
       await _db.insertItem(item);
+      existingSignatures.add(signature);
+      imported++;
     }
-    return items.length;
+    return imported;
   }
+
+  /// A key identifying [item] independent of its (reassigned-on-insert)
+  /// `id`, used by [importItems] to recognize items already present.
+  String _dedupeSignature(ItemModel item) => [
+    item.title,
+    item.price,
+    item.quantity,
+    item.imagePath,
+    item.isSaved,
+    item.category,
+    item.createdAt.toIso8601String(),
+    item.purchaseUrl,
+  ].join('\u0000');
 }

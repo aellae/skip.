@@ -43,12 +43,7 @@ class SkipCard extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(skipTheme.cardRadius),
           child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: skipTheme.cardBackground,
-              border: skipTheme.isY2K
-                  ? Border.all(color: theme.colorScheme.onSurface, width: 1.5)
-                  : null,
-            ),
+            decoration: BoxDecoration(color: skipTheme.cardBackground),
             child: Padding(padding: padding, child: child),
           ),
         ),
