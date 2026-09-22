@@ -68,7 +68,12 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 12),
               _CurrencySwitcher(
                 currency: currencyProvider.currency,
-                onChanged: currencyProvider.setCurrency,
+                onChanged: (newCurrency) => _changeCurrency(
+                  context,
+                  newCurrency: newCurrency,
+                  hasItems: itemsProvider.items.isNotEmpty,
+                  strings: strings,
+                ),
                 strings: strings,
               ),
               const SizedBox(height: AppSpacing.sectionGap),
@@ -347,12 +352,15 @@ class _LanguageOption extends StatelessWidget {
           children: [
             Text(flag, style: const TextStyle(fontSize: 18)),
             const SizedBox(width: 8),
-            Text(
-              label,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: skipTheme.isY2K && selected
-                    ? Colors.white
-                    : theme.colorScheme.onSurface,
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: skipTheme.isY2K && selected
+                      ? Colors.white
+                      : theme.colorScheme.onSurface,
+                ),
               ),
             ),
           ],
@@ -528,6 +536,42 @@ class _StatTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Switches the display currency, warning first if there are already saved
+/// items — the switch is display-only (no exchange-rate conversion, since
+/// the app is fully offline), so a $1 item will simply show as €1 after.
+Future<void> _changeCurrency(
+  BuildContext context, {
+  required AppCurrency newCurrency,
+  required bool hasItems,
+  required AppStrings strings,
+}) async {
+  final currencyProvider = context.read<CurrencyProvider>();
+  if (newCurrency == currencyProvider.currency) return;
+
+  if (hasItems) {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(strings.currencyChangeWarningTitle),
+        content: Text(strings.currencyChangeWarningContent),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(strings.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(strings.continueAction),
+          ),
+        ],
+      ),
+    );
+    if (!context.mounted || confirmed != true) return;
+  }
+
+  currencyProvider.setCurrency(newCurrency);
 }
 
 /// Opens the hourly-wage dialog and persists the result — `null` means the

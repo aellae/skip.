@@ -498,16 +498,45 @@ class AppStrings {
     AppLocale.de => 'Währung',
   };
   String get usDollar => switch (locale) {
-    AppLocale.en => 'US Dollar',
-    AppLocale.it => 'Dollaro USA',
-    AppLocale.fr => 'Dollar américain',
-    AppLocale.de => 'US-Dollar',
+    AppLocale.en => 'Dollar',
+    AppLocale.it => 'Dollaro',
+    AppLocale.fr => 'Dollar',
+    AppLocale.de => 'Dollar',
   };
   String get euro => switch (locale) {
     AppLocale.en => 'Euro',
     AppLocale.it => 'Euro',
     AppLocale.fr => 'Euro',
     AppLocale.de => 'Euro',
+  };
+  String get currencyChangeWarningTitle => switch (locale) {
+    AppLocale.en => 'Change currency?',
+    AppLocale.it => 'Cambiare valuta?',
+    AppLocale.fr => 'Changer de devise ?',
+    AppLocale.de => 'Währung ändern?',
+  };
+  String get currencyChangeWarningContent => switch (locale) {
+    AppLocale.en =>
+      'This only changes how amounts are displayed. Amounts already saved '
+          "won't be converted — a \$1 item will simply show as €1.",
+    AppLocale.it =>
+      'Questo cambia solo come vengono mostrati gli importi. Gli importi '
+          'già salvati non verranno convertiti: un articolo da 1\$ verrà '
+          'semplicemente mostrato come 1€.',
+    AppLocale.fr =>
+      "Cela ne change que l'affichage des montants. Les montants déjà "
+          "enregistrés ne seront pas convertis : un article à 1\$ "
+          's\'affichera simplement comme 1€.',
+    AppLocale.de =>
+      'Dies ändert nur die Anzeige der Beträge. Bereits gespeicherte '
+          'Beträge werden nicht umgerechnet — ein Artikel für 1\$ wird '
+          'einfach als 1€ angezeigt.',
+  };
+  String get continueAction => switch (locale) {
+    AppLocale.en => 'Continue',
+    AppLocale.it => 'Continua',
+    AppLocale.fr => 'Continuer',
+    AppLocale.de => 'Fortfahren',
   };
   String get costInHours => switch (locale) {
     AppLocale.en => 'Cost in Hours',

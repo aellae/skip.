@@ -53,14 +53,36 @@ class _HomeScreenState extends State<HomeScreen> {
           semanticLabel: skipTheme.logoText,
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (_) => const CoinFlipScreen()));
-            },
-            icon: const Icon(Icons.monetization_on_outlined),
-            tooltip: strings.coinFlipTooltip,
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Tooltip(
+              message: strings.coinFlipTooltip,
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const CoinFlipScreen()),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: skipTheme.isY2K
+                        ? null
+                        : skipTheme.savedColor.withValues(alpha: 0.15),
+                    gradient: skipTheme.isY2K ? skipTheme.accentGradient : null,
+                    boxShadow: skipTheme.isY2K ? skipTheme.glowShadow : null,
+                  ),
+                  child: Icon(
+                    Icons.monetization_on_outlined,
+                    color: skipTheme.isY2K
+                        ? Colors.white
+                        : skipTheme.savedColor,
+                  ),
+                ),
+              ),
+            ),
           ),
           IconButton(
             onPressed: () {
