@@ -1,3 +1,5 @@
+import 'dart:ui' show PlatformDispatcher;
+
 /// The display languages SKIP supports.
 enum AppLocale {
   en,
@@ -19,4 +21,10 @@ enum AppLocale {
     'de' => AppLocale.de,
     _ => AppLocale.en,
   };
+
+  /// The best-supported match for the device's current system language,
+  /// falling back to English when the device language isn't one SKIP has
+  /// strings for.
+  static AppLocale system() =>
+      fromCode(PlatformDispatcher.instance.locale.languageCode);
 }

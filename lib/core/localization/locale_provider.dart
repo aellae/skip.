@@ -13,7 +13,7 @@ class LocaleProvider extends ChangeNotifier {
 
   AppLocale _locale;
 
-  LocaleProvider({AppLocale initial = AppLocale.en}) : _locale = initial;
+  LocaleProvider({AppLocale? initial}) : _locale = initial ?? AppLocale.system();
 
   AppLocale get locale => _locale;
 
