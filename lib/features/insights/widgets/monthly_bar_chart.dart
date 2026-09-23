@@ -41,7 +41,7 @@ class MonthlyBarChart extends StatelessWidget {
     // Pick a "nice" (1/2/5 * 10^n) axis interval instead of letting fl_chart's
     // auto-interval fall back to raw, unrounded steps — those can land two
     // labels (e.g. 200 and 204) close enough together to overlap.
-    final axisInterval = _niceInterval(maxValue <= 0 ? 10.0 : maxValue / 4);
+    final baseInterval = _niceInterval(maxValue <= 0 ? 10.0 : maxValue / 4);
     // Add half a step of headroom above the top tick label: fl_chart's
     // fitInside otherwise nudges a label sitting flush at the chart's top
     // edge downward to avoid clipping it, which visually shrinks the gap
@@ -49,10 +49,13 @@ class MonthlyBarChart extends StatelessWidget {
     // this pushes maxY past the last clean multiple of axisInterval,
     // leftTitles also sets maxIncluded: false below, so fl_chart doesn't
     // additionally force a label at this odd maxY value.
-    final maxY = maxValue <= 0
+    double maxYFor(double interval) => maxValue <= 0
         ? 10.0
-        : (maxValue * 1.2 / axisInterval).ceil() * axisInterval +
-              axisInterval / 2;
+        : (maxValue * 1.2 / interval).ceil() * interval + interval / 2;
+    List<String> labelsFor(double interval, double maxY) => [
+      for (var v = 0.0; v < maxY; v += interval)
+        formatCurrencyCompact(v, currency: currency),
+    ];
 
     BarChartRodData rod(double value, Color statusColor) {
       return BarChartRodData(
@@ -73,14 +76,6 @@ class MonthlyBarChart extends StatelessWidget {
       );
     }
 
-    // fl_chart reserves a fixed box for axis labels, so size it from the
-    // labels actually drawn (locale, currency, font and system text size
-    // all change their width). At large text sizes it's capped so the
-    // labels can't squeeze the plot away; they scale down to fit instead.
-    final leftLabels = [
-      for (var v = 0.0; v < maxY; v += axisInterval)
-        formatCurrencyCompact(v, currency: currency),
-    ];
     final monthLabels = [
       for (final m in monthlyTotals) monthAbbreviation(m.month, locale),
     ];
@@ -89,11 +84,23 @@ class MonthlyBarChart extends StatelessWidget {
       builder: (context, constraints) {
         final style = DefaultTextStyle.of(context).style.merge(axisStyle);
         final textDirection = Directionality.of(context);
+        var axisInterval = baseInterval;
+        var maxY = maxYFor(axisInterval);
+        var leftLabels = labelsFor(axisInterval, maxY);
         var leftScaler = textScaler;
         var bottomScaler = textScaler;
-        var leftReserved =
-            _widest(leftLabels, style, textScaler, textDirection) + _titleSpace;
-        if (constraints.hasBoundedWidth) {
+        var leftReserved = 0.0;
+
+        // fl_chart reserves a fixed box for axis labels, so size it from
+        // the labels actually drawn (locale, currency, font and system text
+        // size all change their width). At large text sizes it's capped so
+        // the labels can't squeeze the plot away; they scale down instead.
+        void sizeAxes() {
+          leftScaler = textScaler;
+          leftReserved =
+              _widest(leftLabels, style, textScaler, textDirection) +
+              _titleSpace;
+          if (!constraints.hasBoundedWidth) return;
           final maxReserved = constraints.maxWidth * _maxAxisShare;
           if (leftReserved > maxReserved) {
             leftScaler = FitWordsText.fitScaler(
@@ -115,6 +122,21 @@ class MonthlyBarChart extends StatelessWidget {
               textDirection: textDirection,
             );
           }
+        }
+
+        sizeAxes();
+        // Tall labels (large system text) on a short chart would overlap:
+        // step up to coarser intervals until each label fits its slot.
+        if (constraints.hasBoundedHeight && maxValue > 0) {
+          final labelHeight = _lineHeight(style, leftScaler, textDirection);
+          final plotHeight = constraints.maxHeight - bottomScaler.scale(20) - 8;
+          while (leftLabels.length > 2 &&
+              plotHeight * axisInterval / maxY < labelHeight * 1.2) {
+            axisInterval = _niceInterval(axisInterval * 1.01);
+            maxY = maxYFor(axisInterval);
+            leftLabels = labelsFor(axisInterval, maxY);
+          }
+          sizeAxes();
         }
 
         return BarChart(
@@ -225,6 +247,21 @@ class MonthlyBarChart extends StatelessWidget {
 
   /// The most of the chart's width the y-axis labels may take.
   static const double _maxAxisShare = 0.25;
+
+  static double _lineHeight(
+    TextStyle style,
+    TextScaler textScaler,
+    TextDirection textDirection,
+  ) {
+    final painter = TextPainter(
+      text: TextSpan(text: '0', style: style),
+      textDirection: textDirection,
+      textScaler: textScaler,
+    )..layout();
+    final height = painter.height;
+    painter.dispose();
+    return height;
+  }
 
   static double _widest(
     List<String> labels,

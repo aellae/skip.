@@ -22,8 +22,10 @@ void main() {
     required AppCurrency currency,
     required SkipAesthetic aesthetic,
     double textScale = 1,
+    double height = 260,
+    double width = 393,
   }) async {
-    tester.view.physicalSize = const Size(1179, 2556);
+    tester.view.physicalSize = Size(width * 3, 2556);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
@@ -41,7 +43,7 @@ void main() {
           body: Padding(
             padding: const EdgeInsets.all(16),
             child: SizedBox(
-              height: 260,
+              height: height,
               child: MonthlyBarChart(
                 monthlyTotals: totals,
                 currency: currency,
@@ -107,6 +109,32 @@ void main() {
     final chartWidth = tester.getSize(find.byType(MonthlyBarChart)).width;
     final label = tester.getRect(find.text('2,0k €'));
     expect(label.right, lessThanOrEqualTo(16 + chartWidth * 0.25));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('y-axis labels never overlap at large text', (tester) async {
+    // Insights' chart height, at iOS's largest accessibility size. Wider
+    // than a phone because the test font's square glyphs are far wider
+    // than real ones: this keeps the labels about as tall as on device.
+    await pumpChart(
+      tester,
+      locale: AppLocale.de,
+      currency: AppCurrency.eur,
+      aesthetic: SkipAesthetic.y2k,
+      textScale: 3.5,
+      height: 250,
+      width: 900,
+    );
+    final rects =
+        tester
+            .widgetList<Text>(find.textContaining('€'))
+            .map((t) => tester.getRect(find.text(t.data!)))
+            .toList()
+          ..sort((a, b) => a.top.compareTo(b.top));
+    expect(rects.length, greaterThanOrEqualTo(2));
+    for (var i = 1; i < rects.length; i++) {
+      expect(rects[i].top, greaterThanOrEqualTo(rects[i - 1].bottom));
+    }
     expect(tester.takeException(), isNull);
   });
 }
