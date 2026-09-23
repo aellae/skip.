@@ -548,6 +548,7 @@ Future<void> _changeCurrency(
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        scrollable: true,
         title: Text(strings.currencyChangeWarningTitle),
         content: Text(strings.currencyChangeWarningContent),
         actions: [
@@ -689,6 +690,7 @@ class _HourlyWageDialogState extends State<_HourlyWageDialog> {
   Widget build(BuildContext context) {
     final isEuro = isEuroCurrency(widget.currency);
     return AlertDialog(
+      scrollable: true,
       title: Text(widget.strings.hourlyWageDialogTitle),
       content: Form(
         key: _formKey,

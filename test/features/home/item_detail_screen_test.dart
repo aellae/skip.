@@ -327,4 +327,26 @@ void main() {
     expect(find.bySemanticsLabel('Photo, tap to change'), findsOneWidget);
     semantics.dispose();
   });
+
+  testWidgets(
+    'link dialog scrolls instead of overflowing in landscape with the keyboard up',
+    (tester) async {
+      // A phone in landscape (logical 915x412) with a ~285px keyboard
+      // (Gboard plus its suggestion strip).
+      tester.view.physicalSize = const Size(2402, 1082);
+      tester.view.devicePixelRatio = 2.625;
+      addTearDown(tester.view.reset);
+      await pumpDetail(tester);
+
+      await tester.ensureVisible(find.text('Add product link'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add product link'));
+      await tester.pumpAndSettle();
+      tester.view.viewInsets = const FakeViewPadding(bottom: 750);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(TextFormField), findsOneWidget);
+    },
+  );
 }

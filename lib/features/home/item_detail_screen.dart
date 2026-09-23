@@ -112,6 +112,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        scrollable: true,
         title: Text(strings.deleteItemTitle),
         content: Text(strings.deleteItemContent),
         actions: [
@@ -574,6 +575,7 @@ class _PurchaseLinkDialogState extends State<_PurchaseLinkDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      scrollable: true,
       title: Text(
         widget.currentUrl == null
             ? widget.strings.addProductLink
@@ -687,6 +689,7 @@ class _EditDetailsDialogState extends State<_EditDetailsDialog> {
   Widget build(BuildContext context) {
     final isEuro = isEuroCurrency(widget.currency);
     return AlertDialog(
+      scrollable: true,
       title: Text(widget.strings.editDetailsDialogTitle),
       content: Form(
         key: _formKey,
