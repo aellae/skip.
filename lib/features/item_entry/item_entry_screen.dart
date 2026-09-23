@@ -133,6 +133,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
       // Copy into app documents immediately; never keep the picker's temp
       // file reference (CLAUDE.md image-pipeline rule).
       final relativePath = await _fileHelper.saveImage(File(picked.path));
+      await _fileHelper.deletePickerTempFile(picked.path);
       final resolved = await _fileHelper.resolveImageFile(relativePath);
       if (!mounted) {
         await _fileHelper.deleteImage(relativePath);

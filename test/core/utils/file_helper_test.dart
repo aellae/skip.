@@ -25,6 +25,34 @@ void main() {
   });
 
   group('FileHelper', () {
+    group('deletePickerTempFile', () {
+      test('deletes a picker copy inside the app cache dir', () async {
+        final cacheDir = Directory(p.join(tempDocsDir.path, 'cache'))
+          ..createSync();
+        final cached = File(p.join(cacheDir.path, 'scaled_1.jpg'))
+          ..writeAsBytesSync([1]);
+
+        await fileHelper.deletePickerTempFile(cached.path);
+
+        expect(cached.existsSync(), isFalse);
+      });
+
+      test('never deletes a file outside the app cache dir', () async {
+        final original = File(p.join(sourceDir.path, 'gallery.jpg'))
+          ..writeAsBytesSync([1]);
+
+        await fileHelper.deletePickerTempFile(original.path);
+
+        expect(original.existsSync(), isTrue);
+      });
+
+      test('is a no-op for a path that no longer exists', () async {
+        await fileHelper.deletePickerTempFile(
+          p.join(tempDocsDir.path, 'cache', 'gone.jpg'),
+        );
+      });
+    });
+
     test(
       'saveImage copies the file into the app documents images subdir',
       () async {

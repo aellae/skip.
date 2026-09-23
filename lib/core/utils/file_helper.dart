@@ -66,6 +66,22 @@ class FileHelper {
     return p.join(imagesSubdir, fileName);
   }
 
+  /// Deletes [path], image_picker's temporary copy of a picked photo, once
+  /// it has been copied into app documents. Only a file inside the app's
+  /// own cache directory is ever removed; anything elsewhere (e.g. an
+  /// original in the gallery) is left alone. Best-effort: never throws.
+  Future<void> deletePickerTempFile(String path) async {
+    try {
+      final cacheDir = await getTemporaryDirectory();
+      if (!p.isWithin(p.normalize(cacheDir.path), p.normalize(path))) return;
+      final file = File(path);
+      if (file.existsSync()) file.deleteSync();
+    } catch (_) {
+      // Leftover cache files are private and OS-evictable; not worth
+      // interrupting the pick over.
+    }
+  }
+
   /// Resolves a relative path (as stored in the database) to an absolute
   /// [File] for the current install, suitable for `Image.file()`.
   Future<File> resolveImageFile(String relativePath) async {
