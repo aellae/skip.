@@ -346,6 +346,21 @@ void main() {
       ).called(1);
     });
 
+    test('the auto-backup throttle survives an app restart', () async {
+      await provider.addItem(price: 10, imagePath: 'a.jpg', isSaved: true);
+
+      // A fresh provider over the same data stands in for a cold start.
+      final restarted = ItemsProvider(databaseHelper: databaseHelper);
+      await restarted.load();
+
+      verify(
+        () => mockFileHelper.writeExportFile(
+          BackupService.autoBackupFileName,
+          any(),
+        ),
+      ).called(1);
+    });
+
     test(
       'importJsonBackup throws BackupFormatException for malformed content',
       () {

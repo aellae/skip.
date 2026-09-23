@@ -84,6 +84,10 @@ class BackupService {
   static const String _lastRestoredAutoBackupKey =
       'skip_last_restored_auto_backup_exported_at';
 
+  /// SharedPreferences key holding when [writeAutoBackup] last ran, so its
+  /// throttle survives app restarts instead of rewriting on every launch.
+  static const String _lastAutoBackupAtKey = 'skip_last_auto_backup_at';
+
   final DatabaseHelper _db;
   final FileHelper _fileHelper;
 
@@ -95,9 +99,25 @@ class BackupService {
   /// 100% offline — written to Application Documents via [FileHelper], never
   /// sent anywhere. Not a substitute for a user-triggered export: this is
   /// only meant to recover from an unexplained empty/corrupt database.
-  Future<void> writeAutoBackup() async {
+  Future<void> writeAutoBackup({DateTime? now}) async {
     final content = await buildJsonBackup();
     await _fileHelper.writeExportFile(autoBackupFileName, content);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _lastAutoBackupAtKey,
+      (now ?? DateTime.now()).toIso8601String(),
+    );
+  }
+
+  /// Whether at least [interval] has passed since [writeAutoBackup] last
+  /// ran, in this launch or an earlier one. A recorded time in the future
+  /// (the clock was set back) also counts as due, so backups can't stall.
+  Future<bool> isAutoBackupDue(Duration interval, {DateTime? now}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final last = DateTime.tryParse(prefs.getString(_lastAutoBackupAtKey) ?? '');
+    if (last == null) return true;
+    final current = now ?? DateTime.now();
+    return last.isAfter(current) || current.difference(last) >= interval;
   }
 
   /// Reads the local safety-net backup written by [writeAutoBackup], or

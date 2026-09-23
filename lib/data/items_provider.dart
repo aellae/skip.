@@ -33,7 +33,9 @@ class ItemsProvider extends ChangeNotifier {
   DateTime _currentMonth = _monthOf(DateTime.now());
 
   // Throttles the local safety-net backup so it writes at most this often,
-  // rather than after every single load() call.
+  // rather than after every single load() call. Persisted by BackupService
+  // so a cold start doesn't reset it; the in-memory copy just stops
+  // overlapping load() calls from both deciding to write.
   static const Duration _autoBackupInterval = Duration(minutes: 10);
   DateTime? _lastAutoBackupAt;
 
@@ -70,7 +72,9 @@ class ItemsProvider extends ChangeNotifier {
         (_lastAutoBackupAt == null ||
             now.difference(_lastAutoBackupAt!) >= _autoBackupInterval)) {
       _lastAutoBackupAt = now;
-      await _backupService.writeAutoBackup();
+      if (await _backupService.isAutoBackupDue(_autoBackupInterval, now: now)) {
+        await _backupService.writeAutoBackup(now: now);
+      }
     }
   }
 
