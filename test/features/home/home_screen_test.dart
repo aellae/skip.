@@ -204,4 +204,21 @@ void main() {
     expect(find.bySemanticsLabel('Log an item'), findsOneWidget);
     semantics.dispose();
   });
+
+  testWidgets('keeps the body clear of a landscape display cutout', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(2400, 1080);
+    tester.view.devicePixelRatio = 3;
+    tester.view.padding = const FakeViewPadding(left: 128 * 3);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(_buildApp(buildTestItemsProvider()));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getTopLeft(find.text('Total Saved')).dx,
+      greaterThanOrEqualTo(128),
+    );
+  });
 }

@@ -112,84 +112,90 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () => itemsProvider.load(),
-        child: itemsProvider.isLoading && itemsProvider.items.isEmpty
-            ? const HomeLoadingSkeleton()
-            : CustomScrollView(
-                slivers: [
-                  SliverPadding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    sliver: SliverToBoxAdapter(
-                      child: SummaryCards(
-                        totalSaved: itemsProvider.totalSaved,
-                        totalSpent: itemsProvider.totalSpent,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const InsightsScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  const SliverPadding(
-                    padding: EdgeInsets.fromLTRB(
-                      AppSpacing.xl,
-                      0,
-                      AppSpacing.xl,
-                      AppSpacing.lg,
-                    ),
-                    sliver: SliverToBoxAdapter(child: HomeMotto()),
-                  ),
-                  if (itemsProvider.items.isEmpty)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Center(
-                        child: EmptyState(
-                          icon: skipTheme.isY2K
-                              ? Icons.auto_awesome_rounded
-                              : Icons.savings_outlined,
-                          message: strings.emptyHomeMessage,
+      // Horizontal insets only: keeps cards clear of a landscape camera
+      // cutout while the grid still scrolls under the system bars.
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: RefreshIndicator(
+          onRefresh: () => itemsProvider.load(),
+          child: itemsProvider.isLoading && itemsProvider.items.isEmpty
+              ? const HomeLoadingSkeleton()
+              : CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      sliver: SliverToBoxAdapter(
+                        child: SummaryCards(
+                          totalSaved: itemsProvider.totalSaved,
+                          totalSpent: itemsProvider.totalSpent,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const InsightsScreen(),
+                              ),
+                            );
+                          },
                         ),
                       ),
-                    )
-                  else
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.lg,
-                        0,
-                        AppSpacing.lg,
-                        AppSpacing.lg,
-                      ),
-                      sliver: SliverMasonryGrid.count(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: AppSpacing.md,
-                        crossAxisSpacing: AppSpacing.md,
-                        childCount: itemsProvider.items.length,
-                        itemBuilder: (context, index) {
-                          final item = itemsProvider.items[index];
-                          return EntranceFade(
-                            key: ValueKey(item.id ?? item.imagePath),
-                            child: ItemGridCard(
-                              item: item,
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    fullscreenDialog: true,
-                                    builder: (_) =>
-                                        ItemDetailScreen(item: item),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        },
-                      ),
                     ),
-                ],
-              ),
+                    const SliverPadding(
+                      padding: EdgeInsets.fromLTRB(
+                        AppSpacing.xl,
+                        0,
+                        AppSpacing.xl,
+                        AppSpacing.lg,
+                      ),
+                      sliver: SliverToBoxAdapter(child: HomeMotto()),
+                    ),
+                    if (itemsProvider.items.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: EmptyState(
+                            icon: skipTheme.isY2K
+                                ? Icons.auto_awesome_rounded
+                                : Icons.savings_outlined,
+                            message: strings.emptyHomeMessage,
+                          ),
+                        ),
+                      )
+                    else
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.lg,
+                          0,
+                          AppSpacing.lg,
+                          AppSpacing.lg,
+                        ),
+                        sliver: SliverMasonryGrid.count(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: AppSpacing.md,
+                          crossAxisSpacing: AppSpacing.md,
+                          childCount: itemsProvider.items.length,
+                          itemBuilder: (context, index) {
+                            final item = itemsProvider.items[index];
+                            return EntranceFade(
+                              key: ValueKey(item.id ?? item.imagePath),
+                              child: ItemGridCard(
+                                item: item,
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      fullscreenDialog: true,
+                                      builder: (_) =>
+                                          ItemDetailScreen(item: item),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
