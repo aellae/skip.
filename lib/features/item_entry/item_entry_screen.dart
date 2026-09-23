@@ -58,6 +58,11 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
   File? _previewFile;
   bool _isPickingImage = false;
   bool _isSaving = false;
+
+  /// While the Y2K "Resisted!" celebration plays out before the pop: the
+  /// toggle stays blocked but isn't dimmed, so the effect shows at full
+  /// strength.
+  bool _isCelebrating = false;
   bool _didSave = false;
   int _quantity = 1;
 
@@ -167,21 +172,37 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
   Future<void> _saveWithDecision(bool? isSaved) async {
     if (!_canSave()) return;
 
-    setState(() => _isSaving = true);
+    // Only Y2K + Resisted plays an effect worth holding the screen for;
+    // every other decision pops as soon as the insert lands.
+    final celebrate =
+        isSaved == true &&
+        Theme.of(context).extension<SkipThemeExtension>()!.isY2K;
+    setState(() {
+      _isSaving = true;
+      _isCelebrating = celebrate;
+    });
     final price = double.parse(_normalizedPrice(_priceController.text));
     final title = _titleController.text.trim();
     final purchaseUrl = parseHttpUrl(_purchaseUrlController.text)?.toString();
     try {
-      await context.read<ItemsProvider>().addItem(
-        title: title.isEmpty ? null : title,
-        price: price,
-        quantity: _quantity,
-        imagePath: _relativeImagePath,
-        isSaved: isSaved,
-        purchaseUrl: purchaseUrl,
-      );
+      await Future.wait([
+        context.read<ItemsProvider>().addItem(
+          title: title.isEmpty ? null : title,
+          price: price,
+          quantity: _quantity,
+          imagePath: _relativeImagePath,
+          isSaved: isSaved,
+          purchaseUrl: purchaseUrl,
+        ),
+        if (celebrate) Future<void>.delayed(DecisionToggle.celebrationDuration),
+      ]);
     } catch (_) {
-      if (mounted) setState(() => _isSaving = false);
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+          _isCelebrating = false;
+        });
+      }
       _showError();
       return;
     }
@@ -395,7 +416,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                 IgnorePointer(
                   ignoring: _isSaving,
                   child: Opacity(
-                    opacity: _isSaving ? 0.5 : 1,
+                    opacity: _isSaving && !_isCelebrating ? 0.5 : 1,
                     child: DecisionToggle(
                       isSaved: null,
                       canSelect: _canSave,
@@ -403,7 +424,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                     ),
                   ),
                 ),
-                if (_isSaving) ...[
+                if (_isSaving && !_isCelebrating) ...[
                   const SizedBox(height: 16),
                   const Center(
                     child: SizedBox(

@@ -28,6 +28,11 @@ class DecisionToggle extends StatefulWidget {
   final bool Function()? canSelect;
   final SkipSfxPlayer? sfxPlayer;
 
+  /// How long the Y2K "Resisted!" confetti burst runs. A caller that leaves
+  /// the screen right after a decision should wait this long first so the
+  /// celebration is actually seen.
+  static const celebrationDuration = Duration(milliseconds: 1200);
+
   const DecisionToggle({
     super.key,
     required this.isSaved,
@@ -42,7 +47,7 @@ class DecisionToggle extends StatefulWidget {
 
 class _DecisionToggleState extends State<DecisionToggle> {
   late final ConfettiController _confettiController = ConfettiController(
-    duration: const Duration(milliseconds: 1200),
+    duration: DecisionToggle.celebrationDuration,
   );
   late final SkipSfxPlayer _sfx =
       widget.sfxPlayer ??

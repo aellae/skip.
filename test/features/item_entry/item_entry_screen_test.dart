@@ -13,6 +13,7 @@ import 'package:skip/core/settings/wage_provider.dart';
 import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/data/items_provider.dart';
 import 'package:skip/features/item_entry/item_entry_screen.dart';
+import 'package:skip/features/item_entry/widgets/decision_toggle.dart';
 
 import '../../test_helpers/widget_test_env.dart';
 
@@ -379,4 +380,77 @@ void main() {
       semantics.dispose();
     },
   );
+
+  group('leaving the screen after a decision', () {
+    /// Opens the entry form on top of a placeholder route, so a pop is
+    /// observable.
+    Future<void> pumpPushedEntry(
+      WidgetTester tester,
+      ItemsProvider itemsProvider,
+      ThemeData theme,
+    ) async {
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: itemsProvider),
+            ChangeNotifierProvider(create: (_) => LocaleProvider()),
+            ChangeNotifierProvider(create: (_) => CurrencyProvider()),
+            ChangeNotifierProvider(create: (_) => SfxProvider()),
+            ChangeNotifierProvider(create: (_) => WageProvider()),
+          ],
+          child: MaterialApp(
+            theme: theme,
+            home: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ItemEntryScreen()),
+                ),
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.widgetWithText(TextFormField, 'Price'), '5');
+      await tester.ensureVisible(find.text('Resisted!'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+      'Y2K Resisted! stays on screen for the celebration, then pops once',
+      (tester) async {
+        final itemsProvider = buildTestItemsProvider();
+        await pumpPushedEntry(tester, itemsProvider, AppThemes.y2k);
+
+        await tester.tap(find.text('Resisted!'));
+        await tester.pump(const Duration(milliseconds: 600));
+        // Mid-celebration: the form is still up and further taps are ignored.
+        expect(find.byType(ItemEntryScreen), findsOneWidget);
+        await tester.tap(find.text('Resisted!'), warnIfMissed: false);
+
+        await tester.pump(DecisionToggle.celebrationDuration);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ItemEntryScreen), findsNothing);
+        expect(itemsProvider.items, hasLength(1));
+      },
+    );
+
+    testWidgets('Minimal pops as soon as the item is saved', (tester) async {
+      final itemsProvider = buildTestItemsProvider();
+      await pumpPushedEntry(tester, itemsProvider, AppThemes.minimal);
+
+      await tester.tap(find.text('Resisted!'));
+      // Well under the celebration hold: frame by frame through the insert
+      // and the route's exit transition.
+      for (var i = 0; i < 12; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+
+      expect(find.byType(ItemEntryScreen), findsNothing);
+      expect(itemsProvider.items, hasLength(1));
+    });
+  });
 }
