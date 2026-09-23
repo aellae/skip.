@@ -120,10 +120,11 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
         return;
       }
       await _attachPickedFile(picked);
-    } catch (_) {
+    } catch (e) {
       // e.g. camera/photo permission denied.
-      if (mounted) setState(() => _isPickingImage = false);
-      _showError();
+      if (!mounted) return;
+      setState(() => _isPickingImage = false);
+      showImagePickError(context, e, context.read<LocaleProvider>().strings);
     }
   }
 

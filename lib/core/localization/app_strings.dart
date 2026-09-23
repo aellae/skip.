@@ -80,6 +80,32 @@ class AppStrings {
     AppLocale.fr => "Une erreur s'est produite. Veuillez réessayer.",
     AppLocale.de => 'Etwas ist schiefgelaufen. Bitte versuche es erneut.',
   };
+  String get cameraAccessOff => switch (locale) {
+    AppLocale.en =>
+      'Camera access is turned off. You can turn it on in Settings.',
+    AppLocale.it =>
+      "L'accesso alla fotocamera è disattivato. Puoi attivarlo nelle Impostazioni.",
+    AppLocale.fr =>
+      "L'accès à l'appareil photo est désactivé. Vous pouvez l'activer dans les Réglages.",
+    AppLocale.de =>
+      'Der Kamerazugriff ist deaktiviert. Du kannst ihn in den Einstellungen aktivieren.',
+  };
+  String get photoAccessOff => switch (locale) {
+    AppLocale.en =>
+      'Photo access is turned off. You can turn it on in Settings.',
+    AppLocale.it =>
+      "L'accesso alle foto è disattivato. Puoi attivarlo nelle Impostazioni.",
+    AppLocale.fr =>
+      "L'accès aux photos est désactivé. Vous pouvez l'activer dans les Réglages.",
+    AppLocale.de =>
+      'Der Fotozugriff ist deaktiviert. Du kannst ihn in den Einstellungen aktivieren.',
+  };
+  String get openSettings => switch (locale) {
+    AppLocale.en => 'Open Settings',
+    AppLocale.it => 'Apri Impostazioni',
+    AppLocale.fr => 'Ouvrir Réglages',
+    AppLocale.de => 'Einstellungen öffnen',
+  };
   String get status => switch (locale) {
     AppLocale.en => 'Status',
     AppLocale.it => 'Stato',

@@ -205,16 +205,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         await _fileHelper.deleteImage(relativePath);
         rethrow;
       }
-    } catch (_) {
+    } catch (e) {
       // e.g. camera/photo permission denied.
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.read<LocaleProvider>().strings.somethingWentWrong,
-            ),
-          ),
-        );
+        showImagePickError(context, e, context.read<LocaleProvider>().strings);
       }
     } finally {
       if (mounted) setState(() => _isPickingImage = false);

@@ -4,6 +4,7 @@ import UIKit
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   private static let appIconChannelName = "skip/app_icon"
+  private static let deviceChannelName = "skip/device"
 
   override func application(
     _ application: UIApplication,
@@ -31,6 +32,24 @@ import UIKit
       let args = call.arguments as? [String: Any]
       let iconName = args?["iconName"] as? String
       AppDelegate.applyAlternateIcon(iconName, result: result)
+    }
+
+    let deviceChannel = FlutterMethodChannel(
+      name: AppDelegate.deviceChannelName,
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
+    )
+    deviceChannel.setMethodCallHandler { call, result in
+      switch call.method {
+      case "isCameraAvailable":
+        result(UIImagePickerController.isSourceTypeAvailable(.camera))
+      case "openAppSettings":
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+          UIApplication.shared.open(url)
+        }
+        result(nil)
+      default:
+        result(FlutterMethodNotImplemented)
+      }
     }
   }
 
