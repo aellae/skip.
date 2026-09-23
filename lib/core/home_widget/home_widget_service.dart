@@ -40,6 +40,12 @@ class HomeWidgetService {
       );
       await HomeWidget.saveWidgetData<String>('currencyCode', currency.code);
       await HomeWidget.saveWidgetData<String>('aesthetic', aesthetic.name);
+      // The widget formats the month name natively; this makes it use the
+      // app's language rather than the device's.
+      await HomeWidget.saveWidgetData<String>(
+        'languageCode',
+        strings.locale.code,
+      );
       // The native widgets can't read AppStrings, so they get the active
       // language's copy pre-translated, and in the active aesthetic's voice
       // (calm for "Skip!", sassy for "Skip!"). Mottos travel newline-joined;

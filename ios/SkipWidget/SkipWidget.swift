@@ -150,6 +150,9 @@ struct SkipWidgetEntry: TimelineEntry {
     let aesthetic: SkipAesthetic
     var savedLabel = "Saved"
     var spentLabel = "Spent"
+    /// The app's language (synced as `languageCode`) for the month name,
+    /// rather than the device's; `.current` until the app has synced one.
+    var locale = Locale.current
     /// Today's line for the medium widget, already translated and in the
     /// aesthetic's voice (see `mottosMinimal`/`mottosY2k` in
     /// app_strings.dart).
@@ -200,6 +203,9 @@ struct SkipWidgetProvider: TimelineProvider {
             currencyCode: defaults?.string(forKey: "currencyCode") ?? "usd",
             aesthetic: aesthetic
         )
+        if let code = defaults?.string(forKey: "languageCode") {
+            entry.locale = Locale(identifier: code)
+        }
         if let label = defaults?.string(forKey: "savedLabel") { entry.savedLabel = label }
         if let label = defaults?.string(forKey: "spentLabel") { entry.spentLabel = label }
         let mottos = (defaults?.string(forKey: "mottos") ?? "")
@@ -291,7 +297,10 @@ struct SkipWidgetEntryView: View {
                     .font(aesthetic.valueFont(size: 15))
                     .widgetAccentable()
                 Spacer(minLength: 4)
-                Text(entry.date.formatted(.dateTime.month(.abbreviated)).uppercased())
+                Text(
+                    entry.date.formatted(.dateTime.month(.abbreviated).locale(entry.locale))
+                        .uppercased(with: entry.locale)
+                )
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.secondary)
             }
@@ -390,7 +399,10 @@ struct SkipWidgetEntryView: View {
     }
 
     private func monthText(style: Date.FormatStyle.Symbol.Month) -> some View {
-        Text(entry.date.formatted(.dateTime.month(style)).uppercased())
+        Text(
+            entry.date.formatted(.dateTime.month(style).locale(entry.locale))
+                .uppercased(with: entry.locale)
+        )
             .font(aesthetic.labelFont)
             .tracking(1.2)
             .foregroundStyle(aesthetic.textColor.opacity(0.5))
@@ -403,7 +415,7 @@ struct SkipWidgetEntryView: View {
                 Circle()
                     .fill(color)
                     .frame(width: 6, height: 6)
-                Text(label.uppercased())
+                Text(label.uppercased(with: entry.locale))
                     .font(aesthetic.labelFont)
                     .tracking(1.2)
                     .foregroundStyle(aesthetic.textColor.opacity(0.55))

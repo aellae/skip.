@@ -137,11 +137,16 @@ class SkipHomeWidgetProvider : HomeWidgetProvider() {
                 .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
         val isWide = minWidthDp >= WIDE_MIN_WIDTH_DP
 
+        // The app's language, not the device's; data written by a build
+        // before the key existed falls back to the device locale.
+        val appLocale =
+            widgetData.getString("languageCode", null)?.let(Locale::forLanguageTag)
+                ?: Locale.getDefault()
         val labelColor = withAlpha(aesthetic.textColor, 0.55f)
         val month =
-            SimpleDateFormat(if (isWide) "LLLL" else "LLL", Locale.getDefault())
+            SimpleDateFormat(if (isWide) "LLLL" else "LLL", appLocale)
                 .format(Date())
-                .uppercase(Locale.getDefault())
+                .uppercase(appLocale)
 
         // Saved share of this month's decisions by amount; secondaryProgress
         // fills the rest with the spent color, or stays 0 to show the empty
@@ -167,12 +172,12 @@ class SkipHomeWidgetProvider : HomeWidgetProvider() {
 
                 setTextViewText(
                     R.id.widget_saved_label,
-                    dotLabel(savedLabel.uppercase(Locale.getDefault()), aesthetic.savedColor),
+                    dotLabel(savedLabel.uppercase(appLocale), aesthetic.savedColor),
                 )
                 setTextColor(R.id.widget_saved_label, labelColor)
                 setTextViewText(
                     R.id.widget_spent_label,
-                    dotLabel(spentLabel.uppercase(Locale.getDefault()), aesthetic.spentColor),
+                    dotLabel(spentLabel.uppercase(appLocale), aesthetic.spentColor),
                 )
                 setTextColor(R.id.widget_spent_label, labelColor)
 
