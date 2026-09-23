@@ -759,15 +759,23 @@ class _SoundToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SkipCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(strings.soundEffects, style: theme.textTheme.bodyLarge),
-          ),
-          Switch(value: enabled, onChanged: onChanged),
-        ],
+    // The whole row toggles, not just the switch; merged so a screen reader
+    // reads the label and switch state as one control.
+    return MergeSemantics(
+      child: SkipCard(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        onTap: () => onChanged(!enabled),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                strings.soundEffects,
+                style: theme.textTheme.bodyLarge,
+              ),
+            ),
+            Switch(value: enabled, onChanged: onChanged),
+          ],
+        ),
       ),
     );
   }

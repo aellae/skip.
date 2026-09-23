@@ -274,6 +274,22 @@ void main() {
     expect(sfxProvider.enabled, isFalse);
   });
 
+  testWidgets('tapping the sound row label toggles it too', (tester) async {
+    final sfxProvider = SfxProvider();
+    await pumpSettings(
+      tester,
+      themeProvider: ThemeProvider(),
+      itemsProvider: buildTestItemsProvider(),
+      sfxProvider: sfxProvider,
+    );
+
+    await tester.scrollUntilVisible(find.text('Sound effects'), 200);
+    await tester.tap(find.text('Sound effects'));
+    await tester.pumpAndSettle();
+
+    expect(sfxProvider.enabled, isFalse);
+  });
+
   testWidgets('shows "Not set" for the hourly wage until one is configured', (
     tester,
   ) async {
