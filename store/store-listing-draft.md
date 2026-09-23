@@ -48,8 +48,8 @@ HOW IT WORKS
 
 TWO LOOKS, ONE APP
 Switch anytime between two complete aesthetics:
-• skip. — a quiet, minimal financial diary in charcoal and champagne
-• SKIP! — an explosive Y2K pop mood in hot magenta and electric violet, complete with confetti and sound
+• Skip! — a quiet, minimal financial diary in charcoal and champagne
+• Skip! — an explosive Y2K pop mood in hot magenta and electric violet, complete with confetti and sound
 
 SEE THE FULL PICTURE
 • Total Saved vs Total Spent, always visible
@@ -67,7 +67,7 @@ Choose your aesthetic. Snap the temptation. Skip it or don't — either way, see
 
 **What's New (v1.0.0)**
 ```
-First release! Snap what tempts you, choose to resist or buy, and watch your savings add up — in whichever aesthetic fits your mood, skip. or SKIP!
+First release! Snap what tempts you, choose to resist or buy, and watch your savings add up — in whichever aesthetic fits your mood, Skip! or Skip!
 ```
 
 **Support URL:** `[TODO — needs a hosted page, e.g. GitHub repo README or a simple GitHub Pages site]`
@@ -106,8 +106,8 @@ HOW IT WORKS
 
 TWO LOOKS, ONE APP
 Switch anytime between two complete aesthetics:
-• skip. — a quiet, minimal financial diary in charcoal and champagne
-• SKIP! — an explosive Y2K pop mood in hot magenta and electric violet, complete with confetti and sound
+• Skip! — a quiet, minimal financial diary in charcoal and champagne
+• Skip! — an explosive Y2K pop mood in hot magenta and electric violet, complete with confetti and sound
 
 SEE THE FULL PICTURE
 • Total Saved vs Total Spent, always visible
@@ -166,8 +166,8 @@ COME FUNZIONA
 
 DUE STILI, UN'UNICA APP
 Passa in qualsiasi momento tra due estetiche complete:
-• skip. — un diario finanziario minimale e sobrio, tra antracite e champagne
-• SKIP! — un'esplosione pop Y2K in magenta acceso ed elettrico, completa di coriandoli e suoni
+• Skip! — un diario finanziario minimale e sobrio, tra antracite e champagne
+• Skip! — un'esplosione pop Y2K in magenta acceso ed elettrico, completa di coriandoli e suoni
 
 VEDI IL QUADRO COMPLETO
 • Totale risparmiato e totale speso, sempre visibili
@@ -185,7 +185,7 @@ Scegli la tua estetica. Scatta la tentazione. Resisti o no — in ogni caso, ved
 
 **Novità (v1.0.0)**
 ```
-Prima versione! Fotografa ciò che ti tenta, scegli se resistere o comprare, e guarda crescere i tuoi risparmi — nell'estetica più adatta al tuo mood, skip. o SKIP!
+Prima versione! Fotografa ciò che ti tenta, scegli se resistere o comprare, e guarda crescere i tuoi risparmi — nell'estetica più adatta al tuo mood, Skip! o Skip!
 ```
 
 **URL di supporto:** `[TODO — serve una pagina pubblica, es. README del repo GitHub o una GitHub Pages]`
@@ -224,8 +224,8 @@ COME FUNZIONA
 
 DUE STILI, UN'UNICA APP
 Passa in qualsiasi momento tra due estetiche complete:
-• skip. — un diario finanziario minimale e sobrio, tra antracite e champagne
-• SKIP! — un'esplosione pop Y2K in magenta acceso ed elettrico, completa di coriandoli e suoni
+• Skip! — un diario finanziario minimale e sobrio, tra antracite e champagne
+• Skip! — un'esplosione pop Y2K in magenta acceso ed elettrico, completa di coriandoli e suoni
 
 VEDI IL QUADRO COMPLETO
 • Totale risparmiato e totale speso, sempre visibili
@@ -248,7 +248,7 @@ Scegli la tua estetica. Scatta la tentazione. Resisti o no — in ogni caso, ved
 
 ## Note aperte per dopo
 
-- **Screenshot / anteprime:** non inclusi in questa bozza — servono catture reali da entrambi i temi (skip. e SKIP!) una volta pronti gli account, seguendo le dimensioni richieste da App Store Connect (6.7" e 6.5" minimo per iPhone) e Play Console (telefono + eventuale tablet).
+- **Screenshot / anteprime:** non inclusi in questa bozza — servono catture reali da entrambi i temi (Skip! e Skip!) una volta pronti gli account, seguendo le dimensioni richieste da App Store Connect (6.7" e 6.5" minimo per iPhone) e Play Console (telefono + eventuale tablet).
 - **App icon:** già presente (`assets/icon/Skip!-Logo.png`, generata via `flutter_launcher_icons`), va solo esportata alle risoluzioni richieste dagli store (1024×1024 per App Store, 512×512 per Play).
 - **Privacy Policy URL:** priorità prima del submit — senza un URL pubblico raggiungibile, entrambi gli store rifiutano la pubblicazione. La soluzione più veloce è abilitare GitHub Pages sul repo `aellae/skip.` puntando a `PRIVACY_POLICY.md`.
 - **Support URL:** stesso discorso — basta una pagina statica minima o il README del repo, se pubblico.

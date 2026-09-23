@@ -9,7 +9,7 @@ void main() {
   setUpAll(() => setUpWidgetTestEnvironment());
 
   testWidgets(
-    'SkipApp shows the minimal logo by default and switches to SKIP! on toggle',
+    'SkipApp shows the minimal logo by default and switches to Skip! on toggle',
     (tester) async {
       final themeProvider = ThemeProvider();
       final itemsProvider = buildTestItemsProvider();
@@ -26,13 +26,13 @@ void main() {
       String logoAssetKey() => (logoImage().image as AssetImage).assetName;
 
       expect(logoAssetKey(), 'assets/images/logo_minimal.png');
-      expect(logoImage().semanticLabel, 'skip.');
+      expect(logoImage().semanticLabel, 'Skip!');
 
       themeProvider.toggle();
       await tester.pumpAndSettle();
 
       expect(logoAssetKey(), 'assets/images/logo_y2k.png');
-      expect(logoImage().semanticLabel, 'SKIP!');
+      expect(logoImage().semanticLabel, 'Skip!');
     },
   );
 }

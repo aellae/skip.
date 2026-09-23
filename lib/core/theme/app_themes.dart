@@ -113,7 +113,7 @@ class SkipThemeExtension extends ThemeExtension<SkipThemeExtension> {
   }
 }
 
-/// The two SKIP aesthetics: Quiet Luxury (`skip.`) and Baddie Y2K (`SKIP!`).
+/// The two SKIP aesthetics: Quiet Luxury (`Skip!`) and Baddie Y2K (`Skip!`).
 class AppThemes {
   AppThemes._();
 
@@ -381,7 +381,7 @@ class AppThemes {
         spentColor: AppColors.minimalSpent,
         ponderingColor: AppColors.minimalPondering,
         cardBackground: AppColors.minimalSilkBeige,
-        logoText: 'skip.',
+        logoText: 'Skip!',
         logoAsset: 'assets/images/logo_minimal.png',
         isY2K: false,
         cardRadius: 10,
@@ -513,7 +513,7 @@ class AppThemes {
         spentColor: AppColors.y2kSpent,
         ponderingColor: AppColors.y2kPondering,
         cardBackground: AppColors.y2kDeepSurface,
-        logoText: 'SKIP!',
+        logoText: 'Skip!',
         logoAsset: 'assets/images/logo_y2k.png',
         isY2K: true,
         cardRadius: 20,

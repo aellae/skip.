@@ -32,13 +32,13 @@ enum SkipAesthetic: String {
     /// everything monochrome and the logo image would render as a flat blob.
     var logoText: String {
         switch self {
-        case .minimal: return "skip."
-        case .y2k: return "SKIP!"
+        case .minimal: return "Skip!"
+        case .y2k: return "Skip!"
         }
     }
 
-    /// Mirrors each theme's card surface: a warm paper fade for "skip.",
-    /// a deep violet night for "SKIP!" (glows are layered on in the view).
+    /// Mirrors each theme's card surface: a warm paper fade for "Skip!",
+    /// a deep violet night for "Skip!" (glows are layered on in the view).
     var backgroundGradient: LinearGradient {
         switch self {
         case .minimal:
@@ -98,7 +98,7 @@ enum SkipAesthetic: String {
     }
 
     /// The motto matches each theme's voice: a quiet italic serif aside for
-    /// "skip.", a loud rounded shout for "SKIP!".
+    /// "Skip!", a loud rounded shout for "Skip!".
     func mottoFont(size: CGFloat) -> Font {
         switch self {
         case .minimal: return .system(size: size, weight: .regular, design: .serif).italic()

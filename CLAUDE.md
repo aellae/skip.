@@ -11,12 +11,12 @@ This document provides guidelines, technical conventions, and architectural rule
    - All data resides exclusively in SQLite (`sqflite`).
    - All image assets reside exclusively in the local Application Documents directory using `path_provider`.
 
-2. **Dual-Theme Integrity (`skip.` vs `SKIP!`):**
+2. **Dual-Theme Integrity (`Skip!` vs `Skip!`):**
    - Every user-facing UI component must respect the active theme provided by `ThemeProvider`.
    - Never hardcode visual colors, font families, or decorative styling inline unless derived from context (`Theme.of(context)`).
    - Dynamic logo naming convention:
-     - Minimal Theme: lowercase `skip.`
-     - Baddie/Y2K Theme: uppercase `SKIP!`
+     - Minimal Theme: lowercase `Skip!`
+     - Baddie/Y2K Theme: uppercase `Skip!`
 
 3. **Performance & Memory Rules for Images:**
    - Picked images from `image_picker` must be copied into local app documents immediately and referenced by relative file path.
@@ -136,6 +136,6 @@ Full functional detail and reusable building blocks are documented in [docs/NEW_
 
 ## 🎨 Design Rules for New Features
 
-- **Adding a new feature UI:** Ensure both Minimal (`skip.`) and Y2K (`SKIP!`) variants render properly. Test switching themes live while the screen is open.
+- **Adding a new feature UI:** Ensure both Minimal (`Skip!`) and Y2K (`Skip!`) variants render properly. Test switching themes live while the screen is open.
 - **Form Inputs:** Money fields must enforce double/float numerical inputs with proper currency formatting.
 - **Deleting Items:** Deletion is soft — an item is moved to Trash (`deleted_at` set) and stays recoverable from Settings. Local image files are cleaned up only when Trash is purged past its retention window, not at the moment of deletion, so orphaned files still never persist indefinitely.

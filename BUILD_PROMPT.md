@@ -112,7 +112,7 @@ Do not start phase *N+1* until phase *N* is: implemented, covered by tests (see 
 ## 8. Testing strategy (not specified in the source docs — pinned here)
 
 - **Unit tests** (`sqflite_common_ffi` for host-side SQLite): full CRUD coverage for `database_helper.dart`, `ItemModel.toMap`/`fromMap` round-trip, `file_helper.dart` copy/delete logic (use a temp dir, not real app documents).
-- **Widget tests**: home dashboard counters compute correctly from seeded data; item-entry form rejects non-numeric/negative price input; theme switch re-renders logo text (`skip.` vs `SKIP!`) and typography; card delete triggers both DB delete and file delete (mock the file system with `mocktail`).
+- **Widget tests**: home dashboard counters compute correctly from seeded data; item-entry form rejects non-numeric/negative price input; theme switch re-renders logo text (`Skip!` vs `Skip!`) and typography; card delete triggers both DB delete and file delete (mock the file system with `mocktail`).
 - **Integration tests** (`integration_test` package, run on at least one simulator/emulator): full add-item-and-see-it-in-grid flow; export-then-import round-trip preserves data.
 - Minimum bar: every new file under `lib/data/` and `lib/core/` gets at least one unit test; every screen under `lib/features/` gets at least one widget test. No specific coverage percentage is mandated beyond that.
 - Run `flutter analyze`, `dart format .`, and `flutter test` before every phase-completion commit. Don't defer testing to the end of the project.

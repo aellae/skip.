@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- "skip." widget card: warm paper fade with a hairline edge. Mirrors
+<!-- "Skip!" widget card: warm paper fade with a hairline edge. Mirrors
      SkipAesthetic.minimal's backgroundGradient in ios/SkipWidget/SkipWidget.swift. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
     <corners android:radius="22dp" />

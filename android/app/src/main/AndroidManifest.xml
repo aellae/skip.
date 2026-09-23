@@ -42,7 +42,7 @@
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/launcher_icon_y2k"
-            android:label="SKIP!"
+            android:label="Skip!"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

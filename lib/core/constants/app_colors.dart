@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // Quiet Luxury ("skip.")
+  // Quiet Luxury ("Skip!")
   static const minimalCharcoal = Color(0xFF2C302E);
   static const minimalSilkBeige = Color(0xFFE7DFD3);
   static const minimalChampagne = Color(0xFFE9D5A5);
@@ -17,7 +17,7 @@ class AppColors {
   static const minimalSpent = Color(0xFFA35656);
   static const minimalPondering = Color(0xFFB8863A);
 
-  // Baddie Y2K ("SKIP!")
+  // Baddie Y2K ("Skip!")
   static const y2kHotMagenta = Color(0xFFFF007F);
   static const y2kElectricViolet = Color(0xFFB026FF);
   static const y2kMetallicSilver = Color(0xFFE0E0E0);

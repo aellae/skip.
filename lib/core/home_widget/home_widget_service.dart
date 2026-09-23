@@ -34,7 +34,7 @@ class HomeWidgetService {
       await HomeWidget.saveWidgetData<String>('aesthetic', aesthetic.name);
       // The native widgets can't read AppStrings, so they get the active
       // language's copy pre-translated, and in the active aesthetic's voice
-      // (calm for "skip.", sassy for "SKIP!"). Mottos travel newline-joined;
+      // (calm for "Skip!", sassy for "Skip!"). Mottos travel newline-joined;
       // the widget picks one per day so it rotates without the app being
       // opened.
       final isY2k = aesthetic == SkipAesthetic.y2k;

@@ -108,7 +108,7 @@ void main() {
     await tester.pumpWidget(_buildApp(itemsProvider, theme: AppThemes.y2k));
     await tester.pumpAndSettle();
 
-    expect(find.text('SKIP!'), findsOneWidget);
+    expect(find.text('Skip!'), findsOneWidget);
   });
 
   testWidgets('tapping the insights icon opens the Insights screen', (

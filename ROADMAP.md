@@ -30,7 +30,7 @@ A privacy-first, 100% offline mobile app built with Flutter and SQLite. Skip! al
   - `FileHelper` copies files into the app's local application documents directory (`path_provider`) under a `skip_images/` subdir and stores a *relative* path (not absolute — iOS sandbox container paths aren't stable across reinstalls).
   - `image_picker` wiring for Camera & Gallery access lands in Phase 2 alongside the quick-add UI that actually calls it.
 - [x] **Dual-Theme Engine**
-  - `ThemeProvider` managing dynamic toggle between **Minimal Luxury (`skip.`)** and **Baddie Y2K (`SKIP!`)**.
+  - `ThemeProvider` managing dynamic toggle between **Minimal Luxury (`Skip!`)** and **Baddie Y2K (`Skip!`)**.
   - Typographic sets (Playfair Display + Inter vs. Titan One + Fredoka), bundled as local variable-font assets — zero runtime network fetches (`GoogleFonts.config.allowRuntimeFetching = false`).
   - Dynamic palette tokens (Charcoal/Silk Beige/Champagne/Soft White vs. Hot Magenta/Electric Violet/Metallic Silver) exposed via `SkipThemeExtension`.
 
@@ -40,7 +40,7 @@ A privacy-first, 100% offline mobile app built with Flutter and SQLite. Skip! al
 > **Goal:** Deliver smooth visual logging of wishlist/resisted items and clear financial impact counters.
 
 - [x] **Home Dashboard & Counters**
-  - Header with dynamic logo rendering based on active theme (`skip.` vs `SKIP!`).
+  - Header with dynamic logo rendering based on active theme (`Skip!` vs `Skip!`).
   - Dual prominent financial status cards:
     - **Total Saved** (Money retained by resisting purchases).
     - **Total Spent** (Money spent on executed purchases).

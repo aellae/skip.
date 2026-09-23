@@ -48,7 +48,7 @@ class SkipHomeWidgetProvider : HomeWidgetProvider() {
         val valueFontFamily: String,
         /**
          * The motto matches each theme's voice: a quiet italic serif aside
-         * for "skip.", a loud black shout for "SKIP!".
+         * for "Skip!", a loud black shout for "Skip!".
          */
         val mottoFontFamily: String,
         val mottoStyle: Int,

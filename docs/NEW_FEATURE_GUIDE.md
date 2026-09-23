@@ -32,8 +32,8 @@ Only add a `widgets/` subfolder if the feature has sub-components worth splittin
 
 - Every widget must read colors/fonts from `Theme.of(context)` — no hardcoded colors or font families.
 - Manually verify the feature in **both** themes:
-  - Minimal (`skip.`, lowercase branding)
-  - Baddie/Y2K (`SKIP!`, uppercase branding)
+  - Minimal (`Skip!`, lowercase branding)
+  - Baddie/Y2K (`Skip!`, uppercase branding)
 - Toggle themes live (Settings) while the new screen is open to confirm it adapts.
 
 ## 5. Images (if the feature touches photos)
@@ -81,7 +81,7 @@ A factual snapshot of the current app, so new work builds on the right primitive
 
 ### Theming (`lib/core/theme/`)
 
-- `SkipThemeExtension` (a `ThemeExtension`) carries app-specific tokens `ThemeData` doesn't cover: `savedColor`/`spentColor`/`ponderingColor`, `cardBackground`, `logoText` (`'skip.'` vs `'SKIP!'`), `isY2K`, `cardRadius`/`buttonRadius`, `cardShadow`/`glowShadow`, `accentGradient` (nullable), `accentHighlight`. Read it via `Theme.of(context).extension<SkipThemeExtension>()`.
+- `SkipThemeExtension` (a `ThemeExtension`) carries app-specific tokens `ThemeData` doesn't cover: `savedColor`/`spentColor`/`ponderingColor`, `cardBackground`, `logoText` (`'Skip!'` vs `'Skip!'`), `isY2K`, `cardRadius`/`buttonRadius`, `cardShadow`/`glowShadow`, `accentGradient` (nullable), `accentHighlight`. Read it via `Theme.of(context).extension<SkipThemeExtension>()`.
 - `AppThemes.minimal` and `AppThemes.y2k` are the two full `ThemeData` objects (fonts, `ColorScheme`, and every major component theme). Minimal = light, Playfair Display/Inter, soft shadows, no gradient. Y2K = dark, Titan One/Fredoka, bordered cards, magenta→violet glow/gradient.
 - `ThemeProvider` holds the active `SkipAesthetic`, persists it to `SharedPreferences`, and — on iOS — swaps the home-screen app icon via `AppIconChannel` (a native `MethodChannel`; alternate icon `AppIcon-Y2K` declared in `ios/Runner/Info.plist`).
 - Raw color constants live in `lib/core/constants/app_colors.dart` but are only consumed by `AppThemes` — feature code should never reference them directly, only `Theme.of(context)`.

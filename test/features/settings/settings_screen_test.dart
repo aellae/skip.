@@ -72,7 +72,7 @@ void main() {
     expect(find.text(formatCurrency(20)), findsOneWidget);
   });
 
-  testWidgets('tapping SKIP! switches the active aesthetic', (tester) async {
+  testWidgets('tapping Baddie Y2K switches the active aesthetic', (tester) async {
     final themeProvider = ThemeProvider();
     await pumpSettings(
       tester,
@@ -82,13 +82,13 @@ void main() {
 
     expect(themeProvider.isY2K, isFalse);
 
-    await tester.tap(find.text('SKIP!'));
+    await tester.tap(find.text('Baddie Y2K'));
     await tester.pumpAndSettle();
 
     expect(themeProvider.isY2K, isTrue);
   });
 
-  testWidgets('tapping skip. switches back to the minimal aesthetic', (
+  testWidgets('tapping Quiet Luxury switches back to the minimal aesthetic', (
     tester,
   ) async {
     final themeProvider = ThemeProvider(initial: SkipAesthetic.y2k);
@@ -98,7 +98,7 @@ void main() {
       itemsProvider: buildTestItemsProvider(),
     );
 
-    await tester.tap(find.text('skip.'));
+    await tester.tap(find.text('Quiet Luxury'));
     await tester.pumpAndSettle();
 
     expect(themeProvider.isY2K, isFalse);

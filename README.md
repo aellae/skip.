@@ -23,8 +23,8 @@ Switch between two distinct UI personalities anytime in settings:
 
 | Aesthetic | Theme Name | Primary Palette | Typography | Vibe |
 | :--- | :--- | :--- | :--- | :--- |
-| **Quiet Luxury** | `skip.` | Charcoal, Silk Beige, Champagne, Soft White | *Playfair Display* & *Inter* | Minimalist, serene, disciplined financial diary. |
-| **Baddie Y2K** | `SKIP!` | Hot Magenta, Electric Violet, Metallic Silver | *Titan One* & *Fredoka* | Explosive 2000s pop, sassy, "Girl Math" victory celebration. |
+| **Quiet Luxury** | `Skip!` | Charcoal, Silk Beige, Champagne, Soft White | *Playfair Display* & *Inter* | Minimalist, serene, disciplined financial diary. |
+| **Baddie Y2K** | `Skip!` | Hot Magenta, Electric Violet, Metallic Silver | *Titan One* & *Fredoka* | Explosive 2000s pop, sassy, "Girl Math" victory celebration. |
 
 ---
 

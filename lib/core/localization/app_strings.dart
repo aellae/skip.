@@ -715,7 +715,7 @@ class AppStrings {
   // Home-screen widget (pushed to the native widget by HomeWidgetService,
   // since the iOS/Android extensions can't reach this class).
   /// Short nudges the widget rotates through, one per day, in the calm
-  /// voice of the minimal "skip." aesthetic. Kept neutral so each reads right
+  /// voice of the minimal "Skip!" aesthetic. Kept neutral so each reads right
   /// whether the month is going well or not, and short enough for three
   /// lines of a medium widget's half column.
   List<String> get widgetMottosMinimal => switch (locale) {
@@ -758,7 +758,7 @@ class AppStrings {
   };
 
   /// Same role as [widgetMottosMinimal], in the sassier voice of the Y2K
-  /// "SKIP!" aesthetic. Still never scolds: the line shows on bad months too.
+  /// "Skip!" aesthetic. Still never scolds: the line shows on bad months too.
   List<String> get widgetMottosY2k => switch (locale) {
     AppLocale.en => const [
       'Put the card down. Slowly.',

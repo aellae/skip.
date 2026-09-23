@@ -193,7 +193,7 @@ class _AestheticSwitcher extends StatelessWidget {
         Expanded(
           child: _AestheticOption(
             previewTheme: AppThemes.minimal,
-            label: 'skip.',
+            label: 'Skip!',
             description: strings.quietLuxury,
             selected: aesthetic == SkipAesthetic.minimal,
             onTap: () => onChanged(SkipAesthetic.minimal),
@@ -203,7 +203,7 @@ class _AestheticSwitcher extends StatelessWidget {
         Expanded(
           child: _AestheticOption(
             previewTheme: AppThemes.y2k,
-            label: 'SKIP!',
+            label: 'Skip!',
             description: strings.baddieY2k,
             selected: aesthetic == SkipAesthetic.y2k,
             onTap: () => onChanged(SkipAesthetic.y2k),
@@ -388,7 +388,7 @@ class _CurrencySwitcher extends StatelessWidget {
 
 /// Each option always previews its *own* theme's font/colors/gradient,
 /// regardless of which aesthetic is currently active app-wide — so picking
-/// "SKIP!" is an informed choice, not a guess. The "selected" ring reads
+/// "Skip!" is an informed choice, not a guess. The "selected" ring reads
 /// off the *ambient* theme (via [Theme.of], outside the nested [Theme]
 /// scope below) so the pick signal itself stays legible in both states.
 class _AestheticOption extends StatelessWidget {

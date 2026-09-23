@@ -2,7 +2,7 @@
 
 **Effective date:** September 16, 2026
 
-This policy covers **Skip!** (shown in-app as `skip.` or `SKIP!` depending on the theme you pick), a mobile app for tracking purchases you resist or make. It applies to the iOS and Android versions of the app.
+This policy covers **Skip!** (shown in-app as `Skip!` or `Skip!` depending on the theme you pick), a mobile app for tracking purchases you resist or make. It applies to the iOS and Android versions of the app.
 
 ## The short version
 

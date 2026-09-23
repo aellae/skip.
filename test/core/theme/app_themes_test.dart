@@ -9,9 +9,9 @@ void main() {
     final theme = AppThemes.minimal;
     final ext = theme.extension<SkipThemeExtension>();
 
-    test('exposes the lowercase skip. logo via SkipThemeExtension', () {
+    test('exposes the lowercase Skip! logo via SkipThemeExtension', () {
       expect(ext, isNotNull);
-      expect(ext!.logoText, 'skip.');
+      expect(ext!.logoText, 'Skip!');
       expect(ext.logoAsset, 'assets/images/logo_minimal.png');
       expect(ext.isY2K, isFalse);
     });
@@ -33,9 +33,9 @@ void main() {
     final theme = AppThemes.y2k;
     final ext = theme.extension<SkipThemeExtension>();
 
-    test('exposes the uppercase SKIP! logo via SkipThemeExtension', () {
+    test('exposes the uppercase Skip! logo via SkipThemeExtension', () {
       expect(ext, isNotNull);
-      expect(ext!.logoText, 'SKIP!');
+      expect(ext!.logoText, 'Skip!');
       expect(ext.logoAsset, 'assets/images/logo_y2k.png');
       expect(ext.isY2K, isTrue);
     });
@@ -65,9 +65,9 @@ void main() {
     final past = minimalExt.lerp(y2kExt, 0.6);
     final before = minimalExt.lerp(y2kExt, 0.4);
 
-    expect(past.logoText, 'SKIP!');
+    expect(past.logoText, 'Skip!');
     expect(past.isY2K, isTrue);
-    expect(before.logoText, 'skip.');
+    expect(before.logoText, 'Skip!');
     expect(before.isY2K, isFalse);
   });
 }
