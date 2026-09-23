@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'core/home_widget/home_widget_sync.dart';
@@ -93,13 +94,20 @@ class SkipApp extends StatelessWidget {
         ),
       ],
       child: HomeWidgetSync(
-        child: Consumer<ThemeProvider>(
-          builder: (context, themeProvider, _) {
+        child: Consumer2<ThemeProvider, LocaleProvider>(
+          builder: (context, themeProvider, localeProvider, _) {
             return MaterialApp(
               title: 'SKIP',
               debugShowCheckedModeBanner: false,
               navigatorKey: navigatorKeyOverride,
               theme: themeProvider.themeData,
+              // Framework strings (Back/Close tooltips, the text-selection
+              // toolbar) follow the app's chosen language, not the device's.
+              locale: Locale(localeProvider.locale.code),
+              supportedLocales: [
+                for (final locale in AppLocale.values) Locale(locale.code),
+              ],
+              localizationsDelegates: GlobalMaterialLocalizations.delegates,
               builder: (context, child) => AnimatedTheme(
                 duration: const Duration(milliseconds: 450),
                 curve: Curves.easeInOutCubicEmphasized,

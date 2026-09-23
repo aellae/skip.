@@ -261,7 +261,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final skipTheme = theme.extension<SkipThemeExtension>()!;
-    final strings = context.watch<LocaleProvider>().strings;
+    final localeProvider = context.watch<LocaleProvider>();
+    final strings = localeProvider.strings;
     final currency = context.watch<CurrencyProvider>().currency;
     final hourlyWage = context.watch<WageProvider>().hourlyWage;
     final item = context.select<ItemsProvider, ItemModel>(
@@ -432,7 +433,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                formatDate(item.createdAt),
+                formatDate(item.createdAt, localeProvider.locale),
                 style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: AppSpacing.sectionGap),

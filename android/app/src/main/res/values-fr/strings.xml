@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widget picker description. The system picker renders it in the
+         device language, so it's localized via resource qualifiers. -->
+    <string name="skip_widget_description">Les totaux économisés et dépensés de ce mois-ci.</string>
+</resources>

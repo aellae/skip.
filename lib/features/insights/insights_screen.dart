@@ -23,7 +23,8 @@ class InsightsScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final skipTheme = theme.extension<SkipThemeExtension>()!;
     final itemsProvider = context.watch<ItemsProvider>();
-    final strings = context.watch<LocaleProvider>().strings;
+    final localeProvider = context.watch<LocaleProvider>();
+    final strings = localeProvider.strings;
     final currency = context.watch<CurrencyProvider>().currency;
     final monthlyTotals = itemsProvider.monthlyTotals();
     final hasActivity = monthlyTotals.any((m) => m.saved != 0 || m.spent != 0);
@@ -75,6 +76,7 @@ class InsightsScreen extends StatelessWidget {
                   child: MonthlyBarChart(
                     monthlyTotals: monthlyTotals,
                     currency: currency,
+                    locale: localeProvider.locale,
                   ),
                 ),
               ],

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/app_spacing.dart';
 import '../../core/localization/app_currency.dart';
+import '../../core/localization/app_locale.dart';
 import '../../core/localization/currency_provider.dart';
 import '../../core/localization/locale_provider.dart';
 import '../../core/theme/app_themes.dart';
@@ -30,7 +31,8 @@ class TrashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final strings = context.watch<LocaleProvider>().strings;
+    final localeProvider = context.watch<LocaleProvider>();
+    final strings = localeProvider.strings;
     final currency = context.watch<CurrencyProvider>().currency;
     final trashedItems = context.watch<ItemsProvider>().trashedItems;
 
@@ -73,6 +75,7 @@ class TrashScreen extends StatelessWidget {
                             currency: currency,
                             fileHelper: fileHelper,
                             restoreLabel: strings.restore,
+                            locale: localeProvider.locale,
                             onRestore: () => context
                                 .read<ItemsProvider>()
                                 .restoreItem(item.id!),
@@ -93,6 +96,7 @@ class _TrashedItemTile extends StatelessWidget {
   final AppCurrency currency;
   final FileHelper? fileHelper;
   final String restoreLabel;
+  final AppLocale locale;
   final VoidCallback onRestore;
 
   const _TrashedItemTile({
@@ -100,6 +104,7 @@ class _TrashedItemTile extends StatelessWidget {
     required this.currency,
     required this.fileHelper,
     required this.restoreLabel,
+    required this.locale,
     required this.onRestore,
   });
 
@@ -158,7 +163,7 @@ class _TrashedItemTile extends StatelessWidget {
                 ),
                 if (item.deletedAt != null)
                   Text(
-                    formatDate(item.deletedAt!),
+                    formatDate(item.deletedAt!, locale),
                     style: theme.textTheme.bodySmall,
                   ),
               ],

@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/localization/app_currency.dart';
+import '../../../core/localization/app_locale.dart';
 import '../../../core/theme/app_themes.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
@@ -13,11 +14,13 @@ import '../../../data/models/monthly_total.dart';
 class MonthlyBarChart extends StatelessWidget {
   final List<MonthlyTotal> monthlyTotals;
   final AppCurrency currency;
+  final AppLocale locale;
 
   const MonthlyBarChart({
     super.key,
     required this.monthlyTotals,
     required this.currency,
+    required this.locale,
   });
 
   @override
@@ -141,7 +144,7 @@ class MonthlyBarChart extends StatelessWidget {
                   meta: meta,
                   space: 8,
                   child: Text(
-                    monthAbbreviation(monthlyTotals[index].month),
+                    monthAbbreviation(monthlyTotals[index].month, locale),
                     style: axisStyle,
                   ),
                 );
