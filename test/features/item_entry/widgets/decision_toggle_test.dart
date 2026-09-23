@@ -25,6 +25,7 @@ void main() {
     required bool? isSaved,
     required ValueChanged<bool?> onChanged,
     bool Function()? canSelect,
+    bool hasSelection = true,
   }) {
     return tester.pumpWidget(
       ChangeNotifierProvider(
@@ -35,6 +36,7 @@ void main() {
             body: DecisionToggle(
               isSaved: isSaved,
               onChanged: onChanged,
+              hasSelection: hasSelection,
               canSelect: canSelect,
               sfxPlayer: mockSfx,
             ),
@@ -144,5 +146,43 @@ void main() {
 
     expect(called, isFalse);
     verifyNever(() => mockSfx.playResisted());
+  });
+
+  group('selection display', () {
+    Color? labelColor(WidgetTester tester, String label) =>
+        tester.widget<Text>(find.text(label)).style?.color;
+
+    testWidgets('hasSelection: false shows every option unselected', (
+      tester,
+    ) async {
+      await pumpToggle(
+        tester,
+        theme: AppThemes.minimal,
+        isSaved: null,
+        hasSelection: false,
+        onChanged: (_) {},
+      );
+      final unselected = AppThemes.minimal.colorScheme.onSurface;
+
+      expect(labelColor(tester, 'Resisted!'), unselected);
+      expect(labelColor(tester, 'Pondering'), unselected);
+      expect(labelColor(tester, 'Bought It'), unselected);
+    });
+
+    testWidgets('a null decision with a selection highlights Pondering', (
+      tester,
+    ) async {
+      await pumpToggle(
+        tester,
+        theme: AppThemes.minimal,
+        isSaved: null,
+        onChanged: (_) {},
+      );
+
+      expect(
+        labelColor(tester, 'Pondering'),
+        isNot(AppThemes.minimal.colorScheme.onSurface),
+      );
+    });
   });
 }

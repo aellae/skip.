@@ -64,6 +64,11 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
   /// strength.
   bool _isCelebrating = false;
 
+  /// The option tapped, shown selected while the save runs. Nothing is
+  /// selected until the user picks.
+  bool _hasDecision = false;
+  bool? _decision;
+
   /// Off until the first failed save, then live — so an error message
   /// clears as soon as the input is fixed instead of lingering.
   var _autovalidateMode = AutovalidateMode.disabled;
@@ -188,6 +193,8 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     setState(() {
       _isSaving = true;
       _isCelebrating = celebrate;
+      _hasDecision = true;
+      _decision = isSaved;
     });
     final price = double.parse(_normalizedPrice(_priceController.text));
     final title = _titleController.text.trim();
@@ -209,6 +216,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
         setState(() {
           _isSaving = false;
           _isCelebrating = false;
+          _hasDecision = false;
         });
       }
       _showError();
@@ -427,7 +435,8 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                   child: Opacity(
                     opacity: _isSaving && !_isCelebrating ? 0.5 : 1,
                     child: DecisionToggle(
-                      isSaved: null,
+                      isSaved: _decision,
+                      hasSelection: _hasDecision,
                       canSelect: _canSave,
                       onChanged: _saveWithDecision,
                     ),

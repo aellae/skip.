@@ -23,6 +23,11 @@ class DecisionToggle extends StatefulWidget {
   final bool? isSaved;
   final ValueChanged<bool?> onChanged;
 
+  /// `false` shows all three options unselected — for a brand-new item that
+  /// has no decision yet, where a `null` [isSaved] would otherwise light up
+  /// "Pondering" as if it were preselected.
+  final bool hasSelection;
+
   /// Checked before any selection feedback plays; returning `false` drops
   /// the tap, so e.g. an invalid form never gets a "Resisted!" celebration.
   final bool Function()? canSelect;
@@ -37,6 +42,7 @@ class DecisionToggle extends StatefulWidget {
     super.key,
     required this.isSaved,
     required this.onChanged,
+    this.hasSelection = true,
     this.canSelect,
     this.sfxPlayer,
   });
@@ -133,11 +139,14 @@ class _DecisionToggleState extends State<DecisionToggle> {
               Expanded(
                 child: _ToggleOption(
                   label: strings.resisted,
-                  selected: widget.isSaved == true,
+                  selected: widget.hasSelection && widget.isSaved == true,
                   color: skipTheme.savedColor,
                   onTap: () => _selectResisted(skipTheme.isY2K),
                   shimmer:
-                      skipTheme.isY2K && widget.isSaved == true && _shimmering,
+                      skipTheme.isY2K &&
+                      widget.hasSelection &&
+                      widget.isSaved == true &&
+                      _shimmering,
                   pulseKey: _showMinimalPulse ? _pulseKey : null,
                   onPulseDone: () {
                     if (mounted) setState(() => _showMinimalPulse = false);
@@ -148,7 +157,7 @@ class _DecisionToggleState extends State<DecisionToggle> {
               Expanded(
                 child: _ToggleOption(
                   label: strings.pondering,
-                  selected: widget.isSaved == null,
+                  selected: widget.hasSelection && widget.isSaved == null,
                   color: skipTheme.ponderingColor,
                   onTap: _selectPondering,
                 ),
@@ -157,7 +166,7 @@ class _DecisionToggleState extends State<DecisionToggle> {
               Expanded(
                 child: _ToggleOption(
                   label: strings.boughtIt,
-                  selected: widget.isSaved == false,
+                  selected: widget.hasSelection && widget.isSaved == false,
                   color: skipTheme.spentColor,
                   onTap: _selectBought,
                 ),
