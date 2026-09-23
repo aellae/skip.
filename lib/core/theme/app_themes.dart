@@ -434,17 +434,13 @@ class AppThemes {
       color: AppColors.y2kDeepSurface,
       elevation: 4,
       shadowColor: AppColors.y2kHotMagenta.withValues(alpha: 0.4),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.y2kHotMagenta,
         foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         elevation: 6,
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
       ),
@@ -476,9 +472,7 @@ class AppThemes {
       backgroundColor: AppColors.y2kDeepSurface,
       elevation: 8,
       shadowColor: AppColors.y2kHotMagenta.withValues(alpha: 0.4),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       titleTextStyle: _y2kTextTheme.headlineSmall,
       contentTextStyle: _y2kTextTheme.bodyMedium,
     ),
@@ -496,9 +490,7 @@ class AppThemes {
       backgroundColor: AppColors.y2kDeepSurface,
       contentTextStyle: _y2kTextTheme.bodyMedium?.copyWith(color: Colors.white),
       behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       actionTextColor: AppColors.y2kHotMagenta,
     ),
     dividerTheme: DividerThemeData(
