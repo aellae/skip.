@@ -393,10 +393,10 @@ class AppStrings {
       AppLocale.de => 'Diese Datei ist kein gültiges JSON.',
     },
     BackupFormatError.notASkipBackup => switch (locale) {
-      AppLocale.en => "That file doesn't look like a SKIP backup.",
-      AppLocale.it => 'Il file non sembra essere un backup di SKIP.',
-      AppLocale.fr => 'Ce fichier ne semble pas être une sauvegarde SKIP.',
-      AppLocale.de => 'Diese Datei scheint kein SKIP-Backup zu sein.',
+      AppLocale.en => "That file doesn't look like a Skip! backup.",
+      AppLocale.it => 'Il file non sembra essere un backup di Skip!',
+      AppLocale.fr => 'Ce fichier ne semble pas être une sauvegarde de Skip!',
+      AppLocale.de => 'Diese Datei scheint kein Backup von Skip! zu sein.',
     },
     BackupFormatError.invalidItemEntry => switch (locale) {
       AppLocale.en => 'The backup contains an invalid item entry.',
@@ -627,19 +627,19 @@ class AppStrings {
   };
   String get privacyPolicyBody => switch (locale) {
     AppLocale.en =>
-      'SKIP has no servers, no accounts, and no analytics. Everything you '
+      'Skip! has no servers, no accounts, and no analytics. Everything you '
           'enter — photos, prices, titles, categories — stays only on your '
           'device and is never uploaded anywhere.',
     AppLocale.it =>
-      'SKIP non ha server, account o analisi statistiche. Tutto ciò che '
+      'Skip! non ha server, account o analisi statistiche. Tutto ciò che '
           'inserisci — foto, prezzi, titoli, categorie — resta solo sul tuo '
           'dispositivo e non viene mai caricato altrove.',
     AppLocale.fr =>
-      "SKIP n'a ni serveurs, ni comptes, ni outils d'analyse. Tout ce que "
+      "Skip! n'a ni serveurs, ni comptes, ni outils d'analyse. Tout ce que "
           'vous saisissez — photos, prix, titres, catégories — reste '
           "uniquement sur votre appareil et n'est jamais téléversé ailleurs.",
     AppLocale.de =>
-      'SKIP hat keine Server, keine Konten und keine Analysetools. Alles, '
+      'Skip! hat keine Server, keine Konten und keine Analysetools. Alles, '
           'was du eingibst – Fotos, Preise, Titel, Kategorien – bleibt nur '
           'auf deinem Gerät und wird nirgendwohin hochgeladen.',
   };

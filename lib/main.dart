@@ -97,7 +97,7 @@ class SkipApp extends StatelessWidget {
         child: Consumer2<ThemeProvider, LocaleProvider>(
           builder: (context, themeProvider, localeProvider, _) {
             return MaterialApp(
-              title: 'SKIP',
+              title: 'Skip!',
               debugShowCheckedModeBanner: false,
               navigatorKey: navigatorKeyOverride,
               theme: themeProvider.themeData,

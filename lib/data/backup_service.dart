@@ -168,7 +168,7 @@ class BackupService {
     if (decoded is! Map || decoded['items'] is! List) {
       throw const BackupFormatException(
         BackupFormatError.notASkipBackup,
-        "That file doesn't look like a SKIP backup.",
+        "That file doesn't look like a Skip! backup.",
       );
     }
 
