@@ -28,13 +28,13 @@ class AppStrings {
   };
   String get emptyHomeMessage => switch (locale) {
     AppLocale.en =>
-      "Nothing logged yet.\nTap + to snap something you're tempted to buy.",
+      "Nothing logged yet.\nTap the camera button to snap something you're tempted to buy.",
     AppLocale.it =>
-      'Ancora nessun articolo.\nTocca + per fotografare qualcosa che vorresti comprare.',
+      'Ancora nessun articolo.\nTocca il pulsante della fotocamera per fotografare qualcosa che vorresti comprare.',
     AppLocale.fr =>
-      "Rien d'enregistré pour l'instant.\nAppuyez sur + pour photographier quelque chose que vous êtes tenté d'acheter.",
+      "Rien d'enregistré pour l'instant.\nAppuyez sur le bouton appareil photo pour photographier quelque chose que vous êtes tenté d'acheter.",
     AppLocale.de =>
-      'Noch nichts erfasst.\nTippe auf +, um etwas zu fotografieren, das du kaufen möchtest.',
+      'Noch nichts erfasst.\nTippe auf den Kamera-Button, um etwas zu fotografieren, das du kaufen möchtest.',
   };
 
   // Item detail screen
@@ -566,9 +566,9 @@ class AppStrings {
   };
   String hourlyWageValue(String formattedAmount) => switch (locale) {
     AppLocale.en => '$formattedAmount / hr',
-    AppLocale.it => '$formattedAmount /ora',
-    AppLocale.fr => '$formattedAmount /h',
-    AppLocale.de => '$formattedAmount /Std.',
+    AppLocale.it => '$formattedAmount / ora',
+    AppLocale.fr => '$formattedAmount / h',
+    AppLocale.de => '$formattedAmount / Std.',
   };
   String hoursOfWork(double hours) {
     final formatted = formatHoursOfWork(hours, locale);
