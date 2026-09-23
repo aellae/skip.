@@ -363,6 +363,9 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                             labelText: strings.priceLabel,
                             prefixText: isEuro ? null : '\$ ',
                             suffixText: isEuro ? '€' : null,
+                            // The field shares its row with the quantity stepper,
+                            // so let a long (e.g. German) error wrap, not truncate.
+                            errorMaxLines: 3,
                             // The decimal numeric keypad has no native
                             // return key on iOS, so give the field its own
                             // dismiss affordance instead of relying on

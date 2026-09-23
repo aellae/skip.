@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import 'package:skip/core/localization/app_currency.dart';
+import 'package:skip/core/localization/app_locale.dart';
+import 'package:skip/core/localization/app_strings.dart';
 import 'package:skip/core/localization/currency_provider.dart';
 import 'package:skip/core/localization/locale_provider.dart';
 import 'package:skip/core/settings/sfx_provider.dart';
@@ -41,6 +44,8 @@ void main() {
     Future<bool> Function(Uri url)? launchUrlOverride,
     AppCurrency currency = AppCurrency.usd,
     double? hourlyWage,
+    AppLocale? locale,
+    ThemeData? theme,
   }) async {
     await itemsProvider.addItem(
       title: 'Jacket',
@@ -55,7 +60,9 @@ void main() {
       MultiProvider(
         providers: [
           ChangeNotifierProvider.value(value: itemsProvider),
-          ChangeNotifierProvider(create: (_) => LocaleProvider()),
+          ChangeNotifierProvider(
+            create: (_) => LocaleProvider(initial: locale),
+          ),
           ChangeNotifierProvider(
             create: (_) => CurrencyProvider(initial: currency),
           ),
@@ -65,7 +72,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
-          theme: AppThemes.minimal,
+          theme: theme ?? AppThemes.minimal,
           home: ItemDetailScreen(
             item: item,
             launchUrlOverride: launchUrlOverride,
@@ -361,4 +368,36 @@ void main() {
 
     expect(find.widgetWithText(TextFormField, '120,00'), findsOneWidget);
   });
+
+  for (final theme in [AppThemes.minimal, AppThemes.y2k]) {
+    testWidgets(
+      'the edit-details price error wraps instead of truncating '
+      '(German, ${theme.extension<SkipThemeExtension>()!.isY2K ? 'y2k' : 'minimal'})',
+      (tester) async {
+        const strings = AppStrings(AppLocale.de);
+        await pumpDetail(tester, locale: AppLocale.de, theme: theme);
+
+        await tester.ensureVisible(find.byIcon(Icons.edit));
+        await tester.tap(find.byIcon(Icons.edit));
+        await tester.pumpAndSettle();
+        final field = tester.widget<TextFormField>(
+          find.widgetWithText(TextFormField, strings.priceLabel),
+        );
+        field.controller!.text = '0';
+        await tester.tap(find.text(strings.save));
+        await tester.pumpAndSettle();
+
+        final error = tester.renderObject<RenderParagraph>(
+          find
+              .descendant(
+                of: find.text(strings.priceGreaterThanZero),
+                matching: find.byType(RichText),
+              )
+              .first,
+        );
+        expect(error.didExceedMaxLines, isFalse);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 }
