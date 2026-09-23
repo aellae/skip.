@@ -8,6 +8,7 @@ import '../../../core/localization/app_locale.dart';
 import '../../../core/theme/app_themes.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/widgets/fit_words_text.dart';
 import '../../../data/models/monthly_total.dart';
 
 /// Grouped bar chart: saved (left bar) vs spent (right bar) per month.
@@ -28,8 +29,6 @@ class MonthlyBarChart extends StatelessWidget {
     final theme = Theme.of(context);
     final skipTheme = theme.extension<SkipThemeExtension>()!;
     final axisStyle = theme.textTheme.labelSmall;
-    // fl_chart reserves a fixed box for axis labels, so grow it with the
-    // system text size — otherwise large text gets truncated there.
     final textScaler = MediaQuery.textScalerOf(context);
     final barRadius = BorderRadius.vertical(
       top: Radius.circular(skipTheme.isY2K ? 8 : 3),
@@ -74,97 +73,177 @@ class MonthlyBarChart extends StatelessWidget {
       );
     }
 
-    return BarChart(
-      duration: const Duration(milliseconds: 600),
-      curve: Curves.easeOutCubic,
-      BarChartData(
-        maxY: maxY,
-        alignment: BarChartAlignment.spaceAround,
-        gridData: const FlGridData(show: false),
-        borderData: FlBorderData(show: false),
-        barTouchData: BarTouchData(
-          enabled: true,
-          touchTooltipData: BarTouchTooltipData(
-            // fl_chart's tooltip defaults to a 4px radius — round it to match
-            // the app's own card language instead of the package default.
-            tooltipBorderRadius: BorderRadius.circular(skipTheme.cardRadius),
-            getTooltipColor: (_) => skipTheme.cardBackground,
-            getTooltipItem: (group, groupIndex, rod, rodIndex) {
-              final statusColor = rodIndex == 0
-                  ? skipTheme.savedColor
-                  : skipTheme.spentColor;
-              return BarTooltipItem(
-                formatCurrencyCompact(rod.toY, currency: currency),
-                (axisStyle ?? const TextStyle()).copyWith(color: statusColor),
-              );
-            },
-          ),
-        ),
-        titlesData: FlTitlesData(
-          show: true,
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: textScaler.scale(44),
-              interval: axisInterval,
-              // fl_chart always labels the exact chart maxY by default
-              // (maxIncluded), even when it isn't a clean multiple of
-              // interval. Since maxY here is intentionally headroom above
-              // the last real tick (see below), suppress that forced label
-              // so only evenly-spaced multiples of axisInterval are shown.
-              maxIncluded: false,
-              getTitlesWidget: (value, meta) => SideTitleWidget(
-                meta: meta,
-                fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
-                child: Text(
-                  formatCurrencyCompact(value, currency: currency),
-                  style: axisStyle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+    // fl_chart reserves a fixed box for axis labels, so size it from the
+    // labels actually drawn (locale, currency, font and system text size
+    // all change their width). At large text sizes it's capped so the
+    // labels can't squeeze the plot away; they scale down to fit instead.
+    final leftLabels = [
+      for (var v = 0.0; v < maxY; v += axisInterval)
+        formatCurrencyCompact(v, currency: currency),
+    ];
+    final monthLabels = [
+      for (final m in monthlyTotals) monthAbbreviation(m.month, locale),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final style = DefaultTextStyle.of(context).style.merge(axisStyle);
+        final textDirection = Directionality.of(context);
+        var leftScaler = textScaler;
+        var bottomScaler = textScaler;
+        var leftReserved =
+            _widest(leftLabels, style, textScaler, textDirection) + _titleSpace;
+        if (constraints.hasBoundedWidth) {
+          final maxReserved = constraints.maxWidth * _maxAxisShare;
+          if (leftReserved > maxReserved) {
+            leftScaler = FitWordsText.fitScaler(
+              leftLabels,
+              style: style,
+              maxWidth: maxReserved - _titleSpace,
+              textScaler: textScaler,
+              textDirection: textDirection,
+            );
+            leftReserved = maxReserved;
+          }
+          if (monthLabels.isNotEmpty) {
+            bottomScaler = FitWordsText.fitScaler(
+              monthLabels,
+              style: style,
+              maxWidth:
+                  (constraints.maxWidth - leftReserved) / monthLabels.length,
+              textScaler: textScaler,
+              textDirection: textDirection,
+            );
+          }
+        }
+
+        return BarChart(
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeOutCubic,
+          BarChartData(
+            maxY: maxY,
+            alignment: BarChartAlignment.spaceAround,
+            gridData: const FlGridData(show: false),
+            borderData: FlBorderData(show: false),
+            barTouchData: BarTouchData(
+              enabled: true,
+              touchTooltipData: BarTouchTooltipData(
+                // fl_chart's tooltip defaults to a 4px radius — round it to match
+                // the app's own card language instead of the package default.
+                tooltipBorderRadius: BorderRadius.circular(
+                  skipTheme.cardRadius,
+                ),
+                getTooltipColor: (_) => skipTheme.cardBackground,
+                getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                  final statusColor = rodIndex == 0
+                      ? skipTheme.savedColor
+                      : skipTheme.spentColor;
+                  return BarTooltipItem(
+                    formatCurrencyCompact(rod.toY, currency: currency),
+                    (axisStyle ?? const TextStyle()).copyWith(
+                      color: statusColor,
+                    ),
+                  );
+                },
+              ),
+            ),
+            titlesData: FlTitlesData(
+              show: true,
+              rightTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              topTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: leftReserved,
+                  interval: axisInterval,
+                  // fl_chart always labels the exact chart maxY by default
+                  // (maxIncluded), even when it isn't a clean multiple of
+                  // interval. Since maxY here is intentionally headroom above
+                  // the last real tick (see below), suppress that forced label
+                  // so only evenly-spaced multiples of axisInterval are shown.
+                  maxIncluded: false,
+                  getTitlesWidget: (value, meta) => SideTitleWidget(
+                    meta: meta,
+                    fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
+                    child: Text(
+                      formatCurrencyCompact(value, currency: currency),
+                      style: axisStyle,
+                      textScaler: leftScaler,
+                      maxLines: 1,
+                      softWrap: false,
+                    ),
+                  ),
+                ),
+              ),
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: bottomScaler.scale(20) + 8,
+                  getTitlesWidget: (value, meta) {
+                    final index = value.toInt();
+                    if (index < 0 || index >= monthlyTotals.length) {
+                      return const SizedBox.shrink();
+                    }
+                    return SideTitleWidget(
+                      meta: meta,
+                      space: 8,
+                      child: Text(
+                        monthAbbreviation(monthlyTotals[index].month, locale),
+                        style: axisStyle,
+                        textScaler: bottomScaler,
+                        maxLines: 1,
+                        softWrap: false,
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
+            barGroups: [
+              for (var i = 0; i < monthlyTotals.length; i++)
+                BarChartGroupData(
+                  x: i,
+                  barsSpace: 4,
+                  barRods: [
+                    rod(monthlyTotals[i].saved, skipTheme.savedColor),
+                    rod(monthlyTotals[i].spent, skipTheme.spentColor),
+                  ],
+                ),
+            ],
           ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: textScaler.scale(20) + 8,
-              getTitlesWidget: (value, meta) {
-                final index = value.toInt();
-                if (index < 0 || index >= monthlyTotals.length) {
-                  return const SizedBox.shrink();
-                }
-                return SideTitleWidget(
-                  meta: meta,
-                  space: 8,
-                  child: Text(
-                    monthAbbreviation(monthlyTotals[index].month, locale),
-                    style: axisStyle,
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-        barGroups: [
-          for (var i = 0; i < monthlyTotals.length; i++)
-            BarChartGroupData(
-              x: i,
-              barsSpace: 4,
-              barRods: [
-                rod(monthlyTotals[i].saved, skipTheme.savedColor),
-                rod(monthlyTotals[i].spent, skipTheme.spentColor),
-              ],
-            ),
-        ],
-      ),
+        );
+      },
     );
+  }
+
+  /// fl_chart's default gap between a side title and the plot.
+  static const double _titleSpace = 8;
+
+  /// The most of the chart's width the y-axis labels may take.
+  static const double _maxAxisShare = 0.25;
+
+  static double _widest(
+    List<String> labels,
+    TextStyle style,
+    TextScaler textScaler,
+    TextDirection textDirection,
+  ) {
+    var widest = 0.0;
+    for (final label in labels) {
+      final painter = TextPainter(
+        text: TextSpan(text: label, style: style),
+        textDirection: textDirection,
+        textScaler: textScaler,
+        maxLines: 1,
+      )..layout();
+      widest = max(widest, painter.width.ceilToDouble() + 1);
+      painter.dispose();
+    }
+    return widest;
   }
 
   /// Rounds [rough] up to the nearest 1/2/5 * 10^n step, so Y-axis labels
