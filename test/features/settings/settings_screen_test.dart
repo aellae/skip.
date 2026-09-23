@@ -72,7 +72,9 @@ void main() {
     expect(find.text(formatCurrency(20)), findsOneWidget);
   });
 
-  testWidgets('tapping Baddie Y2K switches the active aesthetic', (tester) async {
+  testWidgets('tapping Baddie Y2K switches the active aesthetic', (
+    tester,
+  ) async {
     final themeProvider = ThemeProvider();
     await pumpSettings(
       tester,
@@ -104,7 +106,7 @@ void main() {
     expect(themeProvider.isY2K, isFalse);
   });
 
-  testWidgets('shows the Data section with export/import backup actions', (
+  testWidgets('shows the Data section with the restore-backup action', (
     tester,
   ) async {
     await pumpSettings(
@@ -113,10 +115,12 @@ void main() {
       itemsProvider: buildTestItemsProvider(),
     );
 
-    await tester.scrollUntilVisible(find.text('Data'), 200);
+    await tester.scrollUntilVisible(
+      find.text('Restore last automatic backup'),
+      200,
+    );
     expect(find.text('Data'), findsOneWidget);
-    expect(find.text('Export backup'), findsOneWidget);
-    expect(find.text('Import backup'), findsOneWidget);
+    expect(find.text('Restore last automatic backup'), findsOneWidget);
   });
 
   testWidgets('tapping Italiano switches the app to Italian', (tester) async {
@@ -210,7 +214,7 @@ void main() {
 
       expect(localeProvider.isItalian, isTrue);
       expect(currencyProvider.currency, AppCurrency.usd);
-      expect(find.text('Dollaro USA'), findsOneWidget);
+      expect(find.text('Dollaro'), findsOneWidget);
     },
   );
 

@@ -57,7 +57,7 @@ lib/
 ├── data/
 │   ├── database_helper.dart       # SQLite singleton database helper (schema v6)
 │   ├── items_provider.dart        # ChangeNotifier data facade — feature code goes through this, not the DB directly
-│   ├── backup_service.dart        # JSON/CSV export, JSON import, automatic local safety-net backup
+│   ├── backup_service.dart        # Automatic local safety-net backup (JSON write + restore)
 │   └── models/
 │       ├── item_model.dart        # Item model (toMap / fromMap)
 │       └── monthly_total.dart
@@ -125,9 +125,9 @@ flutter test
 - **Item Entry** — quick-add form (photo optional, price/quantity/title/purchase-URL). No separate "Save" button: tapping the `DecisionToggle` (Resisted/Pondering/Bought) sets the decision and persists the item in one action.
 - **Insights** — this month's saved/spent totals plus a 6-month bar chart comparing saved vs. spent (`fl_chart`).
 - **Coin Flip** — standalone decision tool (3D-flip animation, confetti, haptics); does **not** read/write `ItemsProvider` or the database.
-- **Settings** — aesthetic switcher, language (EN/IT/FR/DE), currency (USD/EUR), hourly-wage editor, sound toggle, stat tiles, backup section (export JSON/CSV, import JSON, restore last automatic backup), link to Trash, and a static PayPal support page.
+- **Settings** — aesthetic switcher, language (EN/IT/FR/DE), currency (USD/EUR), hourly-wage editor, sound toggle, stat tiles, backup section (restore last automatic backup), link to Trash, and a static PayPal support page.
 - **Trash** — lists soft-deleted items with per-item restore; never purges itself. Permanent purging (`purgeExpiredTrash`, which also deletes orphaned image files) is triggered once, from `HomeScreen.initState`.
-- **Backup/Restore** — fully local (no HTTP). Manual JSON/CSV export via `share_plus`, manual JSON import via `file_picker`, and an automatic safety-net backup (`ItemsProvider.load()` throttles writes to once per 10 minutes) restorable via `ItemsProvider.restoreFromAutoBackup()`. Backups don't include photos, only records.
+- **Backup/Restore** — fully local (no HTTP). An automatic safety-net backup (`ItemsProvider.load()` throttles writes to once per 10 minutes) restorable via `ItemsProvider.restoreFromAutoBackup()`. Backups don't include photos, only records.
 - **Theming** — `SkipThemeExtension` carries app-specific tokens (`savedColor`/`spentColor`/`ponderingColor`, `cardRadius`, `accentGradient`, `logoText`, etc.) alongside the two full `ThemeData` objects in `AppThemes` (`minimal`, `y2k`). Switching aesthetics also swaps the iOS home-screen app icon via a native `MethodChannel`.
 
 Full functional detail and reusable building blocks are documented in [docs/NEW_FEATURE_GUIDE.md](docs/NEW_FEATURE_GUIDE.md#whats-already-implemented).

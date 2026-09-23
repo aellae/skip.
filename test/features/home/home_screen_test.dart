@@ -108,7 +108,16 @@ void main() {
     await tester.pumpWidget(_buildApp(itemsProvider, theme: AppThemes.y2k));
     await tester.pumpAndSettle();
 
-    expect(find.text('Skip!'), findsOneWidget);
+    // The logo is a themed PNG wordmark, labelled with logoText for a11y.
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Image &&
+            w.image == const AssetImage('assets/images/logo_y2k.png') &&
+            w.semanticLabel == 'Skip!',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('tapping the insights icon opens the Insights screen', (

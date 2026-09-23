@@ -52,7 +52,8 @@
                 tools:text="SEP" />
         </LinearLayout>
 
-        <View
+        <!-- FrameLayout, not View: RemoteViews refuses to inflate a bare View. -->
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1"

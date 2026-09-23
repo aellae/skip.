@@ -13,6 +13,7 @@ import android.text.style.StyleSpan
 import android.text.style.TypefaceSpan
 import android.view.View
 import android.widget.RemoteViews
+import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetPlugin
 import es.antonborri.home_widget.HomeWidgetProvider
 import java.text.SimpleDateFormat
@@ -147,6 +148,12 @@ class SkipHomeWidgetProvider : HomeWidgetProvider() {
         val views =
             RemoteViews(context.packageName, layout).apply {
                 setImageViewResource(R.id.widget_background, aesthetic.backgroundRes)
+                // The background spans the whole card and its siblings aren't
+                // clickable, so a tap anywhere opens the app, as on iOS.
+                setOnClickPendingIntent(
+                    R.id.widget_background,
+                    HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java),
+                )
                 setImageViewResource(R.id.widget_logo, aesthetic.logoRes)
 
                 setTextViewText(R.id.widget_month, month)
@@ -198,7 +205,7 @@ class SkipHomeWidgetProvider : HomeWidgetProvider() {
 
     /**
      * Today's line, already translated and in the aesthetic's voice (see
-     * `widgetMottosMinimal`/`widgetMottosY2k` in app_strings.dart). One per
+     * `mottosMinimal`/`mottosY2k` in app_strings.dart). One per
      * local calendar day, so it rotates without the app being opened.
      */
     private fun motto(prefs: SharedPreferences, isEmpty: Boolean): String {

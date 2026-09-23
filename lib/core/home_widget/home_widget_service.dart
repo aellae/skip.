@@ -5,6 +5,7 @@ import 'package:home_widget/home_widget.dart';
 import '../localization/app_currency.dart';
 import '../localization/app_strings.dart';
 import '../theme/theme_provider.dart';
+import '../utils/motto_picker.dart';
 
 /// Bridges this-month saved/spent totals into the home-screen widget on iOS
 /// (`SkipWidget`, see ios/SkipWidget/SkipWidget.swift, via the shared App
@@ -36,19 +37,22 @@ class HomeWidgetService {
       // language's copy pre-translated, and in the active aesthetic's voice
       // (calm for "Skip!", sassy for "Skip!"). Mottos travel newline-joined;
       // the widget picks one per day so it rotates without the app being
-      // opened.
+      // opened. Mottos are typeset first (non-breaking spaces) so they wrap
+      // cleanly in every language on the native side too.
       final isY2k = aesthetic == SkipAesthetic.y2k;
       await HomeWidget.saveWidgetData<String>('savedLabel', strings.saved);
       await HomeWidget.saveWidgetData<String>('spentLabel', strings.spent);
       await HomeWidget.saveWidgetData<String>(
         'mottos',
-        (isY2k ? strings.widgetMottosY2k : strings.widgetMottosMinimal).join(
-          '\n',
-        ),
+        (isY2k ? strings.mottosY2k : strings.mottosMinimal)
+            .map(typesetMotto)
+            .join('\n'),
       );
       await HomeWidget.saveWidgetData<String>(
         'mottoEmpty',
-        isY2k ? strings.widgetMottoEmptyY2k : strings.widgetMottoEmptyMinimal,
+        typesetMotto(
+          isY2k ? strings.widgetMottoEmptyY2k : strings.widgetMottoEmptyMinimal,
+        ),
       );
       await HomeWidget.updateWidget(
         iOSName: _iOSWidgetName,

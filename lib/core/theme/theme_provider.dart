@@ -41,14 +41,15 @@ class ThemeProvider extends ChangeNotifier {
   Future<void> loadSaved() async {
     final prefs = await SharedPreferences.getInstance();
     final name = prefs.getString(_prefsKey);
-    if (name == null) return;
     final saved = SkipAesthetic.values.where((a) => a.name == name).firstOrNull;
     if (saved != null && saved != _aesthetic) {
       _aesthetic = saved;
       notifyListeners();
     }
     // Keep the home screen icon in sync even if a previous icon switch
-    // never completed (e.g. the user dismissed the system prompt).
+    // never completed (e.g. the user dismissed the system prompt), or app
+    // data was cleared while the Y2K icon was active (Android keeps the
+    // launcher alias state across "Clear storage").
     AppIconChannel.setAlternateIconName(_alternateIconNameFor(_aesthetic));
   }
 

@@ -15,6 +15,7 @@ import '../item_entry/item_entry_screen.dart';
 import '../settings/settings_screen.dart';
 import 'item_detail_screen.dart';
 import 'widgets/home_loading_skeleton.dart';
+import 'widgets/home_motto.dart';
 import 'widgets/item_grid_card.dart';
 import 'widgets/summary_cards.dart';
 
@@ -103,6 +104,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                       ),
                     ),
+                  ),
+                  const SliverPadding(
+                    padding: EdgeInsets.fromLTRB(
+                      AppSpacing.xl,
+                      0,
+                      AppSpacing.xl,
+                      AppSpacing.lg,
+                    ),
+                    sliver: SliverToBoxAdapter(child: HomeMotto()),
                   ),
                   if (itemsProvider.items.isEmpty)
                     SliverFillRemaining(

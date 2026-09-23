@@ -225,10 +225,6 @@ class ItemsProvider extends ChangeNotifier {
     if (purged > 0) await load();
   }
 
-  Future<String> buildJsonBackup() => _backupService.buildJsonBackup();
-
-  Future<String> buildCsvBackup() => _backupService.buildCsvBackup();
-
   /// Parses [jsonContent] as a SKIP backup and imports its items (additive
   /// — existing data is kept), then refreshes state. Throws
   /// [BackupFormatException] if [jsonContent] isn't a valid backup; the

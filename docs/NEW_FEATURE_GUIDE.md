@@ -96,7 +96,7 @@ Key methods: `insertItem`, `updateItem`, `getItemById`, `getAllItems({isSaved, p
 
 ### Backup/restore (`lib/data/backup_service.dart`)
 
-All local, no HTTP. Manual export (JSON + CSV via `share_plus`) and manual JSON import (via `file_picker`), plus an **automatic safety-net backup**: `ItemsProvider.load()` throttles `writeAutoBackup()` to once per 10 minutes, writing `skip_autobackup.json`. Restoring it goes through `ItemsProvider.restoreFromAutoBackup()`, which returns a sealed result (`AutoBackupRestored`/`AutoBackupAlreadyRestored`/`AutoBackupNotFound`) tracked via a `SharedPreferences` flag so the same snapshot can't be imported twice. Backups don't include photos — only records — so a restored item can show a blank image tile.
+All local, no HTTP. The only backup feature is the **automatic safety-net backup**: `ItemsProvider.load()` throttles `writeAutoBackup()` to once per 10 minutes, writing `skip_autobackup.json`. Restoring it goes through `ItemsProvider.restoreFromAutoBackup()`, which returns a sealed result (`AutoBackupRestored`/`AutoBackupAlreadyRestored`/`AutoBackupNotFound`) tracked via a `SharedPreferences` flag so the same snapshot can't be imported twice. Backups don't include photos — only records — so a restored item can show a blank image tile.
 
 ### Features (`lib/features/`)
 
@@ -118,4 +118,4 @@ All local, no HTTP. Manual export (JSON + CSV via `share_plus`) and manual JSON 
 
 ### Key dependencies (`pubspec.yaml`)
 
-`sqflite`/`path`/`path_provider` (storage), `provider` (state), `image_picker`, `flutter_staggered_grid_view` (home grid), `confetti` + `audioplayers` + `shimmer` (celebratory effects), `fl_chart` (Insights), `csv`/`share_plus`/`file_picker` (backup import/export), `url_launcher`, `shared_preferences` (all persisted settings). Dev-only: `mocktail`, `sqflite_common_ffi` (in-memory DB for tests), `flutter_launcher_icons`, `integration_test`.
+`sqflite`/`path`/`path_provider` (storage), `provider` (state), `image_picker`, `flutter_staggered_grid_view` (home grid), `confetti` + `audioplayers` + `shimmer` (celebratory effects), `fl_chart` (Insights), `url_launcher`, `shared_preferences` (all persisted settings). Dev-only: `mocktail`, `sqflite_common_ffi` (in-memory DB for tests), `flutter_launcher_icons`, `integration_test`.

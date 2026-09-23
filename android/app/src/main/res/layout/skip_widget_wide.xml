@@ -51,6 +51,7 @@
                 android:autoSizeMinTextSize="12sp"
                 android:autoSizeStepGranularity="1sp"
                 android:autoSizeTextType="uniform"
+                android:breakStrategy="balanced"
                 android:ellipsize="end"
                 android:gravity="bottom|start"
                 android:maxLines="4"
@@ -77,7 +78,8 @@
                 android:textStyle="bold"
                 tools:text="SEPTEMBER" />
 
-            <View
+            <!-- FrameLayout, not View: RemoteViews refuses to inflate a bare View. -->
+            <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_weight="1"

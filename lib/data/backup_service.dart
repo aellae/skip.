@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:csv/csv.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -133,34 +132,6 @@ class BackupService {
       'items': items.map((item) => item.toMap()).toList(),
     };
     return const JsonEncoder.withIndent('  ').convert(payload);
-  }
-
-  Future<String> buildCsvBackup() async {
-    final items = await _db.getAllItems();
-    final rows = <List<dynamic>>[
-      [
-        'title',
-        'price',
-        'quantity',
-        'image_path',
-        'is_saved',
-        'category',
-        'created_at',
-        'purchase_url',
-      ],
-      for (final item in items)
-        [
-          item.title ?? '',
-          item.price,
-          item.quantity,
-          item.imagePath ?? '',
-          item.isSaved == null ? '' : (item.isSaved! ? 1 : 0),
-          item.category ?? '',
-          item.createdAt.toIso8601String(),
-          item.purchaseUrl ?? '',
-        ],
-    ];
-    return Csv().encode(rows);
   }
 
   /// Reads the `exportedAt` field out of a SKIP JSON backup written by

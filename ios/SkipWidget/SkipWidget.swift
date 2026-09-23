@@ -151,16 +151,24 @@ struct SkipWidgetEntry: TimelineEntry {
     var savedLabel = "Saved"
     var spentLabel = "Spent"
     /// Today's line for the medium widget, already translated and in the
-    /// aesthetic's voice (see `widgetMottosMinimal`/`widgetMottosY2k` in
+    /// aesthetic's voice (see `mottosMinimal`/`mottosY2k` in
     /// app_strings.dart).
     var motto = "Want it, or want it today?"
 }
 
 /// Picks one motto per calendar day, so the line changes at midnight (when
-/// the timeline below refreshes) without the app being opened.
+/// the timeline below refreshes) without the app being opened. Must stay in
+/// sync with `mottoOfTheDay` in lib/core/utils/motto_picker.dart, so the
+/// widget and the app's Home screen show the same line: both index by whole
+/// days since 1970-01-01 for the local Gregorian date.
 private func mottoOfTheDay(_ mottos: [String], on date: Date) -> String? {
     guard !mottos.isEmpty else { return nil }
-    let day = Calendar.current.ordinality(of: .day, in: .era, for: date) ?? 0
+    let local = Calendar(identifier: .gregorian)
+    var utc = Calendar(identifier: .gregorian)
+    utc.timeZone = TimeZone(identifier: "UTC")!
+    let parts = local.dateComponents([.year, .month, .day], from: date)
+    guard let midnightUTC = utc.date(from: parts) else { return mottos[0] }
+    let day = Int(midnightUTC.timeIntervalSince1970 / 86400)
     return mottos[day % mottos.count]
 }
 

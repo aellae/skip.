@@ -201,89 +201,57 @@ void main() {
       expect(all.map((i) => i.imagePath), containsAll(['a.jpg', 'b.jpg']));
     });
 
-    test(
-      'skips an item that matches one already sitting in Trash, rather '
-      'than resurrecting it as a new live row',
-      () async {
-        final id = await db.insertItem(
-          ItemModel(
-            title: 'Jacket',
-            price: 120,
-            imagePath: 'a.jpg',
-            isSaved: true,
-            category: 'Clothes',
-            createdAt: DateTime.utc(2026, 1, 1),
-          ),
-        );
-        await db.deleteItem(id);
-
-        final count = await backup.importItems([
-          ItemModel(
-            id: 999,
-            title: 'Jacket',
-            price: 120,
-            imagePath: 'a.jpg',
-            isSaved: true,
-            category: 'Clothes',
-            createdAt: DateTime.utc(2026, 1, 1),
-          ),
-        ]);
-
-        expect(count, 0);
-        expect(await db.getAllItems(), isEmpty);
-        expect(await db.getTrashedItems(), hasLength(1));
-      },
-    );
-
-    test(
-      'skips duplicates within the same import batch, not just against '
-      'existing data',
-      () async {
-        final count = await backup.importItems([
-          ItemModel(
-            price: 10,
-            imagePath: 'c.jpg',
-            isSaved: true,
-            createdAt: DateTime.utc(2026, 3, 1),
-          ),
-          ItemModel(
-            price: 10,
-            imagePath: 'c.jpg',
-            isSaved: true,
-            createdAt: DateTime.utc(2026, 3, 1),
-          ),
-        ]);
-
-        final all = await db.getAllItems();
-        expect(count, 1);
-        expect(all, hasLength(1));
-      },
-    );
-  });
-
-  group('buildCsvBackup', () {
-    test('includes a header row and one row per item', () async {
-      await db.insertItem(
+    test('skips an item that matches one already sitting in Trash, rather '
+        'than resurrecting it as a new live row', () async {
+      final id = await db.insertItem(
         ItemModel(
-          title: 'Shoes',
-          price: 50,
-          imagePath: 'shoes.jpg',
+          title: 'Jacket',
+          price: 120,
+          imagePath: 'a.jpg',
           isSaved: true,
+          category: 'Clothes',
           createdAt: DateTime.utc(2026, 1, 1),
-          purchaseUrl: 'https://example.com/shoes',
         ),
       );
+      await db.deleteItem(id);
 
-      final csv = await backup.buildCsvBackup();
-      final lines = csv.trim().split('\r\n');
+      final count = await backup.importItems([
+        ItemModel(
+          id: 999,
+          title: 'Jacket',
+          price: 120,
+          imagePath: 'a.jpg',
+          isSaved: true,
+          category: 'Clothes',
+          createdAt: DateTime.utc(2026, 1, 1),
+        ),
+      ]);
 
-      expect(lines, hasLength(2));
-      expect(lines.first, contains('title'));
-      expect(lines.first, contains('price'));
-      expect(lines.first, contains('purchase_url'));
-      expect(lines[1], contains('Shoes'));
-      expect(lines[1], contains('50'));
-      expect(lines[1], contains('https://example.com/shoes'));
+      expect(count, 0);
+      expect(await db.getAllItems(), isEmpty);
+      expect(await db.getTrashedItems(), hasLength(1));
+    });
+
+    test('skips duplicates within the same import batch, not just against '
+        'existing data', () async {
+      final count = await backup.importItems([
+        ItemModel(
+          price: 10,
+          imagePath: 'c.jpg',
+          isSaved: true,
+          createdAt: DateTime.utc(2026, 3, 1),
+        ),
+        ItemModel(
+          price: 10,
+          imagePath: 'c.jpg',
+          isSaved: true,
+          createdAt: DateTime.utc(2026, 3, 1),
+        ),
+      ]);
+
+      final all = await db.getAllItems();
+      expect(count, 1);
+      expect(all, hasLength(1));
     });
   });
 }

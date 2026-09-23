@@ -256,7 +256,7 @@ void main() {
 
   group('backups', () {
     test(
-      'buildJsonBackup / importJsonBackup round-trips into a fresh provider',
+      'BackupService.buildJsonBackup / importJsonBackup round-trips into a fresh provider',
       () async {
         await provider.addItem(
           title: 'Jacket',
@@ -265,7 +265,10 @@ void main() {
           isSaved: true,
         );
 
-        final json = await provider.buildJsonBackup();
+        final json = await BackupService(
+          databaseHelper: databaseHelper,
+          fileHelper: mockFileHelper,
+        ).buildJsonBackup();
 
         final freshDb = DatabaseHelper(
           fileHelper: mockFileHelper,
@@ -316,15 +319,6 @@ void main() {
         );
       },
     );
-
-    test('buildCsvBackup includes a header and item rows', () async {
-      await provider.addItem(price: 10, imagePath: 'a.jpg', isSaved: true);
-
-      final csv = await provider.buildCsvBackup();
-
-      expect(csv, contains('price'));
-      expect(csv, contains('10.0'));
-    });
   });
 
   group('monthly insights', () {

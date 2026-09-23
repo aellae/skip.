@@ -239,12 +239,6 @@ class AppStrings {
     AppLocale.fr => 'Le prix doit être supérieur à zéro.',
     AppLocale.de => 'Der Preis muss größer als null sein.',
   };
-  String get quantityLabel => switch (locale) {
-    AppLocale.en => 'Quantity',
-    AppLocale.it => 'Quantità',
-    AppLocale.fr => 'Quantité',
-    AppLocale.de => 'Menge',
-  };
   String get logAnItem => switch (locale) {
     AppLocale.en => 'Log an item',
     AppLocale.it => 'Registra un articolo',
@@ -262,12 +256,6 @@ class AppStrings {
     AppLocale.it => 'Nessuna foto',
     AppLocale.fr => 'Pas de photo',
     AppLocale.de => 'Kein Foto',
-  };
-  String get changePhotoTooltip => switch (locale) {
-    AppLocale.en => 'Change photo',
-    AppLocale.it => 'Cambia foto',
-    AppLocale.fr => 'Changer la photo',
-    AppLocale.de => 'Foto ändern',
   };
   String get removePhoto => switch (locale) {
     AppLocale.en => 'Remove photo',
@@ -336,36 +324,6 @@ class AppStrings {
       'Les photos restent uniquement sur cet appareil : les sauvegardes ne couvrent que les données des articles.',
     AppLocale.de =>
       'Fotos verbleiben nur auf diesem Gerät – Backups umfassen nur die Artikeldaten.',
-  };
-  String get exportBackup => switch (locale) {
-    AppLocale.en => 'Export backup',
-    AppLocale.it => 'Esporta backup',
-    AppLocale.fr => 'Exporter la sauvegarde',
-    AppLocale.de => 'Backup exportieren',
-  };
-  String get importBackup => switch (locale) {
-    AppLocale.en => 'Import backup',
-    AppLocale.it => 'Importa backup',
-    AppLocale.fr => 'Importer une sauvegarde',
-    AppLocale.de => 'Backup importieren',
-  };
-  String get exportAsJson => switch (locale) {
-    AppLocale.en => 'Export as JSON',
-    AppLocale.it => 'Esporta come JSON',
-    AppLocale.fr => 'Exporter en JSON',
-    AppLocale.de => 'Als JSON exportieren',
-  };
-  String get exportAsCsv => switch (locale) {
-    AppLocale.en => 'Export as CSV',
-    AppLocale.it => 'Esporta come CSV',
-    AppLocale.fr => 'Exporter en CSV',
-    AppLocale.de => 'Als CSV exportieren',
-  };
-  String get couldntExportBackup => switch (locale) {
-    AppLocale.en => "Couldn't export backup.",
-    AppLocale.it => 'Impossibile esportare il backup.',
-    AppLocale.fr => "Impossible d'exporter la sauvegarde.",
-    AppLocale.de => 'Backup konnte nicht exportiert werden.',
   };
   String get couldntReadFile => switch (locale) {
     AppLocale.en => "Couldn't read that file.",
@@ -712,13 +670,14 @@ class AppStrings {
     AppLocale.de => 'Lass es.',
   };
 
-  // Home-screen widget (pushed to the native widget by HomeWidgetService,
-  // since the iOS/Android extensions can't reach this class).
-  /// Short nudges the widget rotates through, one per day, in the calm
+  // Mottos: shown under the Home summary cards and pushed to the native
+  // widgets by HomeWidgetService (the iOS/Android extensions can't reach
+  // this class).
+  /// Short nudges the app and widgets rotate through, one per day, in the calm
   /// voice of the minimal "Skip!" aesthetic. Kept neutral so each reads right
   /// whether the month is going well or not, and short enough for three
   /// lines of a medium widget's half column.
-  List<String> get widgetMottosMinimal => switch (locale) {
+  List<String> get mottosMinimal => switch (locale) {
     AppLocale.en => const [
       'Want it, or want it today?',
       "Sleep on it. It'll still be there.",
@@ -757,9 +716,9 @@ class AppStrings {
     ],
   };
 
-  /// Same role as [widgetMottosMinimal], in the sassier voice of the Y2K
+  /// Same role as [mottosMinimal], in the sassier voice of the Y2K
   /// "Skip!" aesthetic. Still never scolds: the line shows on bad months too.
-  List<String> get widgetMottosY2k => switch (locale) {
+  List<String> get mottosY2k => switch (locale) {
     AppLocale.en => const [
       'Put the card down. Slowly.',
       'Cart abandoned. Iconic.',
