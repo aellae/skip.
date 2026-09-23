@@ -42,6 +42,9 @@ class _CoinFlipScreenState extends State<CoinFlipScreen>
   // landing. Its parity is what actually decides which face ends up facing
   // the viewer — see _flip — the base count is just for visual flair.
   int _totalHalfFlips = 8;
+
+  /// Below this body height (a phone in landscape) the layout tightens up.
+  static const double _compactHeight = 500;
   _CoinFace? _pendingResult;
   _CoinFace? _result;
 
@@ -113,118 +116,140 @@ class _CoinFlipScreenState extends State<CoinFlipScreen>
       body: SafeArea(
         child: EntranceFade(
           beginScale: 1.0,
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  strings.coinFlipSubtitle,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                ),
-                const SizedBox(height: 48),
-                Semantics(
-                  button: true,
-                  label: strings.flipTheCoin,
-                  onTap: _controller.isAnimating ? null : _flip,
-                  excludeSemantics: true,
-                  child: GestureDetector(
-                    onTap: _controller.isAnimating ? null : _flip,
-                    child: Stack(
-                      alignment: Alignment.topCenter,
-                      clipBehavior: Clip.none,
-                      children: [
-                        AnimatedBuilder(
-                          animation: _curve,
-                          builder: (context, _) {
-                            final angle = _curve.value * pi * _totalHalfFlips;
-                            // The "yes" (thumbs up) face is the disc's front at
-                            // rest; cos(angle) tells us which face is currently
-                            // turned toward the viewer as it spins through Y.
-                            final showYesFace = cos(angle) >= 0;
-                            return Transform(
-                              alignment: Alignment.center,
-                              transform: Matrix4.identity()
-                                ..setEntry(3, 2, 0.0015)
-                                ..rotateY(angle),
-                              child: _CoinDisc(
-                                skipTheme: skipTheme,
-                                theme: theme,
-                                shimmering: skipTheme.isY2K && _shimmering,
-                                showYesFace: showYesFace,
-                              ),
-                            );
-                          },
-                        ),
-                        ConfettiWidget(
-                          confettiController: _confettiController,
-                          blastDirectionality: BlastDirectionality.explosive,
-                          shouldLoop: false,
-                          numberOfParticles: skipTheme.isY2K ? 18 : 12,
-                          gravity: 0.25,
-                          particleDrag: 0.08,
-                          minimumSize: skipTheme.isY2K
-                              ? const Size(5, 5)
-                              : const Size(4, 4),
-                          maximumSize: skipTheme.isY2K
-                              ? const Size(10, 10)
-                              : const Size(6, 6),
-                          // Same split as DecisionToggle's confetti: round for
-                          // Y2K, confetti's default (smaller) squares for
-                          // Minimal.
-                          createParticlePath: skipTheme.isY2K
-                              ? (size) {
-                                  final radius = size.width / 2;
-                                  return Path()..addOval(
-                                    Rect.fromCircle(
-                                      center: Offset(radius, radius),
-                                      radius: radius,
-                                    ),
-                                  );
-                                }
-                              : null,
-                          colors: skipTheme.isY2K
-                              ? [
-                                  theme.colorScheme.primary,
-                                  theme.colorScheme.secondary,
-                                  skipTheme.accentHighlight,
-                                  Colors.white,
-                                ]
-                              : [
-                                  skipTheme.savedColor,
-                                  skipTheme.accentHighlight,
-                                  theme.colorScheme.primary,
-                                ],
-                        ),
-                      ],
+          // Centered when there's room; scrolls on short screens (a phone
+          // in landscape) instead of overflowing, with tighter gaps there
+          // so the result stays near the coin.
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxHeight < _compactHeight;
+              return SingleChildScrollView(
+                padding: EdgeInsets.all(compact ? 16 : 24),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: max(
+                      0,
+                      constraints.maxHeight - (compact ? 32 : 48),
                     ),
                   ),
-                ),
-                const SizedBox(height: 40),
-                SizedBox(
-                  height: 64,
-                  child: Center(
-                    child: _result == null
-                        ? const SizedBox.shrink()
-                        : _ResultReveal(
-                            key: ValueKey(_resultKey),
-                            child: Text(
-                              _result == _CoinFace.yes
-                                  ? strings.coinFlipYes
-                                  : strings.coinFlipNo,
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        strings.coinFlipSubtitle,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.7,
                           ),
+                        ),
+                      ),
+                      SizedBox(height: compact ? 16 : 48),
+                      Semantics(
+                        button: true,
+                        label: strings.flipTheCoin,
+                        onTap: _controller.isAnimating ? null : _flip,
+                        excludeSemantics: true,
+                        child: GestureDetector(
+                          onTap: _controller.isAnimating ? null : _flip,
+                          child: Stack(
+                            alignment: Alignment.topCenter,
+                            clipBehavior: Clip.none,
+                            children: [
+                              AnimatedBuilder(
+                                animation: _curve,
+                                builder: (context, _) {
+                                  final angle =
+                                      _curve.value * pi * _totalHalfFlips;
+                                  // The "yes" (thumbs up) face is the disc's front at
+                                  // rest; cos(angle) tells us which face is currently
+                                  // turned toward the viewer as it spins through Y.
+                                  final showYesFace = cos(angle) >= 0;
+                                  return Transform(
+                                    alignment: Alignment.center,
+                                    transform: Matrix4.identity()
+                                      ..setEntry(3, 2, 0.0015)
+                                      ..rotateY(angle),
+                                    child: _CoinDisc(
+                                      skipTheme: skipTheme,
+                                      theme: theme,
+                                      shimmering:
+                                          skipTheme.isY2K && _shimmering,
+                                      showYesFace: showYesFace,
+                                    ),
+                                  );
+                                },
+                              ),
+                              ConfettiWidget(
+                                confettiController: _confettiController,
+                                blastDirectionality:
+                                    BlastDirectionality.explosive,
+                                shouldLoop: false,
+                                numberOfParticles: skipTheme.isY2K ? 18 : 12,
+                                gravity: 0.25,
+                                particleDrag: 0.08,
+                                minimumSize: skipTheme.isY2K
+                                    ? const Size(5, 5)
+                                    : const Size(4, 4),
+                                maximumSize: skipTheme.isY2K
+                                    ? const Size(10, 10)
+                                    : const Size(6, 6),
+                                // Same split as DecisionToggle's confetti: round for
+                                // Y2K, confetti's default (smaller) squares for
+                                // Minimal.
+                                createParticlePath: skipTheme.isY2K
+                                    ? (size) {
+                                        final radius = size.width / 2;
+                                        return Path()..addOval(
+                                          Rect.fromCircle(
+                                            center: Offset(radius, radius),
+                                            radius: radius,
+                                          ),
+                                        );
+                                      }
+                                    : null,
+                                colors: skipTheme.isY2K
+                                    ? [
+                                        theme.colorScheme.primary,
+                                        theme.colorScheme.secondary,
+                                        skipTheme.accentHighlight,
+                                        Colors.white,
+                                      ]
+                                    : [
+                                        skipTheme.savedColor,
+                                        skipTheme.accentHighlight,
+                                        theme.colorScheme.primary,
+                                      ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: compact ? 8 : 40),
+                      SizedBox(
+                        height: 64,
+                        child: Center(
+                          child: _result == null
+                              ? const SizedBox.shrink()
+                              : _ResultReveal(
+                                  key: ValueKey(_resultKey),
+                                  child: Text(
+                                    _result == _CoinFace.yes
+                                        ? strings.coinFlipYes
+                                        : strings.coinFlipNo,
+                                    textAlign: TextAlign.center,
+                                    style: theme.textTheme.headlineSmall
+                                        ?.copyWith(
+                                          color: theme.colorScheme.primary,
+                                        ),
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),

@@ -8,7 +8,11 @@ import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/features/coin_flip/coin_flip_screen.dart';
 
 void main() {
-  Future<void> pumpCoinFlip(WidgetTester tester, AppLocale locale) async {
+  Future<void> pumpCoinFlip(
+    WidgetTester tester,
+    AppLocale locale, {
+    ThemeData? theme,
+  }) async {
     await tester.pumpWidget(
       MultiProvider(
         // Keyed by locale so re-pumping builds a fresh LocaleProvider.
@@ -20,7 +24,7 @@ void main() {
           ChangeNotifierProvider(create: (_) => SfxProvider()),
         ],
         child: MaterialApp(
-          theme: AppThemes.minimal,
+          theme: theme ?? AppThemes.minimal,
           home: const CoinFlipScreen(),
         ),
       ),
@@ -37,4 +41,28 @@ void main() {
     expect(find.bySemanticsLabel('Lancia la moneta'), findsOneWidget);
     semantics.dispose();
   });
+
+  for (final theme in [AppThemes.minimal, AppThemes.y2k]) {
+    final name = theme.extension<SkipThemeExtension>()!.isY2K
+        ? 'y2k'
+        : 'minimal';
+    testWidgets('fits a landscape phone, mid-flip too ($name)', (tester) async {
+      // iPhone 16 in landscape (iOS QA check 10.3).
+      tester.view.physicalSize = const Size(2556, 1179);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+
+      await pumpCoinFlip(tester, AppLocale.de, theme: theme);
+      expect(tester.takeException(), isNull);
+
+      await tester.tap(find.bySemanticsLabel('Münze werfen'));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(tester.takeException(), isNull);
+      // Past the flip, result reveal and confetti (which never "settles").
+      for (var i = 0; i < 30; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(tester.takeException(), isNull);
+    });
+  }
 }
