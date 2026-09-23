@@ -107,19 +107,24 @@ class ItemGridCard extends StatelessWidget {
                   children: [
                     StatusIndicator(isSaved: item.isSaved),
                     const SizedBox(width: 6),
+                    // Scaled down rather than ellipsized: a cut-off amount
+                    // ("50,0…") is unreadable.
                     Flexible(
-                      child: Text(
-                        item.quantity > 1
-                            ? '${formatCurrency(item.totalPrice, currency: currency)} (×${item.quantity})'
-                            : formatCurrency(
-                                item.totalPrice,
-                                currency: currency,
-                              ),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: statusColor,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          item.quantity > 1
+                              ? '${formatCurrency(item.totalPrice, currency: currency)} (×${item.quantity})'
+                              : formatCurrency(
+                                  item.totalPrice,
+                                  currency: currency,
+                                ),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: statusColor,
+                          ),
+                          maxLines: 1,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],

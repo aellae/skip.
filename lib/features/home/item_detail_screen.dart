@@ -400,26 +400,30 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                           ),
                           const SizedBox(height: 4),
                         ],
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
+                        // The "(unit × qty)" part drops onto its own line
+                        // when the pair doesn't fit (large system text); the
+                        // total stays on one line, scaled down if needed.
+                        Wrap(
+                          spacing: 6,
+                          crossAxisAlignment: WrapCrossAlignment.end,
                           children: [
-                            Text(
-                              formatCurrency(
-                                item.totalPrice,
-                                currency: currency,
-                              ),
-                              style: theme.textTheme.headlineMedium?.copyWith(
-                                color: statusColor,
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                formatCurrency(
+                                  item.totalPrice,
+                                  currency: currency,
+                                ),
+                                style: theme.textTheme.headlineMedium?.copyWith(
+                                  color: statusColor,
+                                ),
                               ),
                             ),
-                            if (item.quantity > 1) ...[
-                              const SizedBox(width: 6),
+                            if (item.quantity > 1)
                               Text(
                                 '(${formatCurrency(item.price, currency: currency)} × ${item.quantity})',
                                 style: theme.textTheme.bodyMedium,
                               ),
-                            ],
                           ],
                         ),
                         if (hoursOfWork(item.totalPrice, hourlyWage)

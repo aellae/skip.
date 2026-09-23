@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_themes.dart';
+import 'fit_words_text.dart';
 
 /// Saved/spent status as an icon (+ optional label), not just a color.
 ///
@@ -42,11 +43,15 @@ class StatusIndicator extends StatelessWidget {
         Icon(icon, size: 14, color: color),
         if (label != null) ...[
           const SizedBox(width: 6),
-          Text(
-            label!,
-            style: (labelStyle ?? theme.textTheme.bodyMedium)?.copyWith(
-              color: color,
-              fontWeight: isSaved == false ? FontWeight.w700 : FontWeight.w600,
+          Flexible(
+            child: FitWordsText(
+              label!,
+              style: (labelStyle ?? theme.textTheme.bodyMedium)?.copyWith(
+                color: color,
+                fontWeight: isSaved == false
+                    ? FontWeight.w700
+                    : FontWeight.w600,
+              ),
             ),
           ),
         ],

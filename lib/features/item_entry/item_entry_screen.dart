@@ -15,6 +15,7 @@ import '../../core/utils/currency_formatter.dart';
 import '../../core/utils/file_helper.dart';
 import '../../core/utils/url_validator.dart';
 import '../../core/utils/wage_formatter.dart';
+import '../../core/widgets/fit_words_text.dart';
 import '../../core/widgets/image_source_sheet.dart';
 import '../../core/widgets/quantity_stepper.dart';
 import '../../core/widgets/skip_app_bar.dart';
@@ -304,18 +305,34 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                                 fit: BoxFit.cover,
                                 cacheWidth: 800,
                               )
-                            : Center(
+                            : Padding(
                                 key: const ValueKey('placeholder'),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.add_a_photo, size: 40),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      strings.tapToAddPhoto,
-                                      style: theme.textTheme.bodyMedium,
+                                padding: const EdgeInsets.all(AppSpacing.md),
+                                // Wraps at the box's width, then scales
+                                // down to fit its height at large system
+                                // text sizes instead of clipping.
+                                child: LayoutBuilder(
+                                  builder: (context, constraints) => FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: SizedBox(
+                                      width: constraints.maxWidth,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.add_a_photo,
+                                            size: 40,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          FitWordsText(
+                                            strings.tapToAddPhoto,
+                                            textAlign: TextAlign.center,
+                                            style: theme.textTheme.bodyMedium,
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
                       ),

@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 class AnimatedCountUp extends StatefulWidget {
   final double value;
   final TextStyle? style;
+  final TextScaler? textScaler;
   final String Function(double) formatter;
 
   const AnimatedCountUp({
@@ -20,6 +21,7 @@ class AnimatedCountUp extends StatefulWidget {
     required this.value,
     required this.formatter,
     this.style,
+    this.textScaler,
   });
 
   @override
@@ -69,8 +71,11 @@ class _AnimatedCountUpState extends State<AnimatedCountUp>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _animation,
-      builder: (context, _) =>
-          Text(widget.formatter(_animation.value), style: widget.style),
+      builder: (context, _) => Text(
+        widget.formatter(_animation.value),
+        style: widget.style,
+        textScaler: widget.textScaler,
+      ),
     );
   }
 }

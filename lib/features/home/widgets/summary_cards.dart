@@ -35,33 +35,74 @@ class SummaryCards extends StatelessWidget {
     this.onTap,
   });
 
+  static const double _gap = 12;
+  static const EdgeInsets _padding = EdgeInsets.symmetric(
+    horizontal: 16,
+    vertical: 20,
+  );
+
   @override
   Widget build(BuildContext context) {
-    final skipTheme = Theme.of(context).extension<SkipThemeExtension>()!;
+    final theme = Theme.of(context);
+    final skipTheme = theme.extension<SkipThemeExtension>()!;
     final strings = context.watch<LocaleProvider>().strings;
     final currency = context.watch<CurrencyProvider>().currency;
-    return Row(
-      children: [
-        Expanded(
-          child: _SummaryCard(
-            label: savedLabel ?? strings.totalSaved,
-            amount: totalSaved,
-            color: skipTheme.savedColor,
-            currency: currency,
-            onTap: onTap,
+    final saved = savedLabel ?? strings.totalSaved;
+    final spent = spentLabel ?? strings.totalSpent;
+
+    // Both cards share one label size and one amount size (the smaller of
+    // the two), so a long word or a large total on one side doesn't leave
+    // the pair looking mismatched at large system text sizes.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final textScaler = MediaQuery.textScalerOf(context);
+        var labelScaler = textScaler;
+        var amountScaler = textScaler;
+        if (constraints.hasBoundedWidth) {
+          final width = (constraints.maxWidth - _gap) / 2 - _padding.horizontal;
+          final baseStyle = DefaultTextStyle.of(context).style;
+          final textDirection = Directionality.of(context);
+          labelScaler = FitWordsText.fitScaler(
+            '$saved $spent'.split(RegExp(r'\s+')),
+            style: baseStyle.merge(theme.textTheme.labelLarge),
+            maxWidth: width,
+            textScaler: textScaler,
+            textDirection: textDirection,
+          );
+          amountScaler = FitWordsText.fitScaler(
+            [
+              formatCurrency(totalSaved, currency: currency),
+              formatCurrency(totalSpent, currency: currency),
+            ],
+            style: baseStyle.merge(theme.textTheme.headlineSmall),
+            maxWidth: width,
+            textScaler: textScaler,
+            textDirection: textDirection,
+          );
+        }
+
+        Widget card(String label, double amount, Color color) => _SummaryCard(
+          label: label,
+          amount: amount,
+          color: color,
+          currency: currency,
+          labelScaler: labelScaler,
+          amountScaler: amountScaler,
+          onTap: onTap,
+        );
+
+        // Equal heights even when only one label wraps.
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: card(saved, totalSaved, skipTheme.savedColor)),
+              const SizedBox(width: _gap),
+              Expanded(child: card(spent, totalSpent, skipTheme.spentColor)),
+            ],
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _SummaryCard(
-            label: spentLabel ?? strings.totalSpent,
-            amount: totalSpent,
-            color: skipTheme.spentColor,
-            currency: currency,
-            onTap: onTap,
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
@@ -71,6 +112,8 @@ class _SummaryCard extends StatelessWidget {
   final double amount;
   final Color color;
   final AppCurrency currency;
+  final TextScaler labelScaler;
+  final TextScaler amountScaler;
   final VoidCallback? onTap;
 
   const _SummaryCard({
@@ -78,6 +121,8 @@ class _SummaryCard extends StatelessWidget {
     required this.amount,
     required this.color,
     required this.currency,
+    required this.labelScaler,
+    required this.amountScaler,
     this.onTap,
   });
 
@@ -85,16 +130,20 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SkipCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      padding: SummaryCards._padding,
       onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FitWordsText(label, style: theme.textTheme.labelLarge),
+          Text(
+            label,
+            style: theme.textTheme.labelLarge,
+            textScaler: labelScaler,
+          ),
           const SizedBox(height: 8),
           // One line, scaled down if needed: a wrapped or clipped amount
           // (large totals, large system text) is harder to read than a
-          // smaller one.
+          // smaller one. The FittedBox only matters mid count-up.
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
@@ -102,6 +151,7 @@ class _SummaryCard extends StatelessWidget {
               value: amount,
               formatter: (v) => formatCurrency(v, currency: currency),
               style: theme.textTheme.headlineSmall?.copyWith(color: color),
+              textScaler: amountScaler,
             ),
           ),
         ],

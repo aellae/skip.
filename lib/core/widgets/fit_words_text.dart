@@ -19,29 +19,15 @@ class FitWordsText extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final textScaler = MediaQuery.textScalerOf(context);
-        final effectiveStyle = DefaultTextStyle.of(context).style.merge(style);
-        var scaler = textScaler;
-
-        if (constraints.hasBoundedWidth) {
-          final words = data.split(RegExp(r'\s+'));
-          final textDirection = Directionality.of(context);
-          double longestAt(TextScaler scaler) => words
-              .map((w) => _measure(w, effectiveStyle, scaler, textDirection))
-              .fold<double>(0, max);
-
-          var longest = longestAt(textScaler);
-          if (longest > constraints.maxWidth) {
-            final fontSize = effectiveStyle.fontSize ?? 14;
-            var factor = textScaler.scale(fontSize) / fontSize;
-            // Scaling isn't perfectly proportional (letterSpacing, for one,
-            // doesn't scale), so re-measure and tighten until it fits.
-            for (var i = 0; i < 4 && longest > constraints.maxWidth; i++) {
-              factor *= constraints.maxWidth / longest;
-              scaler = TextScaler.linear(factor);
-              longest = longestAt(scaler);
-            }
-          }
-        }
+        final scaler = constraints.hasBoundedWidth
+            ? fitScaler(
+                data.split(RegExp(r'\s+')),
+                style: DefaultTextStyle.of(context).style.merge(style),
+                maxWidth: constraints.maxWidth,
+                textScaler: textScaler,
+                textDirection: Directionality.of(context),
+              )
+            : textScaler;
 
         return Text(
           data,
@@ -51,6 +37,38 @@ class FitWordsText extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// The [textScaler], shrunk just enough for the widest of [words] to fit
+  /// in [maxWidth] at [style] — or [textScaler] itself when all already
+  /// fit. Measuring several texts' words together gives them one shared
+  /// size (e.g. a pair of side-by-side cards); pass a whole string as a
+  /// single "word" to fit it on one line.
+  static TextScaler fitScaler(
+    Iterable<String> words, {
+    required TextStyle style,
+    required double maxWidth,
+    required TextScaler textScaler,
+    required TextDirection textDirection,
+  }) {
+    double longestAt(TextScaler scaler) => words
+        .map((w) => _measure(w, style, scaler, textDirection))
+        .fold<double>(0, max);
+
+    var scaler = textScaler;
+    var longest = longestAt(textScaler);
+    if (longest > maxWidth) {
+      final fontSize = style.fontSize ?? 14;
+      var factor = textScaler.scale(fontSize) / fontSize;
+      // Scaling isn't perfectly proportional (letterSpacing, for one,
+      // doesn't scale), so re-measure and tighten until it fits.
+      for (var i = 0; i < 4 && longest > maxWidth; i++) {
+        factor *= maxWidth / longest;
+        scaler = TextScaler.linear(factor);
+        longest = longestAt(scaler);
+      }
+    }
+    return scaler;
   }
 
   static double _measure(

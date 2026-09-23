@@ -325,20 +325,23 @@ class _LanguageOption extends StatelessWidget {
           ),
           boxShadow: selected ? skipTheme.glowShadow : null,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        // Flag and label side by side while they fit; at large system
+        // text sizes the label moves under the flag (and scales down to
+        // its longest word) rather than being cut off.
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 4,
           children: [
             Text(flag, style: const TextStyle(fontSize: 18)),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: skipTheme.isY2K && selected
-                      ? Colors.white
-                      : theme.colorScheme.onSurface,
-                ),
+            FitWordsText(
+              label,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: skipTheme.isY2K && selected
+                    ? Colors.white
+                    : theme.colorScheme.onSurface,
               ),
             ),
           ],
