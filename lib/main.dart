@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'core/home_widget/home_widget_sync.dart';
 import 'core/localization/app_currency.dart';
 import 'core/localization/app_locale.dart';
 import 'core/localization/currency_provider.dart';
@@ -91,22 +92,24 @@ class SkipApp extends StatelessWidget {
           create: (_) => wageProviderOverride ?? WageProvider(),
         ),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, _) {
-          return MaterialApp(
-            title: 'SKIP',
-            debugShowCheckedModeBanner: false,
-            navigatorKey: navigatorKeyOverride,
-            theme: themeProvider.themeData,
-            builder: (context, child) => AnimatedTheme(
-              duration: const Duration(milliseconds: 450),
-              curve: Curves.easeInOutCubicEmphasized,
-              data: themeProvider.themeData,
-              child: child!,
-            ),
-            home: const HomeScreen(),
-          );
-        },
+      child: HomeWidgetSync(
+        child: Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) {
+            return MaterialApp(
+              title: 'SKIP',
+              debugShowCheckedModeBanner: false,
+              navigatorKey: navigatorKeyOverride,
+              theme: themeProvider.themeData,
+              builder: (context, child) => AnimatedTheme(
+                duration: const Duration(milliseconds: 450),
+                curve: Curves.easeInOutCubicEmphasized,
+                data: themeProvider.themeData,
+                child: child!,
+              ),
+              home: const HomeScreen(),
+            );
+          },
+        ),
       ),
     );
   }

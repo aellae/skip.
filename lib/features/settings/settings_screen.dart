@@ -21,7 +21,6 @@ import '../../core/widgets/tap_scale.dart';
 import '../../data/items_provider.dart';
 import '../trash/trash_screen.dart';
 import 'privacy_policy_screen.dart';
-import 'support_screen.dart';
 import 'widgets/backup_section.dart';
 
 /// Aesthetic switcher + language switcher + quick summary stats.
@@ -132,30 +131,6 @@ class SettingsScreen extends StatelessWidget {
                     Expanded(
                       child: Text(
                         strings.trashSectionLabel,
-                        style: theme.textTheme.bodyLarge,
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sectionGap),
-              Text(
-                strings.supportSectionLabel,
-                style: theme.textTheme.labelLarge,
-              ),
-              const SizedBox(height: 12),
-              SkipCard(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const SupportScreen()),
-                ),
-                child: Row(
-                  children: [
-                    const Text('💜', style: TextStyle(fontSize: 20)),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        strings.supportSkip,
                         style: theme.textTheme.bodyLarge,
                       ),
                     ),

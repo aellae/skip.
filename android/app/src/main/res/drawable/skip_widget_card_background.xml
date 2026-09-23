@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Opaque rounded-rect fill; recolored per aesthetic at runtime via
+     SkipHomeWidgetProvider's setColorFilter (see ios/SkipWidget/SkipWidget.swift
+     for the color values this mirrors). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <corners android:radius="20dp" />
+    <solid android:color="#FFFFFF" />
+</shape>

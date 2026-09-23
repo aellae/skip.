@@ -20,11 +20,47 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+        </activity>
+        <!-- Home screen icon follows the active aesthetic (see ThemeProvider /
+             AppIconChannel): exactly one of these aliases is enabled at a
+             time via PackageManager.setComponentEnabledSetting, mirroring
+             the iOS alternate-icon behavior. -->
+        <activity-alias
+            android:name=".MainActivityMinimal"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/launcher_icon"
+            android:label="Skip!"
+            android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-        </activity>
+        </activity-alias>
+        <activity-alias
+            android:name=".MainActivityY2K"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/launcher_icon_y2k"
+            android:label="SKIP!"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <!-- Home-screen widget mirroring the iOS one (ios/SkipWidget/SkipWidget.swift):
+             see SkipHomeWidgetProvider.kt for the this-month saved/spent display. -->
+        <receiver
+            android:name=".SkipHomeWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/skip_widget_info" />
+        </receiver>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

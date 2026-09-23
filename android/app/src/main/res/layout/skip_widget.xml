@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- RemoteViews layout for SkipHomeWidgetProvider. Visual twin of
+     ios/SkipWidget/SkipWidget.swift's SkipWidgetEntryView: a logo wordmark,
+     then Saved/Spent stat blocks, on a rounded card colored per aesthetic. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/widget_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/skip_widget_card_background" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/widget_logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            tools:text="skip." />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/widget_saved_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:text="@string/skip_widget_saved_label" />
+
+        <TextView
+            android:id="@+id/widget_saved_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            tools:text="$120.00" />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="8dp" />
+
+        <TextView
+            android:id="@+id/widget_spent_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:text="@string/skip_widget_spent_label" />
+
+        <TextView
+            android:id="@+id/widget_spent_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            tools:text="$45.00" />
+    </LinearLayout>
+</FrameLayout>

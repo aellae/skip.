@@ -636,58 +636,6 @@ class AppStrings {
   String get french => 'Français';
   String get german => 'Deutsch';
 
-  // Support screen
-  String get supportSectionLabel => switch (locale) {
-    AppLocale.en => 'Support',
-    AppLocale.it => 'Supporto',
-    AppLocale.fr => 'Soutien',
-    AppLocale.de => 'Unterstützung',
-  };
-  String get supportSkip => switch (locale) {
-    AppLocale.en => 'Support SKIP',
-    AppLocale.it => 'Sostieni SKIP',
-    AppLocale.fr => 'Soutenir SKIP',
-    AppLocale.de => 'SKIP unterstützen',
-  };
-  String get supportBody => switch (locale) {
-    AppLocale.en =>
-      "If SKIP has helped you spend a little less, you can support its "
-          "development.\n\nThis is entirely voluntary. There's no "
-          "subscription and nothing to unlock — SKIP's features stay "
-          'exactly the same either way. 100% of what you choose to send '
-          'goes directly to the developer.',
-    AppLocale.it =>
-      "Se SKIP ti ha aiutato a spendere un po' meno, puoi sostenerne lo "
-          'sviluppo.\n\nÈ del tutto volontario. Non c\'è alcun abbonamento '
-          'né nulla da sbloccare: le funzionalità di SKIP restano identiche '
-          'in ogni caso. Il 100% di quanto scegli di inviare va '
-          'direttamente alla sviluppatrice.',
-    AppLocale.fr =>
-      'Si SKIP vous a aidé à dépenser un peu moins, vous pouvez soutenir '
-          "son développement.\n\nC'est entièrement volontaire. Il n'y a pas "
-          "d'abonnement ni rien à débloquer — les fonctionnalités de SKIP "
-          'restent exactement les mêmes dans tous les cas. 100 % de ce que '
-          'vous choisissez d\'envoyer va directement à la développeuse.',
-    AppLocale.de =>
-      'Wenn SKIP dir geholfen hat, etwas weniger auszugeben, kannst du die '
-          'Entwicklung unterstützen.\n\nDas ist völlig freiwillig. Es gibt '
-          'kein Abo und nichts freizuschalten – die Funktionen von SKIP '
-          'bleiben so oder so genau gleich. 100 % dessen, was du sendest, '
-          'geht direkt an die Entwicklerin.',
-  };
-  String get supportButton => switch (locale) {
-    AppLocale.en => 'Support the developer',
-    AppLocale.it => 'Sostieni la sviluppatrice',
-    AppLocale.fr => 'Soutenir la développeuse',
-    AppLocale.de => 'Die Entwicklerin unterstützen',
-  };
-  String get supportOpensExternally => switch (locale) {
-    AppLocale.en => 'Opens PayPal in your browser.',
-    AppLocale.it => 'Apre PayPal nel browser.',
-    AppLocale.fr => 'Ouvre PayPal dans votre navigateur.',
-    AppLocale.de => 'Öffnet PayPal in deinem Browser.',
-  };
-
   // Privacy policy
   String get legalSectionLabel => switch (locale) {
     AppLocale.en => 'Legal',

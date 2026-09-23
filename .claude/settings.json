@@ -81,7 +81,13 @@
       "Bash(mkdir -p /tmp/skip_demo_images && cp /Users/elle/Desktop/skip./tool/demo_images/*.jpg /tmp/skip_demo_images/ && ls /tmp/skip_demo_images/)",
       "Bash(sips -g pixelWidth -g pixelHeight /tmp/skip_item_entry_minimal_en.png)",
       "Bash(pkill -f \"seed_demo_data.dart\")",
-      "Bash(sips -g pixelWidth -g pixelHeight /tmp/skip_settings_y2k_en.png)"
+      "Bash(sips -g pixelWidth -g pixelHeight /tmp/skip_settings_y2k_en.png)",
+      "Bash(xcode-select -p)",
+      "Bash(open -a Xcode \"/Users/elle/Desktop/skip./ios/Runner.xcworkspace\")",
+      "Bash(plutil -lint \"/Users/elle/Desktop/skip./ios/Runner.xcodeproj/project.pbxproj\")",
+      "Bash(plutil -lint \"/Users/elle/Desktop/skip./ios/Pods/Pods.xcodeproj/project.pbxproj\")",
+      "Bash(xcodebuild -version)",
+      "Bash(open -a Xcode \"/Users/elle/Desktop/skip./ios/Runner.xcodeproj\")"
     ],
     "additionalDirectories": [
       "/Users/elle/Desktop/Progetti Personali/skip./test/core",

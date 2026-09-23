@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home-screen widget picker description and stat labels; hardcoded
+         English to match ios/SkipWidget/SkipWidget.swift, which doesn't
+         localize its widget either (the extension can't reach app_strings.dart). -->
+    <string name="skip_widget_description">This month\'s saved vs. spent totals.</string>
+    <string name="skip_widget_saved_label">SAVED</string>
+    <string name="skip_widget_spent_label">SPENT</string>
+</resources>

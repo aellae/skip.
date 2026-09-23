@@ -140,23 +140,6 @@ void main() {
     expect(find.text('Estetica'), findsOneWidget);
   });
 
-  testWidgets('tapping Support SKIP opens the support screen', (tester) async {
-    await pumpSettings(
-      tester,
-      themeProvider: ThemeProvider(),
-      itemsProvider: buildTestItemsProvider(),
-    );
-
-    await tester.scrollUntilVisible(find.text('Support SKIP'), 200);
-    await tester.ensureVisible(find.text('Support SKIP'));
-    await tester.pumpAndSettle();
-    expect(find.text('Support'), findsOneWidget);
-    await tester.tap(find.text('Support SKIP'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Support the developer'), findsOneWidget);
-  });
-
   testWidgets('tapping Privacy Policy opens the privacy policy screen', (
     tester,
   ) async {
