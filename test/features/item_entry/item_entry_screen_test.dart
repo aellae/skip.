@@ -453,4 +453,18 @@ void main() {
       expect(itemsProvider.items, hasLength(1));
     });
   });
+
+  testWidgets('a price error clears as soon as a valid price is typed', (
+    tester,
+  ) async {
+    await pumpEntryScreen(tester, buildTestItemsProvider());
+    await tester.enterText(find.widgetWithText(TextFormField, 'Price'), '0');
+    await tapText(tester, 'Resisted!');
+    expect(find.text('Price must be greater than zero.'), findsOneWidget);
+
+    await tester.enterText(find.widgetWithText(TextFormField, 'Price'), '12');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Price must be greater than zero.'), findsNothing);
+  });
 }

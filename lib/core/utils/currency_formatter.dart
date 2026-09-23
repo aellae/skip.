@@ -33,6 +33,15 @@ String formatCurrency(double value, {AppCurrency currency = AppCurrency.usd}) {
   return isEuro ? '$sign$buffer,$cents €' : '$sign\$$buffer.$cents';
 }
 
+/// A bare, editable amount for prefilling a price field: two decimals with
+/// the active currency's decimal separator (`203.00` / `203,00`, matching
+/// [formatCurrency]), no symbol or grouping — the price fields accept
+/// either separator back.
+String formatAmountForInput(double value, {required AppCurrency currency}) {
+  final fixed = value.toStringAsFixed(2);
+  return isEuroCurrency(currency) ? fixed.replaceAll('.', ',') : fixed;
+}
+
 /// Compact form for tight spaces (chart axis labels): no cents, and values
 /// at or above 1,000 collapse to e.g. `$1.2k` / `1,2k €`.
 String formatCurrencyCompact(

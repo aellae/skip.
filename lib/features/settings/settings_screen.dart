@@ -666,10 +666,14 @@ class _HourlyWageDialog extends StatefulWidget {
 
 class _HourlyWageDialogState extends State<_HourlyWageDialog> {
   final _formKey = GlobalKey<FormState>();
+
+  /// Off until the first failed save, then live — so an error message
+  /// clears as soon as the input is fixed instead of lingering.
+  var _autovalidateMode = AutovalidateMode.disabled;
   late final _controller = TextEditingController(
     text: widget.currentWage == null
         ? ''
-        : widget.currentWage!.toStringAsFixed(2),
+        : formatAmountForInput(widget.currentWage!, currency: widget.currency),
   );
 
   @override
@@ -694,6 +698,7 @@ class _HourlyWageDialogState extends State<_HourlyWageDialog> {
       title: Text(widget.strings.hourlyWageDialogTitle),
       content: Form(
         key: _formKey,
+        autovalidateMode: _autovalidateMode,
         child: TextFormField(
           controller: _controller,
           autofocus: true,
@@ -721,7 +726,12 @@ class _HourlyWageDialogState extends State<_HourlyWageDialog> {
         ),
         TextButton(
           onPressed: () {
-            if (!(_formKey.currentState?.validate() ?? false)) return;
+            if (!(_formKey.currentState?.validate() ?? false)) {
+              setState(
+                () => _autovalidateMode = AutovalidateMode.onUserInteraction,
+              );
+              return;
+            }
             Navigator.of(context).pop(
               _WageResult(double.parse(_controller.text.replaceAll(',', '.'))),
             );

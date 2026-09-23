@@ -561,6 +561,10 @@ class _PurchaseLinkDialogState extends State<_PurchaseLinkDialog> {
   late final _controller = TextEditingController(text: widget.currentUrl ?? '');
   final _formKey = GlobalKey<FormState>();
 
+  /// Off until the first failed save, then live — so an error message
+  /// clears as soon as the input is fixed instead of lingering.
+  var _autovalidateMode = AutovalidateMode.disabled;
+
   @override
   void dispose() {
     _controller.dispose();
@@ -583,6 +587,7 @@ class _PurchaseLinkDialogState extends State<_PurchaseLinkDialog> {
       ),
       content: Form(
         key: _formKey,
+        autovalidateMode: _autovalidateMode,
         child: TextFormField(
           controller: _controller,
           autofocus: true,
@@ -604,7 +609,12 @@ class _PurchaseLinkDialogState extends State<_PurchaseLinkDialog> {
         ),
         TextButton(
           onPressed: () {
-            if (!(_formKey.currentState?.validate() ?? false)) return;
+            if (!(_formKey.currentState?.validate() ?? false)) {
+              setState(
+                () => _autovalidateMode = AutovalidateMode.onUserInteraction,
+              );
+              return;
+            }
             Navigator.of(context).pop(_controller.text.trim());
           },
           child: Text(widget.strings.save),
@@ -651,12 +661,16 @@ class _EditDetailsDialog extends StatefulWidget {
 class _EditDetailsDialogState extends State<_EditDetailsDialog> {
   final _formKey = GlobalKey<FormState>();
   late final _priceController = TextEditingController(
-    text: widget.currentPrice.toStringAsFixed(2),
+    text: formatAmountForInput(widget.currentPrice, currency: widget.currency),
   );
   late final _titleController = TextEditingController(
     text: widget.currentTitle ?? '',
   );
   late int _quantity = widget.currentQuantity;
+
+  /// Off until the first failed save, then live — so an error message
+  /// clears as soon as the input is fixed instead of lingering.
+  var _autovalidateMode = AutovalidateMode.disabled;
 
   @override
   void dispose() {
@@ -674,7 +688,10 @@ class _EditDetailsDialogState extends State<_EditDetailsDialog> {
   }
 
   void _save() {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      setState(() => _autovalidateMode = AutovalidateMode.onUserInteraction);
+      return;
+    }
     final title = _titleController.text.trim();
     Navigator.of(context).pop(
       _ItemDetailsEdit(
@@ -693,6 +710,7 @@ class _EditDetailsDialogState extends State<_EditDetailsDialog> {
       title: Text(widget.strings.editDetailsDialogTitle),
       content: Form(
         key: _formKey,
+        autovalidateMode: _autovalidateMode,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

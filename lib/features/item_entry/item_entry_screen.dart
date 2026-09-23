@@ -63,6 +63,10 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
   /// toggle stays blocked but isn't dimmed, so the effect shows at full
   /// strength.
   bool _isCelebrating = false;
+
+  /// Off until the first failed save, then live — so an error message
+  /// clears as soon as the input is fixed instead of lingering.
+  var _autovalidateMode = AutovalidateMode.disabled;
   bool _didSave = false;
   int _quantity = 1;
 
@@ -166,7 +170,11 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     // Force any in-flight IME edit (e.g. a paste still being committed) to
     // land in the controllers before reading their text below.
     FocusScope.of(context).unfocus();
-    return _formKey.currentState?.validate() ?? false;
+    final valid = _formKey.currentState?.validate() ?? false;
+    if (!valid && _autovalidateMode == AutovalidateMode.disabled) {
+      setState(() => _autovalidateMode = AutovalidateMode.onUserInteraction);
+    }
+    return valid;
   }
 
   Future<void> _saveWithDecision(bool? isSaved) async {
@@ -243,6 +251,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Form(
             key: _formKey,
+            autovalidateMode: _autovalidateMode,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

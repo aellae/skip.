@@ -349,4 +349,16 @@ void main() {
       expect(find.byType(TextFormField), findsOneWidget);
     },
   );
+
+  testWidgets('edit dialog prefills the price with a comma under EUR', (
+    tester,
+  ) async {
+    await pumpDetail(tester, currency: AppCurrency.eur);
+
+    await tester.ensureVisible(find.byIcon(Icons.edit));
+    await tester.tap(find.byIcon(Icons.edit));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(TextFormField, '120,00'), findsOneWidget);
+  });
 }

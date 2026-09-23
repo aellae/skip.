@@ -41,4 +41,10 @@ void main() {
     expect(formatCurrencyCompact(1500), r'$1.5k');
     expect(formatCurrencyCompact(1500, currency: AppCurrency.eur), '1,5k €');
   });
+
+  test('formatAmountForInput uses the currency decimal separator, bare', () {
+    expect(formatAmountForInput(203, currency: AppCurrency.usd), '203.00');
+    expect(formatAmountForInput(203, currency: AppCurrency.eur), '203,00');
+    expect(formatAmountForInput(1234.5, currency: AppCurrency.eur), '1234,50');
+  });
 }
