@@ -7,6 +7,7 @@ import '../../../core/localization/locale_provider.dart';
 import '../../../core/theme/app_themes.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/animated_count_up.dart';
+import '../../../core/widgets/fit_words_text.dart';
 import '../../../core/widgets/skip_card.dart';
 
 /// The two headline financial status cards: Total Saved and Total Spent.
@@ -89,12 +90,19 @@ class _SummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: theme.textTheme.labelLarge),
+          FitWordsText(label, style: theme.textTheme.labelLarge),
           const SizedBox(height: 8),
-          AnimatedCountUp(
-            value: amount,
-            formatter: (v) => formatCurrency(v, currency: currency),
-            style: theme.textTheme.headlineSmall?.copyWith(color: color),
+          // One line, scaled down if needed: a wrapped or clipped amount
+          // (large totals, large system text) is harder to read than a
+          // smaller one.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: AnimatedCountUp(
+              value: amount,
+              formatter: (v) => formatCurrency(v, currency: currency),
+              style: theme.textTheme.headlineSmall?.copyWith(color: color),
+            ),
           ),
         ],
       ),

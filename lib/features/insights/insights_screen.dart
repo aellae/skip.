@@ -53,14 +53,15 @@ class InsightsScreen extends StatelessWidget {
               else ...[
                 Text(strings.last6Months, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
-                Row(
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 4,
                   children: [
                     StatusIndicator(
                       isSaved: true,
                       label: strings.saved,
                       labelStyle: theme.textTheme.bodySmall,
                     ),
-                    const SizedBox(width: 16),
                     StatusIndicator(
                       isSaved: false,
                       label: strings.spent,

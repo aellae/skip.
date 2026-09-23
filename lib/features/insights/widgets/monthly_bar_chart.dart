@@ -25,6 +25,9 @@ class MonthlyBarChart extends StatelessWidget {
     final theme = Theme.of(context);
     final skipTheme = theme.extension<SkipThemeExtension>()!;
     final axisStyle = theme.textTheme.labelSmall;
+    // fl_chart reserves a fixed box for axis labels, so grow it with the
+    // system text size — otherwise large text gets truncated there.
+    final textScaler = MediaQuery.textScalerOf(context);
     final barRadius = BorderRadius.vertical(
       top: Radius.circular(skipTheme.isY2K ? 8 : 3),
     );
@@ -105,7 +108,7 @@ class MonthlyBarChart extends StatelessWidget {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 44,
+              reservedSize: textScaler.scale(44),
               interval: axisInterval,
               // fl_chart always labels the exact chart maxY by default
               // (maxIncluded), even when it isn't a clean multiple of
@@ -128,7 +131,7 @@ class MonthlyBarChart extends StatelessWidget {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 28,
+              reservedSize: textScaler.scale(20) + 8,
               getTitlesWidget: (value, meta) {
                 final index = value.toInt();
                 if (index < 0 || index >= monthlyTotals.length) {

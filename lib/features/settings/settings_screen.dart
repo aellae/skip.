@@ -15,6 +15,7 @@ import '../../core/theme/theme_provider.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../core/widgets/animated_count_up.dart';
 import '../../core/widgets/entrance_fade.dart';
+import '../../core/widgets/fit_words_text.dart';
 import '../../core/widgets/skip_app_bar.dart';
 import '../../core/widgets/skip_card.dart';
 import '../../core/widgets/tap_scale.dart';
@@ -458,15 +459,17 @@ class _AestheticOption extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
+                    FitWordsText(
                       label,
+                      textAlign: TextAlign.center,
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: textColor,
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    FitWordsText(
                       description,
+                      textAlign: TextAlign.center,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: textColor,
                       ),
@@ -501,13 +504,27 @@ class _StatTile extends StatelessWidget {
     return SkipCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: theme.textTheme.bodyLarge),
-          AnimatedCountUp(
-            value: value,
-            formatter: formatter,
-            style: theme.textTheme.titleLarge?.copyWith(color: color),
+          Expanded(
+            flex: 3,
+            child: FitWordsText(label, style: theme.textTheme.bodyLarge),
+          ),
+          const SizedBox(width: 12),
+          // Scales a long amount (large text, big totals) down to fit
+          // rather than clipping it.
+          Flexible(
+            flex: 2,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: AnimatedCountUp(
+                  value: value,
+                  formatter: formatter,
+                  style: theme.textTheme.titleLarge?.copyWith(color: color),
+                ),
+              ),
+            ),
           ),
         ],
       ),

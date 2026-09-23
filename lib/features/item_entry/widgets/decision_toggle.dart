@@ -10,6 +10,7 @@ import '../../../core/localization/locale_provider.dart';
 import '../../../core/settings/sfx_provider.dart';
 import '../../../core/theme/app_themes.dart';
 import '../../../core/theme/contrast.dart';
+import '../../../core/widgets/fit_words_text.dart';
 import '../../../core/widgets/tap_scale.dart';
 
 /// "Resisted! / Pondering / Bought It" decision toggle. `isSaved`/`onChanged`
@@ -235,7 +236,7 @@ class _ToggleOption extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 260),
           curve: Curves.easeOutQuart,
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: glossy
@@ -259,8 +260,9 @@ class _ToggleOption extends StatelessWidget {
               width: skipTheme.isY2K ? 2 : 1.5,
             ),
           ),
-          child: Text(
+          child: FitWordsText(
             label,
+            textAlign: TextAlign.center,
             style: theme.textTheme.titleMedium?.copyWith(
               color: selected
                   ? bestOnColor(color)
