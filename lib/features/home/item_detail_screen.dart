@@ -800,37 +800,46 @@ class _CoinFlipButton extends StatelessWidget {
     final radius = BorderRadius.circular(skipTheme.cardRadius);
     final foreground = skipTheme.isY2K ? Colors.white : skipTheme.savedColor;
 
-    return Material(
-      color: Colors.transparent,
-      child: Ink(
-        decoration: BoxDecoration(
-          borderRadius: radius,
-          color: skipTheme.isY2K
-              ? null
-              : skipTheme.savedColor.withValues(alpha: 0.15),
-          gradient: skipTheme.isY2K ? skipTheme.accentGradient : null,
-          boxShadow: skipTheme.isY2K ? skipTheme.glowShadow : null,
-        ),
-        child: InkWell(
-          borderRadius: radius,
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.monetization_on_outlined, color: foreground),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    label,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: foreground,
-                      fontWeight: FontWeight.w600,
+    // The glow is painted outside the Material: ink is clipped to the
+    // Material's rectangular bounds, which would square off the part of the
+    // shadow that falls inside that rectangle but outside the pill's
+    // rounded corners.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: skipTheme.isY2K ? skipTheme.glowShadow : null,
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            color: skipTheme.isY2K
+                ? null
+                : skipTheme.savedColor.withValues(alpha: 0.15),
+            gradient: skipTheme.isY2K ? skipTheme.accentGradient : null,
+          ),
+          child: InkWell(
+            borderRadius: radius,
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.monetization_on_outlined, color: foreground),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: foreground,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
