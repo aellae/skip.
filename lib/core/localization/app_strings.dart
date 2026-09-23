@@ -251,6 +251,24 @@ class AppStrings {
     AppLocale.fr => 'Appuyez pour ajouter une photo (facultatif)',
     AppLocale.de => 'Tippen, um ein Foto hinzuzufügen (optional)',
   };
+  String get photoTapToChange => switch (locale) {
+    AppLocale.en => 'Photo, tap to change',
+    AppLocale.it => 'Foto, tocca per cambiarla',
+    AppLocale.fr => 'Photo, appuyez pour la changer',
+    AppLocale.de => 'Foto, tippen zum Ändern',
+  };
+  String get decreaseQuantity => switch (locale) {
+    AppLocale.en => 'Decrease quantity',
+    AppLocale.it => 'Diminuisci quantità',
+    AppLocale.fr => 'Diminuer la quantité',
+    AppLocale.de => 'Menge verringern',
+  };
+  String get increaseQuantity => switch (locale) {
+    AppLocale.en => 'Increase quantity',
+    AppLocale.it => 'Aumenta quantità',
+    AppLocale.fr => 'Augmenter la quantité',
+    AppLocale.de => 'Menge erhöhen',
+  };
   String get noPhotoLabel => switch (locale) {
     AppLocale.en => 'No photo',
     AppLocale.it => 'Nessuna foto',
@@ -643,6 +661,12 @@ class AppStrings {
     AppLocale.en => 'Flip a coin',
     AppLocale.it => 'Lancia una moneta',
     AppLocale.fr => 'Lancer une pièce',
+    AppLocale.de => 'Münze werfen',
+  };
+  String get flipTheCoin => switch (locale) {
+    AppLocale.en => 'Flip the coin',
+    AppLocale.it => 'Lancia la moneta',
+    AppLocale.fr => 'Lancer la pièce',
     AppLocale.de => 'Münze werfen',
   };
   String get coinFlipTitle => switch (locale) {

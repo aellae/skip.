@@ -126,75 +126,81 @@ class _CoinFlipScreenState extends State<CoinFlipScreen>
                   ),
                 ),
                 const SizedBox(height: 48),
-                GestureDetector(
+                Semantics(
+                  button: true,
+                  label: strings.flipTheCoin,
                   onTap: _controller.isAnimating ? null : _flip,
-                  child: Stack(
-                    alignment: Alignment.topCenter,
-                    clipBehavior: Clip.none,
-                    children: [
-                      AnimatedBuilder(
-                        animation: _curve,
-                        builder: (context, _) {
-                          final angle = _curve.value * pi * _totalHalfFlips;
-                          // The "yes" (thumbs up) face is the disc's front at
-                          // rest; cos(angle) tells us which face is currently
-                          // turned toward the viewer as it spins through Y.
-                          final showYesFace = cos(angle) >= 0;
-                          return Transform(
-                            alignment: Alignment.center,
-                            transform: Matrix4.identity()
-                              ..setEntry(3, 2, 0.0015)
-                              ..rotateY(angle),
-                            child: _CoinDisc(
-                              skipTheme: skipTheme,
-                              theme: theme,
-                              shimmering: skipTheme.isY2K && _shimmering,
-                              showYesFace: showYesFace,
-                            ),
-                          );
-                        },
-                      ),
-                      ConfettiWidget(
-                        confettiController: _confettiController,
-                        blastDirectionality: BlastDirectionality.explosive,
-                        shouldLoop: false,
-                        numberOfParticles: skipTheme.isY2K ? 18 : 12,
-                        gravity: 0.25,
-                        particleDrag: 0.08,
-                        minimumSize: skipTheme.isY2K
-                            ? const Size(5, 5)
-                            : const Size(4, 4),
-                        maximumSize: skipTheme.isY2K
-                            ? const Size(10, 10)
-                            : const Size(6, 6),
-                        // Same split as DecisionToggle's confetti: round for
-                        // Y2K, confetti's default (smaller) squares for
-                        // Minimal.
-                        createParticlePath: skipTheme.isY2K
-                            ? (size) {
-                                final radius = size.width / 2;
-                                return Path()..addOval(
-                                  Rect.fromCircle(
-                                    center: Offset(radius, radius),
-                                    radius: radius,
-                                  ),
-                                );
-                              }
-                            : null,
-                        colors: skipTheme.isY2K
-                            ? [
-                                theme.colorScheme.primary,
-                                theme.colorScheme.secondary,
-                                skipTheme.accentHighlight,
-                                Colors.white,
-                              ]
-                            : [
-                                skipTheme.savedColor,
-                                skipTheme.accentHighlight,
-                                theme.colorScheme.primary,
-                              ],
-                      ),
-                    ],
+                  excludeSemantics: true,
+                  child: GestureDetector(
+                    onTap: _controller.isAnimating ? null : _flip,
+                    child: Stack(
+                      alignment: Alignment.topCenter,
+                      clipBehavior: Clip.none,
+                      children: [
+                        AnimatedBuilder(
+                          animation: _curve,
+                          builder: (context, _) {
+                            final angle = _curve.value * pi * _totalHalfFlips;
+                            // The "yes" (thumbs up) face is the disc's front at
+                            // rest; cos(angle) tells us which face is currently
+                            // turned toward the viewer as it spins through Y.
+                            final showYesFace = cos(angle) >= 0;
+                            return Transform(
+                              alignment: Alignment.center,
+                              transform: Matrix4.identity()
+                                ..setEntry(3, 2, 0.0015)
+                                ..rotateY(angle),
+                              child: _CoinDisc(
+                                skipTheme: skipTheme,
+                                theme: theme,
+                                shimmering: skipTheme.isY2K && _shimmering,
+                                showYesFace: showYesFace,
+                              ),
+                            );
+                          },
+                        ),
+                        ConfettiWidget(
+                          confettiController: _confettiController,
+                          blastDirectionality: BlastDirectionality.explosive,
+                          shouldLoop: false,
+                          numberOfParticles: skipTheme.isY2K ? 18 : 12,
+                          gravity: 0.25,
+                          particleDrag: 0.08,
+                          minimumSize: skipTheme.isY2K
+                              ? const Size(5, 5)
+                              : const Size(4, 4),
+                          maximumSize: skipTheme.isY2K
+                              ? const Size(10, 10)
+                              : const Size(6, 6),
+                          // Same split as DecisionToggle's confetti: round for
+                          // Y2K, confetti's default (smaller) squares for
+                          // Minimal.
+                          createParticlePath: skipTheme.isY2K
+                              ? (size) {
+                                  final radius = size.width / 2;
+                                  return Path()..addOval(
+                                    Rect.fromCircle(
+                                      center: Offset(radius, radius),
+                                      radius: radius,
+                                    ),
+                                  );
+                                }
+                              : null,
+                          colors: skipTheme.isY2K
+                              ? [
+                                  theme.colorScheme.primary,
+                                  theme.colorScheme.secondary,
+                                  skipTheme.accentHighlight,
+                                  Colors.white,
+                                ]
+                              : [
+                                  skipTheme.savedColor,
+                                  skipTheme.accentHighlight,
+                                  theme.colorScheme.primary,
+                                ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 40),

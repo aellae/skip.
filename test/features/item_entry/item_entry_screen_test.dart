@@ -362,4 +362,21 @@ void main() {
     expect(find.text('Enter a valid link (https://…).'), findsOneWidget);
     expect(itemsProvider.items, isEmpty);
   });
+
+  testWidgets(
+    'quantity buttons and the picked photo have screen-reader labels',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pumpEntryScreen(tester, buildTestItemsProvider());
+
+      expect(find.bySemanticsLabel('Decrease quantity'), findsOneWidget);
+      expect(find.bySemanticsLabel('Increase quantity'), findsOneWidget);
+      expect(find.bySemanticsLabel('Photo, tap to change'), findsNothing);
+
+      await pickAPhoto(tester);
+
+      expect(find.bySemanticsLabel('Photo, tap to change'), findsOneWidget);
+      semantics.dispose();
+    },
+  );
 }

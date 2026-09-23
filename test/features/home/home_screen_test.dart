@@ -195,4 +195,13 @@ void main() {
 
     expect(find.byType(ItemEntryScreen), findsNothing);
   });
+
+  testWidgets('the add FAB has a screen-reader label', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(_buildApp(buildTestItemsProvider()));
+    await tester.pumpAndSettle();
+
+    expect(find.bySemanticsLabel('Log an item'), findsOneWidget);
+    semantics.dispose();
+  });
 }

@@ -317,4 +317,14 @@ void main() {
 
     expect(itemsProvider.items.single.price, 120);
   });
+
+  testWidgets('the photo-change control has a screen-reader label', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await pumpDetail(tester);
+
+    expect(find.bySemanticsLabel('Photo, tap to change'), findsOneWidget);
+    semantics.dispose();
+  });
 }

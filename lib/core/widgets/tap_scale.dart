@@ -12,11 +12,16 @@ class TapScale extends StatefulWidget {
   final VoidCallback? onTap;
   final bool haptic;
 
+  /// Screen-reader label for the whole tappable area. Replaces [child]'s
+  /// own semantics, for children (e.g. a bare photo) that have none.
+  final String? semanticLabel;
+
   const TapScale({
     super.key,
     required this.child,
     this.onTap,
     this.haptic = true,
+    this.semanticLabel,
   });
 
   @override
@@ -33,17 +38,18 @@ class _TapScaleState extends State<TapScale> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final onTap = widget.onTap == null
+        ? null
+        : () {
+            if (widget.haptic) HapticFeedback.selectionClick();
+            widget.onTap!();
+          };
+    final detector = GestureDetector(
       // Opaque so TapScale registers a hit anywhere in its bounds even when
       // wrapping a child that doesn't paint there itself (deferToChild, the
       // default, would silently swallow taps on such children).
       behavior: HitTestBehavior.opaque,
-      onTap: widget.onTap == null
-          ? null
-          : () {
-              if (widget.haptic) HapticFeedback.selectionClick();
-              widget.onTap!();
-            },
+      onTap: onTap,
       onTapDown: (_) => _setPressed(true),
       onTapUp: (_) => _setPressed(false),
       onTapCancel: () => _setPressed(false),
@@ -53,6 +59,16 @@ class _TapScaleState extends State<TapScale> {
         curve: Curves.easeOut,
         child: widget.child,
       ),
+    );
+    final label = widget.semanticLabel;
+    if (label == null) return detector;
+    return Semantics(
+      button: true,
+      enabled: onTap != null,
+      label: label,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: detector,
     );
   }
 }

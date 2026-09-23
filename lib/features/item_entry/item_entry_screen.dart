@@ -227,6 +227,9 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
               children: [
                 TapScale(
                   onTap: _isPickingImage ? null : _showImageSourceSheet,
+                  semanticLabel: _previewFile != null
+                      ? strings.photoTapToChange
+                      : null,
                   child: AspectRatio(
                     aspectRatio: 1,
                     child: Container(
@@ -315,6 +318,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     QuantityStepper(
+                      strings: strings,
                       value: _quantity,
                       onChanged: (value) => setState(() => _quantity = value),
                     ),

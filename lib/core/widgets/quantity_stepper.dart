@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../localization/app_strings.dart';
 import '../theme/app_themes.dart';
 
 /// Compact +/- stepper for an item's quantity. Deliberately small and
@@ -9,11 +10,13 @@ class QuantityStepper extends StatelessWidget {
   final int value;
   final ValueChanged<int> onChanged;
   final int min;
+  final AppStrings strings;
 
   const QuantityStepper({
     super.key,
     required this.value,
     required this.onChanged,
+    required this.strings,
     this.min = 1,
   });
 
@@ -27,6 +30,7 @@ class QuantityStepper extends StatelessWidget {
       children: [
         _StepButton(
           icon: Icons.remove,
+          label: strings.decreaseQuantity,
           onTap: value > min ? () => onChanged(value - 1) : null,
           skipTheme: skipTheme,
         ),
@@ -40,6 +44,7 @@ class QuantityStepper extends StatelessWidget {
         ),
         _StepButton(
           icon: Icons.add,
+          label: strings.increaseQuantity,
           onTap: () => onChanged(value + 1),
           skipTheme: skipTheme,
         ),
@@ -50,11 +55,13 @@ class QuantityStepper extends StatelessWidget {
 
 class _StepButton extends StatelessWidget {
   final IconData icon;
+  final String label;
   final VoidCallback? onTap;
   final SkipThemeExtension skipTheme;
 
   const _StepButton({
     required this.icon,
+    required this.label,
     required this.onTap,
     required this.skipTheme,
   });
@@ -62,27 +69,32 @@ class _StepButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      customBorder: const CircleBorder(),
-      child: Container(
-        width: 28,
-        height: 28,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: theme.colorScheme.onSurface.withValues(
-              alpha: onTap == null ? 0.15 : 0.4,
+    return Semantics(
+      container: true,
+      button: true,
+      label: label,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Container(
+          width: 28,
+          height: 28,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: theme.colorScheme.onSurface.withValues(
+                alpha: onTap == null ? 0.15 : 0.4,
+              ),
             ),
           ),
-        ),
-        child: Icon(
-          icon,
-          size: 16,
-          color: onTap == null
-              ? theme.colorScheme.onSurface.withValues(alpha: 0.3)
-              : theme.colorScheme.onSurface,
+          child: Icon(
+            icon,
+            size: 16,
+            color: onTap == null
+                ? theme.colorScheme.onSurface.withValues(alpha: 0.3)
+                : theme.colorScheme.onSurface,
+          ),
         ),
       ),
     );

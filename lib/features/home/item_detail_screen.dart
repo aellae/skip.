@@ -300,6 +300,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       : () => _showImageSourceSheet(
                           hasImage: item.imagePath != null,
                         ),
+                  semanticLabel: item.imagePath != null
+                      ? strings.photoTapToChange
+                      : strings.tapToAddPhoto,
                   child: AspectRatio(
                     aspectRatio: 1,
                     child: Stack(
@@ -725,6 +728,7 @@ class _EditDetailsDialogState extends State<_EditDetailsDialog> {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 QuantityStepper(
+                  strings: widget.strings,
                   value: _quantity,
                   onChanged: (value) => setState(() => _quantity = value),
                 ),

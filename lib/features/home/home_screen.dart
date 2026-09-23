@@ -200,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         },
-        child: const Icon(Icons.add_a_photo),
+        child: Icon(Icons.add_a_photo, semanticLabel: strings.logAnItem),
       ),
     );
   }
