@@ -132,7 +132,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
+                      child: FitWordsText(
                         strings.trashSectionLabel,
                         style: theme.textTheme.bodyLarge,
                       ),
@@ -161,7 +161,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
+                      child: FitWordsText(
                         strings.privacyPolicy,
                         style: theme.textTheme.bodyLarge,
                       ),
