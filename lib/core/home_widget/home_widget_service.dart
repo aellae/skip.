@@ -31,6 +31,13 @@ class HomeWidgetService {
       await HomeWidget.setAppGroupId(_appGroupId);
       await HomeWidget.saveWidgetData<double>('saved', savedThisMonth);
       await HomeWidget.saveWidgetData<double>('spent', spentThisMonth);
+      // Tags the totals with the month they belong to, so a widget refreshing
+      // after a new month starts (before the app is opened) shows zeros
+      // instead of last month's numbers under the new month's name.
+      await HomeWidget.saveWidgetData<String>(
+        'totalsMonth',
+        widgetMonthKey(DateTime.now()),
+      );
       await HomeWidget.saveWidgetData<String>('currencyCode', currency.code);
       await HomeWidget.saveWidgetData<String>('aesthetic', aesthetic.name);
       // The native widgets can't read AppStrings, so they get the active
@@ -69,3 +76,10 @@ class HomeWidgetService {
     }
   }
 }
+
+/// `yyyy-MM` key for [date]'s local calendar month. Must stay in sync with
+/// the native widgets' `currentMonthKey` (SkipWidget.swift and
+/// SkipHomeWidgetProvider.kt), which compare it against their own clock.
+String widgetMonthKey(DateTime date) =>
+    '${date.year.toString().padLeft(4, '0')}-'
+    '${date.month.toString().padLeft(2, '0')}';

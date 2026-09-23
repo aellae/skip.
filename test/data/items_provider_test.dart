@@ -347,4 +347,26 @@ void main() {
       },
     );
   });
+
+  group('checkMonthRollover', () {
+    test('does nothing within the same month', () {
+      var notified = 0;
+      provider.addListener(() => notified++);
+      final now = DateTime.now();
+
+      expect(provider.checkMonthRollover(now: now), isFalse);
+      expect(notified, 0);
+    });
+
+    test('notifies once when a new month starts', () {
+      var notified = 0;
+      provider.addListener(() => notified++);
+      final now = DateTime.now();
+      final nextMonth = DateTime(now.year, now.month + 1, 1);
+
+      expect(provider.checkMonthRollover(now: nextMonth), isTrue);
+      expect(provider.checkMonthRollover(now: nextMonth), isFalse);
+      expect(notified, 1);
+    });
+  });
 }

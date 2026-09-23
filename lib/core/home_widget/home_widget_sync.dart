@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
@@ -14,6 +16,10 @@ import 'home_widget_service.dart';
 /// that supplies [ItemsProvider]/[ThemeProvider]/[CurrencyProvider]/
 /// [LocaleProvider]) with this so every screen benefits without wiring the
 /// push into each provider method individually.
+///
+/// Also watches for a new calendar month starting — on app resume and via a
+/// timer at the boundary while the app stays open — since "this month"
+/// totals change then without any provider having anything to notify.
 class HomeWidgetSync extends StatefulWidget {
   final Widget child;
 
@@ -23,11 +29,13 @@ class HomeWidgetSync extends StatefulWidget {
   State<HomeWidgetSync> createState() => _HomeWidgetSyncState();
 }
 
-class _HomeWidgetSyncState extends State<HomeWidgetSync> {
+class _HomeWidgetSyncState extends State<HomeWidgetSync>
+    with WidgetsBindingObserver {
   late final ItemsProvider _items;
   late final ThemeProvider _theme;
   late final CurrencyProvider _currency;
   late final LocaleProvider _locale;
+  Timer? _monthTimer;
 
   @override
   void initState() {
@@ -40,7 +48,31 @@ class _HomeWidgetSyncState extends State<HomeWidgetSync> {
     _theme.addListener(_sync);
     _currency.addListener(_sync);
     _locale.addListener(_sync);
+    WidgetsBinding.instance.addObserver(this);
+    _scheduleMonthRollover();
     _sync();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    // Timers don't fire while suspended, so re-check and re-arm on resume.
+    _items.checkMonthRollover();
+    _scheduleMonthRollover();
+  }
+
+  void _scheduleMonthRollover() {
+    _monthTimer?.cancel();
+    final now = DateTime.now();
+    final nextMonth = DateTime(now.year, now.month + 1);
+    // A second of slack so the check lands safely inside the new month.
+    _monthTimer = Timer(
+      nextMonth.difference(now) + const Duration(seconds: 1),
+      () {
+        _items.checkMonthRollover();
+        _scheduleMonthRollover();
+      },
+    );
   }
 
   void _sync() {
@@ -55,6 +87,8 @@ class _HomeWidgetSyncState extends State<HomeWidgetSync> {
 
   @override
   void dispose() {
+    _monthTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _items.removeListener(_sync);
     _theme.removeListener(_sync);
     _currency.removeListener(_sync);

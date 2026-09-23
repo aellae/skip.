@@ -65,8 +65,8 @@ class SkipHomeWidgetProvider : HomeWidgetProvider() {
             mottoFontFamily = "serif",
             mottoStyle = Typeface.ITALIC,
             textColor = Color.parseColor("#2C302E"),
-            savedColor = Color.parseColor("#5C7A5A"),
-            spentColor = Color.parseColor("#A35656"),
+            savedColor = Color.parseColor("#3F5470"),
+            spentColor = Color.parseColor("#B07A6E"),
         ),
         Y2K(
             logoRes = R.drawable.skip_widget_logo_y2k,
@@ -113,8 +113,14 @@ class SkipHomeWidgetProvider : HomeWidgetProvider() {
     ) {
         val aesthetic = SkipAesthetic.from(widgetData.getString("aesthetic", null))
         val currencyCode = widgetData.getString("currencyCode", null) ?: "usd"
-        val saved = readDouble(widgetData, "saved")
-        val spent = readDouble(widgetData, "spent")
+        // Totals are tagged with the month the app computed them for; once a
+        // new month starts they're last month's, so show zeros until the app
+        // is opened and pushes fresh ones. Untagged data (from an app version
+        // before the tag existed) is shown as-is.
+        val totalsMonth = widgetData.getString("totalsMonth", null)
+        val isStale = totalsMonth != null && totalsMonth != currentMonthKey()
+        val saved = if (isStale) 0.0 else readDouble(widgetData, "saved")
+        val spent = if (isStale) 0.0 else readDouble(widgetData, "spent")
         // Translated by the app; the strings.xml copies only cover the gap
         // before the app has pushed anything.
         val savedLabel =
@@ -235,6 +241,12 @@ class SkipHomeWidgetProvider : HomeWidgetProvider() {
     /** `home_widget`'s `saveWidgetData<double>` stores doubles as raw bits in a Long. */
     private fun readDouble(prefs: SharedPreferences, key: String): Double =
         java.lang.Double.longBitsToDouble(prefs.getLong(key, 0L))
+
+    /**
+     * `yyyy-MM` for today's local month. Must stay in sync with
+     * `widgetMonthKey` in lib/core/home_widget/home_widget_service.dart.
+     */
+    private fun currentMonthKey(): String = SimpleDateFormat("yyyy-MM", Locale.US).format(Date())
 
     private fun withAlpha(color: Int, alpha: Float): Int =
         Color.argb((alpha * 255).toInt(), Color.red(color), Color.green(color), Color.blue(color))

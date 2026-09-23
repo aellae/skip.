@@ -7,6 +7,9 @@
     <string name="skip_widget_saved_label">SAVED</string>
     <string name="skip_widget_spent_label">SPENT</string>
     <!-- Sample values for the picker preview (layout/skip_widget_preview.xml). -->
+    <!-- "●  LABEL" with the dot in the stat color, like the provider's dotLabel. -->
+    <string name="skip_widget_preview_saved_label" translatable="false"><font color="#3F5470">●</font>  SAVED</string>
+    <string name="skip_widget_preview_spent_label" translatable="false"><font color="#B07A6E">●</font>  SPENT</string>
     <string name="skip_widget_preview_month" translatable="false">SEP</string>
     <string name="skip_widget_preview_saved" translatable="false">$120.00</string>
     <string name="skip_widget_preview_spent" translatable="false">$45.00</string>

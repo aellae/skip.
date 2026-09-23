@@ -4,7 +4,6 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../core/audio/sfx_player.dart';
 import '../../../core/localization/locale_provider.dart';
@@ -122,9 +121,7 @@ class _DecisionToggleState extends State<DecisionToggle> {
                   color: skipTheme.savedColor,
                   onTap: () => _selectResisted(skipTheme.isY2K),
                   shimmer:
-                      skipTheme.isY2K &&
-                      widget.isSaved == true &&
-                      _shimmering,
+                      skipTheme.isY2K && widget.isSaved == true && _shimmering,
                   pulseKey: _showMinimalPulse ? _pulseKey : null,
                   onPulseDone: () {
                     if (mounted) setState(() => _showMinimalPulse = false);
@@ -265,17 +262,23 @@ class _ToggleOption extends StatelessWidget {
     );
 
     if (shimmer) {
-      // Same reasoning as the ClipRRect above: Shimmer's ShaderMask sweep is
-      // an extra paint layer on top of the already-clipped fill, and needs
-      // its own explicit clip or it can paint over the rounded corners too.
-      fill = ClipRRect(
-        borderRadius: radius,
-        child: Shimmer.fromColors(
-          baseColor: color,
-          highlightColor: skipTheme.accentHighlight,
-          period: const Duration(milliseconds: 1100),
-          child: fill,
-        ),
+      // A translucent highlight band swept over the fill, not a
+      // Shimmer.fromColors mask: Shimmer paints with BlendMode.srcIn, which
+      // replaces every pixel of the child — fill, label and glow — with its
+      // own gradient, so the selected pill washed out to a pale, label-less
+      // blob for the whole sweep. Clipped for the same reason as the fill.
+      fill = Stack(
+        children: [
+          fill,
+          Positioned.fill(
+            child: IgnorePointer(
+              child: ClipRRect(
+                borderRadius: radius,
+                child: _ShimmerSweep(color: skipTheme.accentHighlight),
+              ),
+            ),
+          ),
+        ],
       );
     }
 
@@ -296,6 +299,66 @@ class _ToggleOption extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// A looping diagonal highlight band that slides across its box — the Y2K
+/// "Resisted!" sparkle. Paints on top of the pill without masking it, so the
+/// fill color and label stay visible underneath.
+class _ShimmerSweep extends StatefulWidget {
+  final Color color;
+
+  const _ShimmerSweep({required this.color});
+
+  @override
+  State<_ShimmerSweep> createState() => _ShimmerSweepState();
+}
+
+class _ShimmerSweepState extends State<_ShimmerSweep>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1100),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) => DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              widget.color.withValues(alpha: 0),
+              widget.color.withValues(alpha: 0.55),
+              widget.color.withValues(alpha: 0),
+            ],
+            stops: const [0.35, 0.5, 0.65],
+            transform: _SlideGradient(_controller.value),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SlideGradient extends GradientTransform {
+  final double percent;
+
+  const _SlideGradient(this.percent);
+
+  @override
+  Matrix4? transform(Rect bounds, {TextDirection? textDirection}) {
+    // Travel from fully off the left edge to fully off the right edge.
+    return Matrix4.translationValues(bounds.width * (2 * percent - 1), 0, 0);
   }
 }
 

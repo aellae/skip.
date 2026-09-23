@@ -58,7 +58,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:letterSpacing="0.12"
-            android:text="@string/skip_widget_saved_label"
+            android:text="@string/skip_widget_preview_saved_label"
             android:textColor="#8C2C302E"
             android:textSize="10sp"
             android:textStyle="bold" />
@@ -69,7 +69,7 @@
             android:fontFamily="serif"
             android:singleLine="true"
             android:text="@string/skip_widget_preview_saved"
-            android:textColor="#5C7A5A"
+            android:textColor="#3F5470"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -78,7 +78,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:letterSpacing="0.12"
-            android:text="@string/skip_widget_spent_label"
+            android:text="@string/skip_widget_preview_spent_label"
             android:textColor="#8C2C302E"
             android:textSize="10sp"
             android:textStyle="bold" />
@@ -89,7 +89,7 @@
             android:fontFamily="serif"
             android:singleLine="true"
             android:text="@string/skip_widget_preview_spent"
-            android:textColor="#A35656"
+            android:textColor="#B07A6E"
             android:textSize="20sp"
             android:textStyle="bold" />
 

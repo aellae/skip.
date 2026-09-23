@@ -65,14 +65,14 @@ enum SkipAesthetic: String {
 
     var savedColor: Color {
         switch self {
-        case .minimal: return Color(hex: 0x5C7A5A)
+        case .minimal: return Color(hex: 0x3F5470)
         case .y2k: return Color(hex: 0x00E5FF)
         }
     }
 
     var spentColor: Color {
         switch self {
-        case .minimal: return Color(hex: 0xA35656)
+        case .minimal: return Color(hex: 0xB07A6E)
         case .y2k: return Color(hex: 0xFF5FC8)
         }
     }
@@ -172,14 +172,27 @@ private func mottoOfTheDay(_ mottos: [String], on date: Date) -> String? {
     return mottos[day % mottos.count]
 }
 
+/// `yyyy-MM` for [date]'s local Gregorian month. Must stay in sync with
+/// `widgetMonthKey` in lib/core/home_widget/home_widget_service.dart.
+private func currentMonthKey(_ date: Date) -> String {
+    let parts = Calendar(identifier: .gregorian).dateComponents([.year, .month], from: date)
+    return String(format: "%04d-%02d", parts.year ?? 0, parts.month ?? 0)
+}
+
 struct SkipWidgetProvider: TimelineProvider {
     private func currentEntry() -> SkipWidgetEntry {
         let defaults = UserDefaults(suiteName: appGroupId)
         let aesthetic =
             SkipAesthetic(rawValue: defaults?.string(forKey: "aesthetic") ?? "") ?? .minimal
         let now = Date()
-        let saved = defaults?.double(forKey: "saved") ?? 0
-        let spent = defaults?.double(forKey: "spent") ?? 0
+        // Totals are tagged with the month the app computed them for; once a
+        // new month starts they're last month's, so show zeros until the app
+        // is opened and pushes fresh ones. Untagged data (from an app version
+        // before the tag existed) is shown as-is.
+        let totalsMonth = defaults?.string(forKey: "totalsMonth")
+        let isStale = totalsMonth != nil && totalsMonth != currentMonthKey(now)
+        let saved = isStale ? 0 : defaults?.double(forKey: "saved") ?? 0
+        let spent = isStale ? 0 : defaults?.double(forKey: "spent") ?? 0
         var entry = SkipWidgetEntry(
             date: now,
             saved: saved,
@@ -212,8 +225,9 @@ struct SkipWidgetProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<SkipWidgetEntry>) -> Void) {
         // The app pushes a fresh entry (via WidgetCenter.reloadTimelines) every
         // time totals actually change; this daily fallback only exists so the
-        // "this month" bucket still rolls over at midnight if the app isn't
-        // opened around the month boundary, and today's motto changes daily.
+        // "this month" totals reset at midnight on the 1st (see the
+        // `totalsMonth` check in currentEntry) if the app isn't opened around
+        // the month boundary, and today's motto changes daily.
         let nextMidnight =
             Calendar.current.nextDate(
                 after: Date(),

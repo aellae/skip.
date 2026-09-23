@@ -27,6 +27,11 @@ class ItemsProvider extends ChangeNotifier {
   double _totalSpent = 0;
   bool _isLoading = false;
 
+  // The calendar month "this month" totals were last shown for, so a month
+  // boundary passing while the app is open or backgrounded can be detected
+  // (see [checkMonthRollover]).
+  DateTime _currentMonth = _monthOf(DateTime.now());
+
   // Throttles the local safety-net backup so it writes at most this often,
   // rather than after every single load() call.
   static const Duration _autoBackupInterval = Duration(minutes: 10);
@@ -243,4 +248,19 @@ class ItemsProvider extends ChangeNotifier {
   double get totalSavedThisMonth => monthlyTotals(monthsBack: 1).single.saved;
 
   double get totalSpentThisMonth => monthlyTotals(monthsBack: 1).single.spent;
+
+  /// "This month" is derived from the clock rather than stored, so nothing
+  /// notifies listeners when a new month starts. Call this when the app
+  /// resumes (or at the month boundary) so screens showing monthly totals
+  /// rebuild and the home-screen widget is re-synced. Returns whether the
+  /// month changed.
+  bool checkMonthRollover({DateTime? now}) {
+    final month = _monthOf(now ?? DateTime.now());
+    if (month == _currentMonth) return false;
+    _currentMonth = month;
+    notifyListeners();
+    return true;
+  }
+
+  static DateTime _monthOf(DateTime date) => DateTime(date.year, date.month);
 }
