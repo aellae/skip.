@@ -15,8 +15,14 @@ final Random _random = Random();
 /// across app reinstalls/updates (notably on iOS), so an absolute path
 /// stored today can silently point nowhere after an update.
 class FileHelper {
+  /// [systemTemp] overrides [Directory.systemTemp], for tests only.
+  FileHelper({Directory Function()? systemTemp})
+    : _systemTemp = systemTemp ?? (() => Directory.systemTemp);
+
   static const String imagesSubdir = 'skip_images';
   static const String exportsSubdir = 'skip_exports';
+
+  final Directory Function() _systemTemp;
 
   Future<String>? _docsPathFuture;
 
@@ -67,19 +73,44 @@ class FileHelper {
   }
 
   /// Deletes [path], image_picker's temporary copy of a picked photo, once
-  /// it has been copied into app documents. Only a file inside the app's
-  /// own cache directory is ever removed; anything elsewhere (e.g. an
-  /// original in the gallery) is left alone. Best-effort: never throws.
+  /// it has been copied into app documents (or the copy failed). Only a
+  /// file inside the app's own temp/cache directories is ever removed;
+  /// anything elsewhere (an original in the gallery, a stored photo in
+  /// [imagesSubdir]) is left alone. Best-effort: never throws.
   Future<void> deletePickerTempFile(String path) async {
     try {
-      final cacheDir = await getTemporaryDirectory();
-      if (!p.isWithin(p.normalize(cacheDir.path), p.normalize(path))) return;
       final file = File(path);
-      if (file.existsSync()) file.deleteSync();
+      if (!file.existsSync()) return;
+      // Compare real paths: iOS reports the same container under both
+      // /var and /private/var, and `..` segments must not escape the check.
+      final target = file.resolveSymbolicLinksSync();
+      final images = (await imagesDirectory()).resolveSymbolicLinksSync();
+      if (p.isWithin(images, target)) return;
+      final docsDir = Directory(await _documentsPath());
+      final allowed = await _pickerTempDirectories(docsDir);
+      if (!allowed.any((dir) => p.isWithin(dir, target))) return;
+      file.deleteSync();
     } catch (_) {
-      // Leftover cache files are private and OS-evictable; not worth
+      // Leftover temp files are private and OS-evictable; not worth
       // interrupting the pick over.
     }
+  }
+
+  /// Real paths of the directories image_picker writes its copies to: the
+  /// app cache dir (Android) and, on iOS, `NSTemporaryDirectory()` — the
+  /// container's `tmp/`, a sibling of `Library/` rather than inside the
+  /// `Library/Caches` that [getTemporaryDirectory] returns. The system temp
+  /// dir only counts when it sits in the app's own container, next to the
+  /// documents directory.
+  Future<List<String>> _pickerTempDirectories(Directory docsDir) async {
+    final dirs = [(await getTemporaryDirectory()).resolveSymbolicLinksSync()];
+    final systemTemp = _systemTemp();
+    if (systemTemp.existsSync()) {
+      final temp = systemTemp.resolveSymbolicLinksSync();
+      final container = docsDir.parent.resolveSymbolicLinksSync();
+      if (p.equals(p.dirname(temp), container)) dirs.add(temp);
+    }
+    return dirs;
   }
 
   /// Resolves a relative path (as stored in the database) to an absolute

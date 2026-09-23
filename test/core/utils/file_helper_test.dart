@@ -51,6 +51,110 @@ void main() {
           p.join(tempDocsDir.path, 'cache', 'gone.jpg'),
         );
       });
+
+      group('in an iOS-style container', () {
+        late Directory container;
+        late Directory docs;
+        late Directory tmp;
+        late Directory caches;
+
+        setUp(() {
+          container = Directory(p.join(sourceDir.path, 'container'));
+          docs = Directory(p.join(container.path, 'Documents'))
+            ..createSync(recursive: true);
+          caches = Directory(p.join(container.path, 'Library', 'Caches'))
+            ..createSync(recursive: true);
+          tmp = Directory(p.join(container.path, 'tmp'))..createSync();
+          PathProviderPlatform.instance = FakePathProviderPlatform.iosContainer(
+            container.path,
+          );
+          fileHelper = FileHelper(systemTemp: () => tmp);
+        });
+
+        File write(String path) => File(path)
+          ..parent.createSync(recursive: true)
+          ..writeAsBytesSync([1]);
+
+        test('deletes a picker copy in the container tmp dir', () async {
+          final copy = write(p.join(tmp.path, 'image_picker_ABC.jpg'));
+
+          await fileHelper.deletePickerTempFile(copy.path);
+
+          expect(copy.existsSync(), isFalse);
+        });
+
+        test('deletes a picker copy in Library/Caches', () async {
+          final copy = write(p.join(caches.path, 'image_picker_ABC.jpg'));
+
+          await fileHelper.deletePickerTempFile(copy.path);
+
+          expect(copy.existsSync(), isFalse);
+        });
+
+        test('never deletes a stored photo in skip_images', () async {
+          final stored = write(
+            p.join(docs.path, FileHelper.imagesSubdir, 'kept.jpg'),
+          );
+
+          await fileHelper.deletePickerTempFile(stored.path);
+
+          expect(stored.existsSync(), isTrue);
+        });
+
+        test('never deletes a file elsewhere in the container', () async {
+          final other = write(p.join(container.path, 'Library', 'prefs.jpg'));
+
+          await fileHelper.deletePickerTempFile(other.path);
+
+          expect(other.existsSync(), isTrue);
+        });
+
+        test('`..` segments cannot escape the allow-list', () async {
+          final stored = write(
+            p.join(docs.path, FileHelper.imagesSubdir, 'kept.jpg'),
+          );
+          final outside = write(p.join(sourceDir.path, 'gallery.jpg'));
+
+          await fileHelper.deletePickerTempFile(
+            p.join(
+              tmp.path,
+              '..',
+              'Documents',
+              FileHelper.imagesSubdir,
+              'kept.jpg',
+            ),
+          );
+          await fileHelper.deletePickerTempFile(
+            p.join(tmp.path, '..', '..', 'gallery.jpg'),
+          );
+
+          expect(stored.existsSync(), isTrue);
+          expect(outside.existsSync(), isTrue);
+        });
+
+        test('resolves a symlinked path to the same tmp dir', () async {
+          final copy = write(p.join(tmp.path, 'image_picker_ABC.jpg'));
+          final alias = Link(p.join(sourceDir.path, 'alias'))
+            ..createSync(container.path);
+
+          await fileHelper.deletePickerTempFile(
+            p.join(alias.path, 'tmp', 'image_picker_ABC.jpg'),
+          );
+
+          expect(copy.existsSync(), isFalse);
+        });
+
+        test('ignores a system temp dir outside the app container', () async {
+          final foreignTmp = Directory(p.join(sourceDir.path, 'foreign_tmp'))
+            ..createSync();
+          fileHelper = FileHelper(systemTemp: () => foreignTmp);
+          final copy = write(p.join(foreignTmp.path, 'image_picker_ABC.jpg'));
+
+          await fileHelper.deletePickerTempFile(copy.path);
+
+          expect(copy.existsSync(), isTrue);
+        });
+      });
     });
 
     test(

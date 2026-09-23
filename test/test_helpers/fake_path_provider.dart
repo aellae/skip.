@@ -7,6 +7,15 @@ class FakePathProviderPlatform extends PathProviderPlatform {
   FakePathProviderPlatform(this.documentsPath, {String? temporaryPath})
     : temporaryPath = temporaryPath ?? '$documentsPath/cache';
 
+  /// Lays the dirs out like an iOS app container: `Documents/` and
+  /// `Library/Caches/` (what `getTemporaryDirectory()` returns), with the
+  /// container's `tmp/` — where image_picker_ios writes — as a sibling.
+  FakePathProviderPlatform.iosContainer(String containerPath)
+    : this(
+        '$containerPath/Documents',
+        temporaryPath: '$containerPath/Library/Caches',
+      );
+
   final String documentsPath;
 
   /// Stands in for the app cache dir, where image_picker leaves its copies.
