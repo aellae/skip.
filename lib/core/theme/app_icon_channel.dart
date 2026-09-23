@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 /// Bridges to the native alternate-icon API so the home screen icon can
 /// follow the active [SkipAesthetic]. On iOS this uses
 /// `UIApplication.setAlternateIconName`; on Android it toggles between two
-/// `activity-alias` entries in the manifest. No-op on other platforms, where
+/// `activity-alias` entries in the manifest, deferred until the user leaves
+/// the app (see MainActivity.kt). No-op on other platforms, where
 /// alternate app icons aren't supported.
 class AppIconChannel {
   static const _channel = MethodChannel('skip/app_icon');
