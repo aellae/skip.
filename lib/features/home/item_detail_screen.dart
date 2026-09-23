@@ -278,8 +278,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 child: TapScale(
                   onTap: _isBusy || _isPickingImage
                       ? null
-                      : () =>
-                            _showImageSourceSheet(hasImage: item.imagePath != null),
+                      : () => _showImageSourceSheet(
+                          hasImage: item.imagePath != null,
+                        ),
                   child: AspectRatio(
                     aspectRatio: 1,
                     child: Stack(
@@ -321,24 +322,23 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                           fit: BoxFit.cover,
                                           cacheWidth: 1200,
                                           errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  Container(
-                                                    color: theme
-                                                        .colorScheme
-                                                        .surface,
-                                                    alignment: Alignment.center,
-                                                    child: Icon(
-                                                      Icons
-                                                          .broken_image_outlined,
-                                                      color: theme
-                                                          .colorScheme
-                                                          .onSurface
-                                                          .withValues(
-                                                            alpha: 0.4,
-                                                          ),
-                                                      size: 48,
-                                                    ),
-                                                  ),
+                                              (
+                                                context,
+                                                error,
+                                                stackTrace,
+                                              ) => Container(
+                                                color:
+                                                    theme.colorScheme.surface,
+                                                alignment: Alignment.center,
+                                                child: Icon(
+                                                  Icons.broken_image_outlined,
+                                                  color: theme
+                                                      .colorScheme
+                                                      .onSurface
+                                                      .withValues(alpha: 0.4),
+                                                  size: 48,
+                                                ),
+                                              ),
                                         );
                                       },
                                     ),
@@ -422,17 +422,14 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                     ? (_) {}
                     : (newValue) => _changeStatus(newValue, item.isSaved),
               ),
-              const SizedBox(height: 8),
-              Center(
-                child: TextButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const CoinFlipScreen()),
-                    );
-                  },
-                  icon: const Icon(Icons.monetization_on_outlined, size: 18),
-                  label: Text(strings.coinFlipTooltip),
-                ),
+              const SizedBox(height: 12),
+              _CoinFlipButton(
+                label: strings.coinFlipTooltip,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const CoinFlipScreen()),
+                  );
+                },
               ),
               const SizedBox(height: AppSpacing.sectionGap),
               Text(strings.productLink, style: theme.textTheme.labelLarge),
@@ -515,11 +512,7 @@ class _PhotoEditBadge extends StatelessWidget {
                 ),
               ],
       ),
-      child: Icon(
-        Icons.camera_alt,
-        size: 18,
-        color: theme.colorScheme.primary,
-      ),
+      child: Icon(Icons.camera_alt, size: 18, color: theme.colorScheme.primary),
     );
   }
 }
@@ -736,6 +729,60 @@ class _EditDetailsDialogState extends State<_EditDetailsDialog> {
         ),
         TextButton(onPressed: _save, child: Text(widget.strings.save)),
       ],
+    );
+  }
+}
+
+/// Prominent entry point to the coin-flip tool, shown right under the
+/// decision toggle so it's easy to find while an item is being weighed up.
+class _CoinFlipButton extends StatelessWidget {
+  const _CoinFlipButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final skipTheme = theme.extension<SkipThemeExtension>()!;
+    final radius = BorderRadius.circular(skipTheme.cardRadius);
+    final foreground = skipTheme.isY2K ? Colors.white : skipTheme.savedColor;
+
+    return Material(
+      color: Colors.transparent,
+      child: Ink(
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          color: skipTheme.isY2K
+              ? null
+              : skipTheme.savedColor.withValues(alpha: 0.15),
+          gradient: skipTheme.isY2K ? skipTheme.accentGradient : null,
+          boxShadow: skipTheme.isY2K ? skipTheme.glowShadow : null,
+        ),
+        child: InkWell(
+          borderRadius: radius,
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.monetization_on_outlined, color: foreground),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: foreground,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

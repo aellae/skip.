@@ -711,4 +711,104 @@ class AppStrings {
     AppLocale.fr => 'Laisse-le.',
     AppLocale.de => 'Lass es.',
   };
+
+  // Home-screen widget (pushed to the native widget by HomeWidgetService,
+  // since the iOS/Android extensions can't reach this class).
+  /// Short nudges the widget rotates through, one per day, in the calm
+  /// voice of the minimal "skip." aesthetic. Kept neutral so each reads right
+  /// whether the month is going well or not, and short enough for three
+  /// lines of a medium widget's half column.
+  List<String> get widgetMottosMinimal => switch (locale) {
+    AppLocale.en => const [
+      'Want it, or want it today?',
+      "Sleep on it. It'll still be there.",
+      'Every skip is a small win.',
+      'Future you says thanks.',
+      'Not buying is always on sale.',
+      'Pause before you pay.',
+      'Less stuff, more choices.',
+    ],
+    AppLocale.it => const [
+      'Lo vuoi, o lo vuoi subito?',
+      'Dormici su. Sarà ancora lì.',
+      'Ogni rinuncia è una piccola vittoria.',
+      'Il te del futuro ringrazia.',
+      'Non comprare è sempre in saldo.',
+      'Fermati prima di pagare.',
+      'Meno cose, più libertà.',
+    ],
+    AppLocale.fr => const [
+      'Envie, ou envie tout de suite ?',
+      'La nuit porte conseil.',
+      'Chaque renoncement est une petite victoire.',
+      'Ton futur toi te remercie.',
+      "Ne pas acheter, c'est toujours en solde.",
+      'Une pause avant de payer.',
+      'Moins de choses, plus de choix.',
+    ],
+    AppLocale.de => const [
+      'Willst du es – oder willst du es jetzt?',
+      'Schlaf eine Nacht drüber.',
+      'Jeder Verzicht ist ein kleiner Sieg.',
+      'Dein zukünftiges Ich sagt danke.',
+      'Nicht kaufen ist immer im Angebot.',
+      'Erst durchatmen, dann zahlen.',
+      'Weniger Zeug, mehr Freiheit.',
+    ],
+  };
+
+  /// Same role as [widgetMottosMinimal], in the sassier voice of the Y2K
+  /// "SKIP!" aesthetic. Still never scolds: the line shows on bad months too.
+  List<String> get widgetMottosY2k => switch (locale) {
+    AppLocale.en => const [
+      'Put the card down. Slowly.',
+      'Cart abandoned. Iconic.',
+      'Your wallet called. It\'s thriving.',
+      'Want ≠ need. Period.',
+      'Main character energy: not buying it.',
+      'Skip it like it\'s hot.',
+      'Rich is a mindset. And a savings account.',
+    ],
+    AppLocale.it => const [
+      'Giù la carta. Piano.',
+      'Carrello abbandonato. Iconico.',
+      'Il portafoglio ha chiamato: sta benissimo.',
+      'Volere ≠ servire. Punto.',
+      'Energia da protagonista: non lo compro.',
+      'Skippalo con stile.',
+      'Essere ricchi è uno stato mentale. E un salvadanaio.',
+    ],
+    AppLocale.fr => const [
+      'Pose la carte. Doucement.',
+      'Panier abandonné. Iconique.',
+      'Ton portefeuille a appelé : il va super bien.',
+      'Envie ≠ besoin. Point.',
+      'Énergie de star : je ne l\'achète pas.',
+      'Skippe-le avec style.',
+      'Être riche, c\'est un état d\'esprit. Et une épargne.',
+    ],
+    AppLocale.de => const [
+      'Karte runter. Ganz langsam.',
+      'Warenkorb verlassen. Ikonisch.',
+      'Dein Konto hat angerufen: Es blüht auf.',
+      'Wollen ≠ brauchen. Punkt.',
+      'Hauptrollen-Energie: Kauf ich nicht.',
+      'Skippen mit Stil.',
+      'Reich ist eine Einstellung. Und ein Sparkonto.',
+    ],
+  };
+
+  /// Shown by the widget instead of a motto while this month is still empty.
+  String get widgetMottoEmptyMinimal => switch (locale) {
+    AppLocale.en => 'Nothing logged this month. First skip?',
+    AppLocale.it => 'Ancora niente questo mese. Primo skip?',
+    AppLocale.fr => 'Rien ce mois-ci. Premier skip ?',
+    AppLocale.de => 'Diesen Monat noch nichts. Erster Skip?',
+  };
+  String get widgetMottoEmptyY2k => switch (locale) {
+    AppLocale.en => 'Zero logged. Go skip something!',
+    AppLocale.it => 'Ancora zero. Vai, skippa qualcosa!',
+    AppLocale.fr => 'Zéro ce mois-ci. Va skipper un truc !',
+    AppLocale.de => 'Noch null. Los, skip was!',
+  };
 }

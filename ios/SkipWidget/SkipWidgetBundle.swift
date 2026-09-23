@@ -12,5 +12,6 @@ import SwiftUI
 struct SkipWidgetBundle: WidgetBundle {
     var body: some Widget {
         SkipWidget()
+        SkipMottoWidget()
     }
 }

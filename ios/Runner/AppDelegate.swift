@@ -30,24 +30,55 @@ import UIKit
       }
       let args = call.arguments as? [String: Any]
       let iconName = args?["iconName"] as? String
-      // Re-setting the same name still triggers the OS confirmation prompt,
-      // so skip the call entirely when it wouldn't change anything.
-      if UIApplication.shared.alternateIconName == iconName {
-        result(nil)
-        return
+      AppDelegate.applyAlternateIcon(iconName, result: result)
+    }
+  }
+
+  private static var pendingIconObserver: NSObjectProtocol?
+  private static var pendingIconResult: FlutterResult?
+
+  /// iOS rejects `setAlternateIconName` unless the app is active, and the
+  /// startup sync runs before `runApp` (while the app is still inactive),
+  /// so in that case wait for the app to become active, then apply the
+  /// latest requested icon.
+  private static func applyAlternateIcon(_ iconName: String?, result: @escaping FlutterResult) {
+    if let observer = pendingIconObserver {
+      NotificationCenter.default.removeObserver(observer)
+      pendingIconObserver = nil
+    }
+    // A newer request supersedes one still waiting for the app to activate.
+    pendingIconResult?(nil)
+    pendingIconResult = nil
+
+    guard UIApplication.shared.applicationState == .active else {
+      pendingIconResult = result
+      pendingIconObserver = NotificationCenter.default.addObserver(
+        forName: UIApplication.didBecomeActiveNotification,
+        object: nil,
+        queue: .main
+      ) { _ in
+        pendingIconResult = nil
+        applyAlternateIcon(iconName, result: result)
       }
-      UIApplication.shared.setAlternateIconName(iconName) { error in
-        if let error = error {
-          result(
-            FlutterError(
-              code: "SET_ALTERNATE_ICON_FAILED",
-              message: error.localizedDescription,
-              details: nil
-            )
+      return
+    }
+    // Re-setting the same name still triggers the OS confirmation prompt,
+    // so skip the call entirely when it wouldn't change anything.
+    if UIApplication.shared.alternateIconName == iconName {
+      result(nil)
+      return
+    }
+    UIApplication.shared.setAlternateIconName(iconName) { error in
+      if let error = error {
+        result(
+          FlutterError(
+            code: "SET_ALTERNATE_ICON_FAILED",
+            message: error.localizedDescription,
+            details: nil
           )
-        } else {
-          result(nil)
-        }
+        )
+      } else {
+        result(nil)
       }
     }
   }

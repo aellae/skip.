@@ -23,8 +23,8 @@ class AppColors {
   static const y2kMetallicSilver = Color(0xFFE0E0E0);
   static const y2kGlitterPink = Color(0xFFFFD1EC);
   static const y2kBlack = Color(0xFF181022);
-  static const y2kSaved = Color(0xFF00E5A0);
-  static const y2kSpent = Color(0xFFFF6B4A);
+  static const y2kSaved = Color(0xFF00E5FF);
+  static const y2kSpent = Color(0xFFFF5FC8);
   static const y2kPondering = Color(0xFFFFC400);
   static const y2kDeepSurface = Color(0xFF241A33);
 }

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wide RemoteViews layout for SkipHomeWidgetProvider, used once the widget
+     is resized to about 4 cells across. Visual twin of
+     ios/SkipWidget/SkipWidget.swift's medium layout: logo and today's motto on
+     the left, month + Saved/Spent + split bar on the right. Shares every view
+     id with skip_widget.xml so the provider fills both the same way. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/widget_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/skip_widget_bg_minimal" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:padding="14dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/widget_logo"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="@null"
+                android:scaleType="fitStart"
+                android:src="@drawable/skip_widget_logo" />
+
+            <!-- Fills the space under the logo: autosize starts at
+                 stat-value size and shrinks only as far as a long line
+                 needs (API 26+; older devices keep the 16sp fallback). -->
+            <TextView
+                android:id="@+id/widget_motto"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                android:layout_weight="1"
+                android:autoSizeMaxTextSize="22sp"
+                android:autoSizeMinTextSize="12sp"
+                android:autoSizeStepGranularity="1sp"
+                android:autoSizeTextType="uniform"
+                android:ellipsize="end"
+                android:gravity="bottom|start"
+                android:maxLines="4"
+                android:textSize="16sp"
+                tools:text="Want it, or want it today?" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/widget_month"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:letterSpacing="0.12"
+                android:singleLine="true"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                tools:text="SEPTEMBER" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:minHeight="4dp" />
+
+            <TextView
+                android:id="@+id/widget_saved_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.12"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                tools:text="● SAVED" />
+
+            <TextView
+                android:id="@+id/widget_saved_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textSize="22sp"
+                tools:text="$120.00" />
+
+            <TextView
+                android:id="@+id/widget_spent_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:letterSpacing="0.12"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                tools:text="● SPENT" />
+
+            <TextView
+                android:id="@+id/widget_spent_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textSize="22sp"
+                tools:text="$45.00" />
+
+            <!-- One bar per aesthetic (RemoteViews can't swap a ProgressBar's
+                 progressDrawable); the provider shows the matching one. -->
+            <ProgressBar
+                android:id="@+id/widget_bar_minimal"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginTop="10dp"
+                android:max="100"
+                android:progressDrawable="@drawable/skip_widget_bar_minimal" />
+
+            <ProgressBar
+                android:id="@+id/widget_bar_y2k"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginTop="10dp"
+                android:max="100"
+                android:progressDrawable="@drawable/skip_widget_bar_y2k"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

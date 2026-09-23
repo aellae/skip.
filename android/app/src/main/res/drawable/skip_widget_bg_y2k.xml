@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "SKIP!" widget card: deep violet night with magenta/violet glows. Mirrors
+     SkipAesthetic.y2k's background in ios/SkipWidget/SkipWidget.swift. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="22dp" />
+            <gradient
+                android:angle="315"
+                android:startColor="#2B1D3E"
+                android:endColor="#181022" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="22dp" />
+            <gradient
+                android:type="radial"
+                android:centerX="1.0"
+                android:centerY="0.0"
+                android:gradientRadius="140dp"
+                android:startColor="#59FF007F"
+                android:endColor="#00FF007F" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="22dp" />
+            <gradient
+                android:type="radial"
+                android:centerX="0.0"
+                android:centerY="1.0"
+                android:gradientRadius="150dp"
+                android:startColor="#47B026FF"
+                android:endColor="#00B026FF" />
+        </shape>
+    </item>
+</layer-list>

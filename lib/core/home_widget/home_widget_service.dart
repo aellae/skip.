@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:home_widget/home_widget.dart';
 
 import '../localization/app_currency.dart';
+import '../localization/app_strings.dart';
 import '../theme/theme_provider.dart';
 
 /// Bridges this-month saved/spent totals into the home-screen widget on iOS
@@ -14,6 +15,7 @@ import '../theme/theme_provider.dart';
 class HomeWidgetService {
   static const _appGroupId = 'group.com.skip.finance';
   static const _iOSWidgetName = 'SkipWidget';
+  static const _iOSMottoWidgetName = 'SkipMottoWidget';
   static const _androidWidgetName = 'SkipHomeWidgetProvider';
 
   static Future<void> update({
@@ -21,6 +23,7 @@ class HomeWidgetService {
     required double spentThisMonth,
     required AppCurrency currency,
     required SkipAesthetic aesthetic,
+    required AppStrings strings,
   }) async {
     if (!Platform.isIOS && !Platform.isAndroid) return;
     try {
@@ -29,10 +32,33 @@ class HomeWidgetService {
       await HomeWidget.saveWidgetData<double>('spent', spentThisMonth);
       await HomeWidget.saveWidgetData<String>('currencyCode', currency.code);
       await HomeWidget.saveWidgetData<String>('aesthetic', aesthetic.name);
+      // The native widgets can't read AppStrings, so they get the active
+      // language's copy pre-translated, and in the active aesthetic's voice
+      // (calm for "skip.", sassy for "SKIP!"). Mottos travel newline-joined;
+      // the widget picks one per day so it rotates without the app being
+      // opened.
+      final isY2k = aesthetic == SkipAesthetic.y2k;
+      await HomeWidget.saveWidgetData<String>('savedLabel', strings.saved);
+      await HomeWidget.saveWidgetData<String>('spentLabel', strings.spent);
+      await HomeWidget.saveWidgetData<String>(
+        'mottos',
+        (isY2k ? strings.widgetMottosY2k : strings.widgetMottosMinimal).join(
+          '\n',
+        ),
+      );
+      await HomeWidget.saveWidgetData<String>(
+        'mottoEmpty',
+        isY2k ? strings.widgetMottoEmptyY2k : strings.widgetMottoEmptyMinimal,
+      );
       await HomeWidget.updateWidget(
         iOSName: _iOSWidgetName,
         androidName: _androidWidgetName,
       );
+      if (Platform.isIOS) {
+        // The lock-screen motto widget is a separate kind, so it needs its
+        // own reload to pick up a new language or aesthetic.
+        await HomeWidget.updateWidget(iOSName: _iOSMottoWidgetName);
+      }
     } catch (_) {
       // Widget refresh is a nicety; ignore failures (e.g. running on a
       // simulator/emulator without the widget added to the home screen yet).
