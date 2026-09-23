@@ -23,23 +23,23 @@ class FitWordsText extends StatelessWidget {
         var scaler = textScaler;
 
         if (constraints.hasBoundedWidth) {
-          final longest = data
-              .split(RegExp(r'\s+'))
-              .map(
-                (word) => _measure(
-                  word,
-                  effectiveStyle,
-                  textScaler,
-                  Directionality.of(context),
-                ),
-              )
+          final words = data.split(RegExp(r'\s+'));
+          final textDirection = Directionality.of(context);
+          double longestAt(TextScaler scaler) => words
+              .map((w) => _measure(w, effectiveStyle, scaler, textDirection))
               .fold<double>(0, max);
+
+          var longest = longestAt(textScaler);
           if (longest > constraints.maxWidth) {
             final fontSize = effectiveStyle.fontSize ?? 14;
-            final currentFactor = textScaler.scale(fontSize) / fontSize;
-            scaler = TextScaler.linear(
-              currentFactor * constraints.maxWidth / longest,
-            );
+            var factor = textScaler.scale(fontSize) / fontSize;
+            // Scaling isn't perfectly proportional (letterSpacing, for one,
+            // doesn't scale), so re-measure and tighten until it fits.
+            for (var i = 0; i < 4 && longest > constraints.maxWidth; i++) {
+              factor *= constraints.maxWidth / longest;
+              scaler = TextScaler.linear(factor);
+              longest = longestAt(scaler);
+            }
           }
         }
 

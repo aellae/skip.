@@ -13,6 +13,7 @@ void main() {
     String text, {
     required double width,
     double textScale = 1,
+    TextStyle textStyle = style,
   }) async {
     await tester.pumpWidget(
       MediaQuery(
@@ -22,7 +23,7 @@ void main() {
           child: Center(
             child: SizedBox(
               width: width,
-              child: FitWordsText(text, style: style),
+              child: FitWordsText(text, style: textStyle),
             ),
           ),
         ),
@@ -58,5 +59,21 @@ void main() {
 
     expect(paragraph.textScaler.scale(10), 10);
     expect(paragraph.size.height, greaterThan(10));
+  });
+
+  testWidgets('still fits when letterSpacing (which never scales) is set', (
+    tester,
+  ) async {
+    // 10 glyphs * 20px + 10 * 5px spacing = 250px at 2x, in a 120px box;
+    // a single proportional rescale would leave it ~145px wide.
+    final paragraph = await pumpText(
+      tester,
+      'Resistito!',
+      width: 120,
+      textScale: 2,
+      textStyle: style.copyWith(letterSpacing: 5),
+    );
+
+    expect(paragraph.size.height, lessThan(2 * paragraph.textScaler.scale(10)));
   });
 }
