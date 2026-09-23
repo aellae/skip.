@@ -142,6 +142,19 @@ private func formatCurrency(_ value: Double, currencyCode: String) -> String {
     return isEuro ? "\(sign)\(grouped),\(cents) €" : "\(sign)$\(grouped).\(cents)"
 }
 
+/// Mirrors the app's `formatCurrencyCompact` (currency_formatter.dart): no
+/// cents, and values at or above 1,000 collapse to e.g. `$1.9k` / `1,9k €`.
+private func formatCurrencyCompact(_ value: Double, currencyCode: String) -> String {
+    let isEuro = currencyCode.lowercased() == "eur"
+    let absValue = abs(value)
+    var body = absValue >= 1000
+        ? String(format: absValue >= 100_000 ? "%.0fk" : "%.1fk", absValue / 1000)
+        : String(format: "%.0f", absValue)
+    if isEuro { body = body.replacingOccurrences(of: ".", with: ",") }
+    let sign = value < 0 ? "-" : ""
+    return isEuro ? "\(sign)\(body) €" : "\(sign)$\(body)"
+}
+
 struct SkipWidgetEntry: TimelineEntry {
     let date: Date
     let saved: Double
@@ -252,6 +265,8 @@ struct SkipWidgetEntryView: View {
     private var aesthetic: SkipAesthetic { entry.aesthetic }
     private var savedText: String { formatCurrency(entry.saved, currencyCode: entry.currencyCode) }
     private var spentText: String { formatCurrency(entry.spent, currencyCode: entry.currencyCode) }
+    private var savedCompactText: String { formatCurrencyCompact(entry.saved, currencyCode: entry.currencyCode) }
+    private var spentCompactText: String { formatCurrencyCompact(entry.spent, currencyCode: entry.currencyCode) }
 
     var body: some View {
         switch family {
@@ -274,12 +289,14 @@ struct SkipWidgetEntryView: View {
     }
 
     /// Lock screen, above the clock: a single line of text. Falls back to
-    /// the bare amounts when the labelled version doesn't fit. The whole
+    /// the bare amounts when the labelled version doesn't fit, then to
+    /// compact amounts (`$1.9k`) so 4-digit totals aren't cut off. The whole
     /// line is privacy-sensitive since it's mostly amounts.
     private var inlineLayout: some View {
         ViewThatFits {
             Text("\(entry.savedLabel) \(savedText) · \(entry.spentLabel) \(spentText)")
             Text("\(aesthetic.logoText) \(savedText) · \(spentText)")
+            Text("\(aesthetic.logoText) \(savedCompactText) · \(spentCompactText)")
         }
         .privacySensitive()
     }
