@@ -80,6 +80,7 @@ void main() {
     AppCurrency currency = AppCurrency.usd,
     double? hourlyWage,
     XFile? recoveredImage,
+    ThemeData? theme,
   }) async {
     fakePicker = _FakeImagePicker(sourceImage);
     await tester.pumpWidget(
@@ -98,7 +99,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
-          theme: AppThemes.minimal,
+          theme: theme ?? AppThemes.minimal,
           home: ItemEntryScreen(
             imagePicker: fakePicker,
             recoveredImage: recoveredImage,
@@ -467,4 +468,23 @@ void main() {
 
     expect(find.text('Price must be greater than zero.'), findsNothing);
   });
+
+  for (final theme in [AppThemes.minimal, AppThemes.y2k]) {
+    testWidgets(
+      'the decision toggle is on screen without scrolling on an '
+      'iPhone 16 (${theme.extension<SkipThemeExtension>()!.isY2K ? 'y2k' : 'minimal'})',
+      (tester) async {
+        tester.view.physicalSize = const Size(1179, 2556);
+        tester.view.devicePixelRatio = 3;
+        tester.view.padding = const FakeViewPadding(top: 177, bottom: 102);
+        addTearDown(tester.view.reset);
+
+        await pumpEntryScreen(tester, buildTestItemsProvider(), theme: theme);
+
+        final toggle = tester.getRect(find.byType(DecisionToggle));
+        expect(toggle.bottom, lessThanOrEqualTo(852 - 34));
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -45,6 +46,9 @@ class ItemEntryScreen extends StatefulWidget {
 }
 
 class _ItemEntryScreenState extends State<ItemEntryScreen> {
+  /// The most of the body's height the photo box may take.
+  static const double _photoMaxHeightShare = 0.4;
+
   late final ImagePicker _picker = widget.imagePicker ?? ImagePicker();
   late final FileHelper _fileHelper = widget.fileHelper ?? FileHelper();
   final _formKey = GlobalKey<FormState>();
@@ -263,223 +267,244 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     return Scaffold(
       appBar: SkipAppBar(title: Text(strings.logAnItem)),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Form(
-            key: _formKey,
-            autovalidateMode: _autovalidateMode,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TapScale(
-                  onTap: _isPickingImage ? null : _showImageSourceSheet,
-                  semanticLabel: _previewFile != null
-                      ? strings.photoTapToChange
-                      : null,
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: skipTheme.cardBackground,
-                        borderRadius: BorderRadius.circular(
-                          skipTheme.cardRadius,
-                        ),
-                        border: skipTheme.isY2K
-                            ? Border.all(
-                                color: theme.colorScheme.onSurface,
-                                width: 1.5,
-                              )
-                            : null,
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Form(
+              key: _formKey,
+              autovalidateMode: _autovalidateMode,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TapScale(
+                    onTap: _isPickingImage ? null : _showImageSourceSheet,
+                    semanticLabel: _previewFile != null
+                        ? strings.photoTapToChange
+                        : null,
+                    // Square where there's room, but capped so the
+                    // decision toggle (the only way to save) fits on screen
+                    // without scrolling on a typical phone. Sized from the
+                    // keyboard-less height so it doesn't jump while typing.
+                    child: SizedBox(
+                      height: min(
+                        constraints.maxWidth - 2 * AppSpacing.lg,
+                        (constraints.maxHeight +
+                                MediaQuery.viewInsetsOf(context).bottom) *
+                            _photoMaxHeightShare,
                       ),
-                      clipBehavior: Clip.antiAlias,
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 220),
-                        child: _isPickingImage
-                            ? const Center(
-                                key: ValueKey('loading'),
-                                child: CircularProgressIndicator(),
-                              )
-                            : _previewFile != null
-                            ? Image.file(
-                                _previewFile!,
-                                key: ValueKey(_previewFile!.path),
-                                fit: BoxFit.cover,
-                                cacheWidth: 800,
-                              )
-                            : Padding(
-                                key: const ValueKey('placeholder'),
-                                padding: const EdgeInsets.all(AppSpacing.md),
-                                // Wraps at the box's width, then scales
-                                // down to fit its height at large system
-                                // text sizes instead of clipping.
-                                child: LayoutBuilder(
-                                  builder: (context, constraints) => FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: SizedBox(
-                                      width: constraints.maxWidth,
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(
-                                            Icons.add_a_photo,
-                                            size: 40,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: skipTheme.cardBackground,
+                          borderRadius: BorderRadius.circular(
+                            skipTheme.cardRadius,
+                          ),
+                          border: skipTheme.isY2K
+                              ? Border.all(
+                                  color: theme.colorScheme.onSurface,
+                                  width: 1.5,
+                                )
+                              : null,
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 220),
+                          child: _isPickingImage
+                              ? const Center(
+                                  key: ValueKey('loading'),
+                                  child: CircularProgressIndicator(),
+                                )
+                              : _previewFile != null
+                              ? Image.file(
+                                  _previewFile!,
+                                  key: ValueKey(_previewFile!.path),
+                                  fit: BoxFit.cover,
+                                  cacheWidth: 800,
+                                )
+                              : Padding(
+                                  key: const ValueKey('placeholder'),
+                                  padding: const EdgeInsets.all(AppSpacing.md),
+                                  // Wraps at the box's width, then scales
+                                  // down to fit its height at large system
+                                  // text sizes instead of clipping.
+                                  child: LayoutBuilder(
+                                    builder: (context, constraints) =>
+                                        FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: SizedBox(
+                                            width: constraints.maxWidth,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Icon(
+                                                  Icons.add_a_photo,
+                                                  size: 40,
+                                                ),
+                                                const SizedBox(height: 8),
+                                                FitWordsText(
+                                                  strings.tapToAddPhoto,
+                                                  textAlign: TextAlign.center,
+                                                  style: theme
+                                                      .textTheme
+                                                      .bodyMedium,
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                          const SizedBox(height: 8),
-                                          FitWordsText(
-                                            strings.tapToAddPhoto,
-                                            textAlign: TextAlign.center,
-                                            style: theme.textTheme.bodyMedium,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                        ),
                                   ),
                                 ),
-                              ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: _ThemedFocusField(
-                        focusNode: _priceFocus,
-                        child: TextFormField(
-                          controller: _priceController,
-                          focusNode: _priceFocus,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          textInputAction: TextInputAction.done,
-                          onFieldSubmitted: (_) => _priceFocus.unfocus(),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d*[.,]?\d{0,2}'),
-                            ),
-                          ],
-                          decoration: InputDecoration(
-                            labelText: strings.priceLabel,
-                            prefixText: isEuro ? null : '\$ ',
-                            suffixText: isEuro ? '€' : null,
-                            // The field shares its row with the quantity stepper,
-                            // so let a long (e.g. German) error wrap, not truncate.
-                            errorMaxLines: 3,
-                            // The decimal numeric keypad has no native
-                            // return key on iOS, so give the field its own
-                            // dismiss affordance instead of relying on
-                            // scrolling to a button below the fold.
-                            suffixIcon: IconButton(
-                              icon: const Icon(Icons.check_circle_outline),
-                              tooltip: strings.doneLabel,
-                              onPressed: _priceFocus.unfocus,
-                            ),
-                          ),
-                          validator: (value) => _validatePrice(value, strings),
                         ),
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.sm),
-                    QuantityStepper(
-                      strings: strings,
-                      value: _quantity,
-                      onChanged: (value) => setState(() => _quantity = value),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: _ThemedFocusField(
+                          focusNode: _priceFocus,
+                          child: TextFormField(
+                            controller: _priceController,
+                            focusNode: _priceFocus,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            textInputAction: TextInputAction.done,
+                            onFieldSubmitted: (_) => _priceFocus.unfocus(),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'^\d*[.,]?\d{0,2}'),
+                              ),
+                            ],
+                            decoration: InputDecoration(
+                              labelText: strings.priceLabel,
+                              prefixText: isEuro ? null : '\$ ',
+                              suffixText: isEuro ? '€' : null,
+                              // The field shares its row with the quantity stepper,
+                              // so let a long (e.g. German) error wrap, not truncate.
+                              errorMaxLines: 3,
+                              // The decimal numeric keypad has no native
+                              // return key on iOS, so give the field its own
+                              // dismiss affordance instead of relying on
+                              // scrolling to a button below the fold.
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.check_circle_outline),
+                                tooltip: strings.doneLabel,
+                                onPressed: _priceFocus.unfocus,
+                              ),
+                            ),
+                            validator: (value) =>
+                                _validatePrice(value, strings),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      QuantityStepper(
+                        strings: strings,
+                        value: _quantity,
+                        onChanged: (value) => setState(() => _quantity = value),
+                      ),
+                    ],
+                  ),
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _priceController,
+                    builder: (context, value, _) {
+                      final price = double.tryParse(
+                        _normalizedPrice(value.text),
+                      );
+                      if (price == null) return const SizedBox.shrink();
+                      final totalPrice = price * _quantity;
+                      final hours = hourlyWage == null
+                          ? null
+                          : hoursOfWork(totalPrice, hourlyWage);
+                      final showTotal = _quantity > 1;
+                      if (!showTotal && hours == null) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 4, left: 4),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (showTotal)
+                              Text(
+                                strings.totalForQuantity(
+                                  formatCurrency(
+                                    totalPrice,
+                                    currency: currency,
+                                  ),
+                                ),
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            if (hours != null)
+                              Text(
+                                strings.hoursOfWork(hours),
+                                style: theme.textTheme.bodySmall,
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  _ThemedFocusField(
+                    focusNode: _titleFocus,
+                    child: TextFormField(
+                      controller: _titleController,
+                      focusNode: _titleFocus,
+                      decoration: InputDecoration(
+                        labelText: strings.titleOptionalLabel,
+                      ),
+                      textCapitalization: TextCapitalization.sentences,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  _ThemedFocusField(
+                    focusNode: _purchaseUrlFocus,
+                    child: TextFormField(
+                      controller: _purchaseUrlController,
+                      focusNode: _purchaseUrlFocus,
+                      decoration: InputDecoration(
+                        labelText: strings.productLinkOptionalLabel,
+                      ),
+                      keyboardType: TextInputType.url,
+                      autocorrect: false,
+                      validator: (value) =>
+                          _validatePurchaseUrl(value, strings),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    strings.tapOneToLogIt,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.labelLarge,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  IgnorePointer(
+                    ignoring: _isSaving,
+                    child: Opacity(
+                      opacity: _isSaving && !_isCelebrating ? 0.5 : 1,
+                      child: DecisionToggle(
+                        isSaved: _decision,
+                        hasSelection: _hasDecision,
+                        canSelect: _canSave,
+                        onChanged: _saveWithDecision,
+                      ),
+                    ),
+                  ),
+                  if (_isSaving && !_isCelebrating) ...[
+                    const SizedBox(height: 16),
+                    const Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
                     ),
                   ],
-                ),
-                ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: _priceController,
-                  builder: (context, value, _) {
-                    final price = double.tryParse(_normalizedPrice(value.text));
-                    if (price == null) return const SizedBox.shrink();
-                    final totalPrice = price * _quantity;
-                    final hours = hourlyWage == null
-                        ? null
-                        : hoursOfWork(totalPrice, hourlyWage);
-                    final showTotal = _quantity > 1;
-                    if (!showTotal && hours == null) {
-                      return const SizedBox.shrink();
-                    }
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 4, left: 4),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (showTotal)
-                            Text(
-                              strings.totalForQuantity(
-                                formatCurrency(totalPrice, currency: currency),
-                              ),
-                              style: theme.textTheme.bodySmall,
-                            ),
-                          if (hours != null)
-                            Text(
-                              strings.hoursOfWork(hours),
-                              style: theme.textTheme.bodySmall,
-                            ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _ThemedFocusField(
-                  focusNode: _titleFocus,
-                  child: TextFormField(
-                    controller: _titleController,
-                    focusNode: _titleFocus,
-                    decoration: InputDecoration(
-                      labelText: strings.titleOptionalLabel,
-                    ),
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _ThemedFocusField(
-                  focusNode: _purchaseUrlFocus,
-                  child: TextFormField(
-                    controller: _purchaseUrlController,
-                    focusNode: _purchaseUrlFocus,
-                    decoration: InputDecoration(
-                      labelText: strings.productLinkOptionalLabel,
-                    ),
-                    keyboardType: TextInputType.url,
-                    autocorrect: false,
-                    validator: (value) => _validatePurchaseUrl(value, strings),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  strings.tapOneToLogIt,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.labelLarge,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                IgnorePointer(
-                  ignoring: _isSaving,
-                  child: Opacity(
-                    opacity: _isSaving && !_isCelebrating ? 0.5 : 1,
-                    child: DecisionToggle(
-                      isSaved: _decision,
-                      hasSelection: _hasDecision,
-                      canSelect: _canSave,
-                      onChanged: _saveWithDecision,
-                    ),
-                  ),
-                ),
-                if (_isSaving && !_isCelebrating) ...[
-                  const SizedBox(height: 16),
-                  const Center(
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  ),
                 ],
-              ],
+              ),
             ),
           ),
         ),
