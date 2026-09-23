@@ -110,6 +110,8 @@ class SettingsScreen extends StatelessWidget {
               _StatTile(
                 label: strings.averageSavedPerItem,
                 value: itemsProvider.averageSavedPerItem,
+                formatter: (v) =>
+                    formatCurrency(v, currency: currencyProvider.currency),
                 color: skipTheme.savedColor,
               ),
               const SizedBox(height: AppSpacing.sectionGap),
@@ -484,13 +486,13 @@ class _StatTile extends StatelessWidget {
   final String label;
   final double value;
   final Color color;
-  final String Function(double)? formatter;
+  final String Function(double) formatter;
 
   const _StatTile({
     required this.label,
     required this.value,
     required this.color,
-    this.formatter,
+    required this.formatter,
   });
 
   @override

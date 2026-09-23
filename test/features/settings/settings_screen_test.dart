@@ -72,6 +72,42 @@ void main() {
     expect(find.text(formatCurrency(20)), findsOneWidget);
   });
 
+  testWidgets(
+    'average saved per item follows the selected currency, not always USD',
+    (tester) async {
+      final itemsProvider = buildTestItemsProvider();
+      await itemsProvider.addItem(price: 12.5, quantity: 3, isSaved: true);
+
+      await pumpSettings(
+        tester,
+        themeProvider: ThemeProvider(),
+        itemsProvider: itemsProvider,
+        localeProvider: LocaleProvider(initial: AppLocale.it),
+        currencyProvider: CurrencyProvider(initial: AppCurrency.eur),
+      );
+      await tester.scrollUntilVisible(find.text('37,50 €'), 200);
+      expect(find.text('37,50 €'), findsOneWidget);
+      expect(find.text('\$37.50'), findsNothing);
+    },
+  );
+
+  testWidgets('average saved per item shows dollars under USD + English', (
+    tester,
+  ) async {
+    final itemsProvider = buildTestItemsProvider();
+    await itemsProvider.addItem(price: 12.5, quantity: 3, isSaved: true);
+
+    await pumpSettings(
+      tester,
+      themeProvider: ThemeProvider(),
+      itemsProvider: itemsProvider,
+      localeProvider: LocaleProvider(initial: AppLocale.en),
+      currencyProvider: CurrencyProvider(initial: AppCurrency.usd),
+    );
+    await tester.scrollUntilVisible(find.text('\$37.50'), 200);
+    expect(find.text('\$37.50'), findsOneWidget);
+  });
+
   testWidgets('tapping Baddie Y2K switches the active aesthetic', (
     tester,
   ) async {
