@@ -41,7 +41,12 @@ import UIKit
     deviceChannel.setMethodCallHandler { call, result in
       switch call.method {
       case "isCameraAvailable":
-        result(UIImagePickerController.isSourceTypeAvailable(.camera))
+        // Same check image_picker makes before showing its own English-only
+        // "Camera not available" alert (for the rear camera it defaults to).
+        result(
+          UIImagePickerController.isSourceTypeAvailable(.camera)
+            && UIImagePickerController.isCameraDeviceAvailable(.rear)
+        )
       case "openAppSettings":
         if let url = URL(string: UIApplication.openSettingsURLString) {
           UIApplication.shared.open(url)
