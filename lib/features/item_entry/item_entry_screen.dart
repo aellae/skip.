@@ -28,7 +28,16 @@ class ItemEntryScreen extends StatefulWidget {
   final ImagePicker? imagePicker;
   final FileHelper? fileHelper;
 
-  const ItemEntryScreen({super.key, this.imagePicker, this.fileHelper});
+  /// A photo the picker returned after Android killed the app mid-pick
+  /// (see `ImagePicker.retrieveLostData`), attached as if just picked.
+  final XFile? recoveredImage;
+
+  const ItemEntryScreen({
+    super.key,
+    this.imagePicker,
+    this.fileHelper,
+    this.recoveredImage,
+  });
 
   @override
   State<ItemEntryScreen> createState() => _ItemEntryScreenState();
@@ -51,6 +60,16 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
   bool _isSaving = false;
   bool _didSave = false;
   int _quantity = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    final recovered = widget.recoveredImage;
+    if (recovered != null) {
+      _isPickingImage = true;
+      _attachPickedFile(recovered);
+    }
+  }
 
   @override
   void dispose() {
@@ -81,8 +100,22 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
         maxWidth: 2000,
         maxHeight: 2000,
       );
-      if (picked == null) return;
+      if (picked == null) {
+        if (mounted) setState(() => _isPickingImage = false);
+        return;
+      }
+      await _attachPickedFile(picked);
+    } catch (_) {
+      // e.g. camera/photo permission denied.
+      if (mounted) setState(() => _isPickingImage = false);
+      _showError();
+    }
+  }
 
+  /// Copies [picked] into app documents and shows it as the preview —
+  /// shared by a normal pick and a photo recovered after process death.
+  Future<void> _attachPickedFile(XFile picked) async {
+    try {
       // Copy into app documents immediately; never keep the picker's temp
       // file reference (CLAUDE.md image-pipeline rule).
       final relativePath = await _fileHelper.saveImage(File(picked.path));
@@ -99,7 +132,6 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
       });
       if (replaced != null) await _fileHelper.deleteImage(replaced);
     } catch (_) {
-      // e.g. camera/photo permission denied.
       _showError();
     } finally {
       if (mounted) setState(() => _isPickingImage = false);

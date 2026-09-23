@@ -78,6 +78,7 @@ void main() {
     AppLocale locale = AppLocale.en,
     AppCurrency currency = AppCurrency.usd,
     double? hourlyWage,
+    XFile? recoveredImage,
   }) async {
     fakePicker = _FakeImagePicker(sourceImage);
     await tester.pumpWidget(
@@ -97,7 +98,10 @@ void main() {
         ],
         child: MaterialApp(
           theme: AppThemes.minimal,
-          home: ItemEntryScreen(imagePicker: fakePicker),
+          home: ItemEntryScreen(
+            imagePicker: fakePicker,
+            recoveredImage: recoveredImage,
+          ),
         ),
       ),
     );
@@ -134,6 +138,26 @@ void main() {
       expect(fakePicker.lastMaxWidth, 2000);
       expect(fakePicker.lastMaxHeight, 2000);
       expect(fakePicker.lastImageQuality, 85);
+    },
+  );
+
+  testWidgets(
+    'a photo recovered after process death is copied in and saved with the item',
+    (tester) async {
+      final itemsProvider = buildTestItemsProvider();
+      await pumpEntryScreen(
+        tester,
+        itemsProvider,
+        recoveredImage: XFile(sourceImage.path),
+      );
+
+      expect(find.byType(Image), findsOneWidget);
+      await tester.enterText(find.widgetWithText(TextFormField, 'Price'), '5');
+      await tapText(tester, 'Resisted!');
+
+      final imagePath = itemsProvider.items.single.imagePath;
+      expect(imagePath, startsWith('skip_images/'));
+      expect(imagePath, isNot(sourceImage.path));
     },
   );
 

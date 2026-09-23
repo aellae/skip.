@@ -236,6 +236,68 @@ void main() {
       },
     );
 
+    group('purgeOrphanedImages', () {
+      late Directory imagesDir;
+
+      setUp(() {
+        imagesDir = Directory.systemTemp.createTempSync('skip_orphans_');
+        when(() => mockFileHelper.listImageFiles()).thenAnswer(
+          (_) async => imagesDir.listSync().whereType<File>().toList(),
+        );
+      });
+
+      tearDown(() => imagesDir.deleteSync(recursive: true));
+
+      File touch(String name) =>
+          File(p.join(imagesDir.path, name))..writeAsStringSync('x');
+
+      test(
+        'deletes only unreferenced files, never one a live or trashed row uses',
+        () async {
+          final live = touch('live.jpg');
+          final trashed = touch('trashed.jpg');
+          final orphan = touch('orphan.jpg');
+          await db.insertItem(makeItem(imagePath: 'skip_images/live.jpg'));
+          final trashedId = await db.insertItem(
+            makeItem(imagePath: 'skip_images/trashed.jpg'),
+          );
+          await db.deleteItem(trashedId);
+
+          final deleted = await db.purgeOrphanedImages(
+            now: DateTime.now().add(const Duration(days: 1)),
+          );
+
+          expect(deleted, 1);
+          expect(live.existsSync(), isTrue);
+          expect(trashed.existsSync(), isTrue);
+          expect(orphan.existsSync(), isFalse);
+        },
+      );
+
+      test(
+        'matches rows by file name, whatever path form they stored',
+        () async {
+          final file = touch('abs.jpg');
+          await db.insertItem(makeItem(imagePath: '/old/container/abs.jpg'));
+
+          await db.purgeOrphanedImages(
+            now: DateTime.now().add(const Duration(days: 1)),
+          );
+
+          expect(file.existsSync(), isTrue);
+        },
+      );
+
+      test('keeps unreferenced files younger than minAge', () async {
+        final fresh = touch('just_picked.jpg');
+
+        final deleted = await db.purgeOrphanedImages();
+
+        expect(deleted, 0);
+        expect(fresh.existsSync(), isTrue);
+      });
+    });
+
     test(
       'getTotalSaved and getTotalSpent sum only their own category',
       () async {

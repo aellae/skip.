@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:skip/core/localization/currency_provider.dart';
 import 'package:skip/core/localization/locale_provider.dart';
@@ -8,13 +11,26 @@ import 'package:skip/core/settings/wage_provider.dart';
 import 'package:skip/core/theme/app_themes.dart';
 import 'package:skip/data/items_provider.dart';
 import 'package:skip/features/home/home_screen.dart';
+import 'package:skip/features/item_entry/item_entry_screen.dart';
 
 import '../../test_helpers/widget_test_env.dart';
+
+/// Answers `retrieveLostData` with a fixed response, standing in for a
+/// photo Android handed back after killing the app mid-pick.
+class _LostDataImagePicker extends ImagePicker {
+  final LostDataResponse response;
+
+  _LostDataImagePicker(this.response);
+
+  @override
+  Future<LostDataResponse> retrieveLostData() async => response;
+}
 
 Widget _buildApp(
   ItemsProvider provider, {
   ThemeData? theme,
   double? hourlyWage,
+  ImagePicker? imagePicker,
 }) {
   return MultiProvider(
     providers: [
@@ -26,7 +42,7 @@ Widget _buildApp(
     ],
     child: MaterialApp(
       theme: theme ?? AppThemes.minimal,
-      home: const HomeScreen(),
+      home: HomeScreen(imagePicker: imagePicker),
     ),
   );
 }
@@ -138,5 +154,45 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets(
+    'reopens the entry form with a photo recovered after process death',
+    (tester) async {
+      final sourceDir = Directory.systemTemp.createTempSync('skip_lost_');
+      addTearDown(() => sourceDir.deleteSync(recursive: true));
+      final lost = File('${sourceDir.path}/lost.jpg')..writeAsBytesSync([0]);
+
+      await tester.pumpWidget(
+        _buildApp(
+          buildTestItemsProvider(),
+          imagePicker: _LostDataImagePicker(
+            LostDataResponse(file: XFile(lost.path), type: RetrieveType.image),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(ItemEntryScreen), findsOneWidget);
+      final entry = tester.widget<ItemEntryScreen>(
+        find.byType(ItemEntryScreen),
+      );
+      expect(entry.recoveredImage?.path, lost.path);
+    },
+  );
+
+  testWidgets('stays on home when there is no lost photo to recover', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(
+        buildTestItemsProvider(),
+        imagePicker: _LostDataImagePicker(LostDataResponse.empty()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ItemEntryScreen), findsNothing);
   });
 }

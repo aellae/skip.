@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_spacing.dart';
@@ -20,7 +22,11 @@ import 'widgets/item_grid_card.dart';
 import 'widgets/summary_cards.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  /// Injectable for tests; only used to recover a photo lost to process
+  /// death (see [_recoverLostPhoto]).
+  final ImagePicker? imagePicker;
+
+  const HomeScreen({super.key, this.imagePicker});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -34,7 +40,30 @@ class _HomeScreenState extends State<HomeScreen> {
       final provider = context.read<ItemsProvider>();
       await provider.load();
       await provider.purgeExpiredTrash();
+      await _recoverLostPhoto();
     });
+  }
+
+  /// Android can kill the app while the camera/gallery is in front; the
+  /// picked photo then comes back on the next cold start instead of to the
+  /// entry form. Reopen the form with that photo attached so it isn't lost.
+  /// Runs after the purges so the recovered copy can't be swept as orphaned.
+  Future<void> _recoverLostPhoto() async {
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+    final LostDataResponse response;
+    try {
+      response = await (widget.imagePicker ?? ImagePicker()).retrieveLostData();
+    } catch (_) {
+      return;
+    }
+    final file = response.file;
+    if (response.isEmpty || file == null || !mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => ItemEntryScreen(recoveredImage: file),
+      ),
+    );
   }
 
   @override

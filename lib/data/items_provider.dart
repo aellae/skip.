@@ -227,12 +227,15 @@ class ItemsProvider extends ChangeNotifier {
   }
 
   /// Permanently removes items trashed more than [retention] ago, deleting
-  /// their image files too. Safe to call on every app start.
+  /// their image files too, then sweeps photos no row references at all
+  /// (see [DatabaseHelper.purgeOrphanedImages]). Safe to call on every app
+  /// start.
   Future<void> purgeExpiredTrash({
     Duration retention = const Duration(days: 30),
   }) async {
     final purged = await _db.purgeExpiredTrash(retention: retention);
     if (purged > 0) await load();
+    await _db.purgeOrphanedImages();
   }
 
   /// Parses [jsonContent] as a SKIP backup and imports its items (additive

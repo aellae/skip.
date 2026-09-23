@@ -47,6 +47,12 @@ class FileHelper {
     return dir;
   }
 
+  /// Every file currently in the images directory, referenced or not.
+  Future<List<File>> listImageFiles() async {
+    final dir = await imagesDirectory();
+    return dir.listSync().whereType<File>().toList();
+  }
+
   /// Copies [sourceFile] into the app documents directory and returns the
   /// path relative to that directory for storage in the database.
   Future<String> saveImage(File sourceFile) async {

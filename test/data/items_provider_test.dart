@@ -24,6 +24,7 @@ void main() {
   setUp(() {
     mockFileHelper = _MockFileHelper();
     when(() => mockFileHelper.deleteImage(any())).thenAnswer((_) async {});
+    when(() => mockFileHelper.listImageFiles()).thenAnswer((_) async => []);
     when(
       () => mockFileHelper.writeExportFile(any(), any()),
     ).thenAnswer((_) async => File(''));

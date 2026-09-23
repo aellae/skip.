@@ -291,6 +291,43 @@ class DatabaseHelper {
     return purged;
   }
 
+  /// Deletes files in the images directory that no row — live or trashed —
+  /// references, e.g. a photo copied in by an entry form that never saved
+  /// because the process was killed. Matches by file name (unique per copy)
+  /// so a row can never lose its photo over a path-format difference, and
+  /// skips files younger than [minAge] so a photo an entry form is holding
+  /// right now isn't swept out from under it. Returns the number deleted.
+  Future<int> purgeOrphanedImages({
+    Duration minAge = const Duration(hours: 1),
+    DateTime? now,
+  }) async {
+    final db = await database;
+    final rows = await db.query(
+      tableItems,
+      columns: ['image_path'],
+      where: 'image_path IS NOT NULL',
+    );
+    final referenced = {
+      for (final row in rows) p.basename(row['image_path'] as String),
+    };
+    final cutoff = (now ?? DateTime.now()).subtract(minAge);
+
+    var deleted = 0;
+    for (final file in await fileHelper.listImageFiles()) {
+      if (referenced.contains(p.basename(file.path))) continue;
+      final stat = file.statSync();
+      // A copy can keep its source's mtime; ctime ("changed") can't be
+      // carried over, so the later of the two is when it landed here.
+      final landedAt = stat.changed.isAfter(stat.modified)
+          ? stat.changed
+          : stat.modified;
+      if (landedAt.isAfter(cutoff)) continue;
+      file.deleteSync();
+      deleted++;
+    }
+    return deleted;
+  }
+
   Future<double> getTotalSaved() => _sumPrice(isSaved: true);
 
   Future<double> getTotalSpent() => _sumPrice(isSaved: false);
