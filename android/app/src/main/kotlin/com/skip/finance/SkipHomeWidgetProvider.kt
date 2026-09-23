@@ -66,7 +66,7 @@ class SkipHomeWidgetProvider : HomeWidgetProvider() {
             mottoStyle = Typeface.ITALIC,
             textColor = Color.parseColor("#2C302E"),
             savedColor = Color.parseColor("#3F5470"),
-            spentColor = Color.parseColor("#B07A6E"),
+            spentColor = Color.parseColor("#A96E61"),
         ),
         Y2K(
             logoRes = R.drawable.skip_widget_logo_y2k,

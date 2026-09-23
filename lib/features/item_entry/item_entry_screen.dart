@@ -49,10 +49,15 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
   File? _previewFile;
   bool _isPickingImage = false;
   bool _isSaving = false;
+  bool _didSave = false;
   int _quantity = 1;
 
   @override
   void dispose() {
+    // A photo copied in but never attached to a saved item (the user backed
+    // out) would otherwise sit in app documents forever.
+    final unused = _relativeImagePath;
+    if (!_didSave && unused != null) _fileHelper.deleteImage(unused).ignore();
     _priceController.dispose();
     _titleController.dispose();
     _purchaseUrlController.dispose();
@@ -82,11 +87,20 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
       // file reference (CLAUDE.md image-pipeline rule).
       final relativePath = await _fileHelper.saveImage(File(picked.path));
       final resolved = await _fileHelper.resolveImageFile(relativePath);
-      if (!mounted) return;
+      if (!mounted) {
+        await _fileHelper.deleteImage(relativePath);
+        return;
+      }
+      // Replacing a previous pick: its copy is no longer referenced.
+      final replaced = _relativeImagePath;
       setState(() {
         _relativeImagePath = relativePath;
         _previewFile = resolved;
       });
+      if (replaced != null) await _fileHelper.deleteImage(replaced);
+    } catch (_) {
+      // e.g. camera/photo permission denied.
+      _showError();
     } finally {
       if (mounted) setState(() => _isPickingImage = false);
     }
@@ -97,25 +111,49 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
     showImageSourceSheet(context, strings: strings, onPick: _pickImage);
   }
 
-  Future<void> _saveWithDecision(bool? isSaved) async {
-    if (_isSaving) return;
+  void _showError() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          context.read<LocaleProvider>().strings.somethingWentWrong,
+        ),
+      ),
+    );
+  }
+
+  /// Validates the form ahead of a decision tap, so the toggle can skip its
+  /// "Resisted!" celebration when the save would be rejected anyway.
+  bool _canSave() {
+    if (_isSaving) return false;
     // Force any in-flight IME edit (e.g. a paste still being committed) to
     // land in the controllers before reading their text below.
     FocusScope.of(context).unfocus();
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    return _formKey.currentState?.validate() ?? false;
+  }
+
+  Future<void> _saveWithDecision(bool? isSaved) async {
+    if (!_canSave()) return;
 
     setState(() => _isSaving = true);
     final price = double.parse(_normalizedPrice(_priceController.text));
     final title = _titleController.text.trim();
     final purchaseUrl = parseHttpUrl(_purchaseUrlController.text)?.toString();
-    await context.read<ItemsProvider>().addItem(
-      title: title.isEmpty ? null : title,
-      price: price,
-      quantity: _quantity,
-      imagePath: _relativeImagePath,
-      isSaved: isSaved,
-      purchaseUrl: purchaseUrl,
-    );
+    try {
+      await context.read<ItemsProvider>().addItem(
+        title: title.isEmpty ? null : title,
+        price: price,
+        quantity: _quantity,
+        imagePath: _relativeImagePath,
+        isSaved: isSaved,
+        purchaseUrl: purchaseUrl,
+      );
+    } catch (_) {
+      if (mounted) setState(() => _isSaving = false);
+      _showError();
+      return;
+    }
+    _didSave = true;
     if (!mounted) return;
     Navigator.of(context).pop();
   }
@@ -253,9 +291,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                 ValueListenableBuilder<TextEditingValue>(
                   valueListenable: _priceController,
                   builder: (context, value, _) {
-                    final price = double.tryParse(
-                      _normalizedPrice(value.text),
-                    );
+                    final price = double.tryParse(_normalizedPrice(value.text));
                     if (price == null) return const SizedBox.shrink();
                     final totalPrice = price * _quantity;
                     final hours = hourlyWage == null
@@ -326,6 +362,7 @@ class _ItemEntryScreenState extends State<ItemEntryScreen> {
                     opacity: _isSaving ? 0.5 : 1,
                     child: DecisionToggle(
                       isSaved: null,
+                      canSelect: _canSave,
                       onChanged: _saveWithDecision,
                     ),
                   ),

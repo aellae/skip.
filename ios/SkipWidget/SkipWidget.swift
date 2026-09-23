@@ -72,7 +72,7 @@ enum SkipAesthetic: String {
 
     var spentColor: Color {
         switch self {
-        case .minimal: return Color(hex: 0xB07A6E)
+        case .minimal: return Color(hex: 0xA96E61)
         case .y2k: return Color(hex: 0xFF5FC8)
         }
     }

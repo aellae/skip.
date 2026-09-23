@@ -24,6 +24,7 @@ void main() {
     required ThemeData theme,
     required bool? isSaved,
     required ValueChanged<bool?> onChanged,
+    bool Function()? canSelect,
   }) {
     return tester.pumpWidget(
       ChangeNotifierProvider(
@@ -34,6 +35,7 @@ void main() {
             body: DecisionToggle(
               isSaved: isSaved,
               onChanged: onChanged,
+              canSelect: canSelect,
               sfxPlayer: mockSfx,
             ),
           ),
@@ -122,5 +124,25 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(lastValue, isNull);
+  });
+
+  testWidgets('Y2K theme: a rejected tap skips the celebration and onChanged', (
+    tester,
+  ) async {
+    var called = false;
+    await pumpToggle(
+      tester,
+      theme: AppThemes.y2k,
+      isSaved: false,
+      canSelect: () => false,
+      onChanged: (_) => called = true,
+    );
+
+    await tester.tap(find.text('Resisted!'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(called, isFalse);
+    verifyNever(() => mockSfx.playResisted());
   });
 }

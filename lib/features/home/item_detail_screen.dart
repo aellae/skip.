@@ -185,11 +185,30 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       // Copy into app documents immediately; never keep the picker's temp
       // file reference (CLAUDE.md image-pipeline rule).
       final relativePath = await _fileHelper.saveImage(File(picked.path));
-      if (!mounted) return;
-      await context.read<ItemsProvider>().setImagePath(
-        widget.item.id!,
-        relativePath,
-      );
+      if (!mounted) {
+        await _fileHelper.deleteImage(relativePath);
+        return;
+      }
+      try {
+        await context.read<ItemsProvider>().setImagePath(
+          widget.item.id!,
+          relativePath,
+        );
+      } catch (_) {
+        await _fileHelper.deleteImage(relativePath);
+        rethrow;
+      }
+    } catch (_) {
+      // e.g. camera/photo permission denied.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.read<LocaleProvider>().strings.somethingWentWrong,
+            ),
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isPickingImage = false);
     }
@@ -642,7 +661,7 @@ class _EditDetailsDialogState extends State<_EditDetailsDialog> {
 
   String? _validatePrice(String? value) {
     if (value == null || value.trim().isEmpty) return widget.strings.enterPrice;
-    final parsed = double.tryParse(value);
+    final parsed = double.tryParse(value.replaceAll(',', '.'));
     if (parsed == null) return widget.strings.enterValidNumber;
     if (parsed <= 0) return widget.strings.priceGreaterThanZero;
     return null;
@@ -654,7 +673,7 @@ class _EditDetailsDialogState extends State<_EditDetailsDialog> {
     Navigator.of(context).pop(
       _ItemDetailsEdit(
         title: title.isEmpty ? null : title,
-        price: double.parse(_priceController.text),
+        price: double.parse(_priceController.text.replaceAll(',', '.')),
         quantity: _quantity,
       ),
     );
@@ -684,7 +703,7 @@ class _EditDetailsDialogState extends State<_EditDetailsDialog> {
                     onFieldSubmitted: (_) => _save(),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d*\.?\d{0,2}'),
+                        RegExp(r'^\d*[.,]?\d{0,2}'),
                       ),
                     ],
                     decoration: InputDecoration(

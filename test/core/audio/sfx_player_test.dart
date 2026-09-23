@@ -35,12 +35,15 @@ void main() {
     },
   );
 
-  test('playResisted plays the system sound when isEnabled returns true', () async {
-    final sfx = SkipSfxPlayer(isEnabled: () => true);
+  test(
+    'playResisted plays the system sound when isEnabled returns true',
+    () async {
+      final sfx = SkipSfxPlayer(isEnabled: () => true);
 
-    await sfx.playResisted();
+      await sfx.playResisted();
 
-    expect(calls.where((c) => c.method == 'SystemSound.play'), hasLength(1));
-    sfx.dispose();
-  });
+      expect(calls.where((c) => c.method == 'SystemSound.play'), hasLength(1));
+      sfx.dispose();
+    },
+  );
 }

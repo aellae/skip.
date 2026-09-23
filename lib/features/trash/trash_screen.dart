@@ -153,7 +153,7 @@ class _TrashedItemTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 Text(
-                  formatCurrency(item.price, currency: currency),
+                  formatCurrency(item.totalPrice, currency: currency),
                   style: theme.textTheme.bodyMedium,
                 ),
                 if (item.deletedAt != null)

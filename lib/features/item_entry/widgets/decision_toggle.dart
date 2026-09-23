@@ -21,12 +21,17 @@ import '../../../core/widgets/tap_scale.dart';
 class DecisionToggle extends StatefulWidget {
   final bool? isSaved;
   final ValueChanged<bool?> onChanged;
+
+  /// Checked before any selection feedback plays; returning `false` drops
+  /// the tap, so e.g. an invalid form never gets a "Resisted!" celebration.
+  final bool Function()? canSelect;
   final SkipSfxPlayer? sfxPlayer;
 
   const DecisionToggle({
     super.key,
     required this.isSaved,
     required this.onChanged,
+    this.canSelect,
     this.sfxPlayer,
   });
 
@@ -62,7 +67,10 @@ class _DecisionToggleState extends State<DecisionToggle> {
     super.dispose();
   }
 
+  bool get _canSelect => widget.canSelect?.call() ?? true;
+
   void _selectResisted(bool isY2K) {
+    if (!_canSelect) return;
     if (isY2K) {
       HapticFeedback.mediumImpact();
       _confettiController.play();
@@ -83,11 +91,13 @@ class _DecisionToggleState extends State<DecisionToggle> {
   }
 
   void _selectBought() {
+    if (!_canSelect) return;
     HapticFeedback.selectionClick();
     widget.onChanged(false);
   }
 
   void _selectPondering() {
+    if (!_canSelect) return;
     HapticFeedback.selectionClick();
     widget.onChanged(null);
   }

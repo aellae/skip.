@@ -138,9 +138,16 @@ class BackupService {
   /// [buildJsonBackup]/[writeAutoBackup], or `null` if [content] isn't
   /// shaped like one.
   String? readExportedAt(String content) {
-    final decoded = jsonDecode(content);
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(content);
+    } on FormatException {
+      // Left to [parseJsonBackup], which reports it as a BackupFormatException.
+      return null;
+    }
     if (decoded is! Map) return null;
-    return decoded['exportedAt'] as String?;
+    final exportedAt = decoded['exportedAt'];
+    return exportedAt is String ? exportedAt : null;
   }
 
   /// Parses [content] as a SKIP JSON backup, returning the items it

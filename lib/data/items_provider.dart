@@ -62,9 +62,13 @@ class ItemsProvider extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
 
+    // Never overwrite the safety-net backup with an empty snapshot: an empty
+    // database at launch is exactly the case the backup exists to recover.
+    final hasData = _items.isNotEmpty || _trashedItems.isNotEmpty;
     final now = DateTime.now();
-    if (_lastAutoBackupAt == null ||
-        now.difference(_lastAutoBackupAt!) >= _autoBackupInterval) {
+    if (hasData &&
+        (_lastAutoBackupAt == null ||
+            now.difference(_lastAutoBackupAt!) >= _autoBackupInterval)) {
       _lastAutoBackupAt = now;
       await _backupService.writeAutoBackup();
     }
@@ -197,6 +201,7 @@ class ItemsProvider extends ChangeNotifier {
         id: current.id,
         title: current.title,
         price: current.price,
+        quantity: current.quantity,
         imagePath: current.imagePath,
         isSaved: current.isSaved,
         category: current.category,

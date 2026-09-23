@@ -177,6 +177,21 @@ void main() {
     expect(provider.items.single.purchaseUrl, isNull);
   });
 
+  test('setPurchaseUrl keeps the item\'s quantity', () async {
+    await provider.addItem(
+      price: 10,
+      quantity: 3,
+      imagePath: 'a.jpg',
+      isSaved: true,
+    );
+    final id = provider.items.single.id!;
+
+    await provider.setPurchaseUrl(id, 'https://example.com/product');
+
+    expect(provider.items.single.quantity, 3);
+    expect(provider.totalSaved, 30);
+  });
+
   test('setPurchaseUrl is a no-op for an unknown id', () async {
     await provider.addItem(price: 30, imagePath: 'a.jpg', isSaved: true);
 
@@ -308,6 +323,26 @@ void main() {
       expect(provider.items, hasLength(2));
       expect(provider.totalSaved, 10);
       expect(provider.totalSpent, 5);
+    });
+
+    test(
+      'load() does not overwrite the auto-backup when the database is empty',
+      () async {
+        await provider.load();
+
+        verifyNever(() => mockFileHelper.writeExportFile(any(), any()));
+      },
+    );
+
+    test('load() writes the auto-backup when the database has items', () async {
+      await provider.addItem(price: 10, imagePath: 'a.jpg', isSaved: true);
+
+      verify(
+        () => mockFileHelper.writeExportFile(
+          BackupService.autoBackupFileName,
+          any(),
+        ),
+      ).called(1);
     });
 
     test(

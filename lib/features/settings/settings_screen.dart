@@ -660,7 +660,7 @@ class _HourlyWageDialogState extends State<_HourlyWageDialog> {
 
   String? _validate(String? value) {
     if (value == null || value.trim().isEmpty) return widget.strings.enterPrice;
-    final parsed = double.tryParse(value);
+    final parsed = double.tryParse(value.replaceAll(',', '.'));
     if (parsed == null) return widget.strings.enterValidNumber;
     if (parsed <= 0) return widget.strings.priceGreaterThanZero;
     return null;
@@ -678,7 +678,7 @@ class _HourlyWageDialogState extends State<_HourlyWageDialog> {
           autofocus: true,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+            FilteringTextInputFormatter.allow(RegExp(r'^\d*[.,]?\d{0,2}')),
           ],
           decoration: InputDecoration(
             labelText: widget.strings.hourlyWageLabel,
@@ -701,9 +701,9 @@ class _HourlyWageDialogState extends State<_HourlyWageDialog> {
         TextButton(
           onPressed: () {
             if (!(_formKey.currentState?.validate() ?? false)) return;
-            Navigator.of(
-              context,
-            ).pop(_WageResult(double.parse(_controller.text)));
+            Navigator.of(context).pop(
+              _WageResult(double.parse(_controller.text.replaceAll(',', '.'))),
+            );
           },
           child: Text(widget.strings.save),
         ),

@@ -254,4 +254,14 @@ void main() {
       expect(all, hasLength(1));
     });
   });
+
+  group('readExportedAt', () {
+    test('returns null instead of throwing for a corrupt file', () {
+      expect(backup.readExportedAt('{not json'), isNull);
+    });
+
+    test('returns null for a non-string exportedAt', () {
+      expect(backup.readExportedAt(jsonEncode({'exportedAt': 42})), isNull);
+    });
+  });
 }

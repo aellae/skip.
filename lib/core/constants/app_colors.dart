@@ -14,7 +14,7 @@ class AppColors {
   static const minimalChampagne = Color(0xFFE9D5A5);
   static const minimalSoftWhite = Color(0xFFFDFBF7);
   static const minimalSaved = Color(0xFF3F5470);
-  static const minimalSpent = Color(0xFFB07A6E);
+  static const minimalSpent = Color(0xFFA96E61);
   static const minimalPondering = Color(0xFF9A8F84);
 
   // Baddie Y2K ("Skip!")

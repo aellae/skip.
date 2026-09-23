@@ -89,7 +89,7 @@
             android:fontFamily="serif"
             android:singleLine="true"
             android:text="@string/skip_widget_preview_spent"
-            android:textColor="#B07A6E"
+            android:textColor="#A96E61"
             android:textSize="20sp"
             android:textStyle="bold" />
 
