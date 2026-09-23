@@ -362,6 +362,51 @@ void main() {
     });
 
     test(
+      'restoring the auto-backup while data is intact does not block a later recovery',
+      () async {
+        final exportsDir = await Directory.systemTemp.createTemp('skip_backup');
+        addTearDown(() => exportsDir.delete(recursive: true));
+        when(
+          () => mockFileHelper.exportsDirectory(),
+        ).thenAnswer((_) async => exportsDir);
+
+        await provider.addItem(price: 10, imagePath: 'a.jpg', isSaved: true);
+        File(
+          '${exportsDir.path}/${BackupService.autoBackupFileName}',
+        ).writeAsStringSync(
+          await BackupService(
+            databaseHelper: databaseHelper,
+            fileHelper: mockFileHelper,
+          ).buildJsonBackup(),
+        );
+
+        expect(
+          await provider.restoreFromAutoBackup(),
+          isA<AutoBackupAlreadyRestored>(),
+        );
+        expect(provider.items, hasLength(1));
+
+        // A fresh, empty database stands in for data loss.
+        final lostDb = DatabaseHelper(
+          fileHelper: mockFileHelper,
+          testDbPath: inMemoryDatabasePath,
+        );
+        final recovering = ItemsProvider(
+          databaseHelper: lostDb,
+          backupService: BackupService(
+            databaseHelper: lostDb,
+            fileHelper: mockFileHelper,
+          ),
+        );
+        final result = await recovering.restoreFromAutoBackup();
+
+        expect(result, isA<AutoBackupRestored>());
+        expect((result as AutoBackupRestored).count, 1);
+        expect(recovering.items, hasLength(1));
+      },
+    );
+
+    test(
       'importJsonBackup throws BackupFormatException for malformed content',
       () {
         expect(

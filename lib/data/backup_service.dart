@@ -51,8 +51,8 @@ class AutoBackupRestored extends AutoBackupRestoreResult {
   const AutoBackupRestored(this.count);
 }
 
-/// This exact auto-backup snapshot was already restored previously, so it
-/// was skipped to avoid duplicating items.
+/// Every item in the auto-backup snapshot is already in the database, so
+/// nothing was imported.
 class AutoBackupAlreadyRestored extends AutoBackupRestoreResult {
   const AutoBackupAlreadyRestored();
 }
@@ -76,13 +76,6 @@ class BackupService {
   /// File name for the automatic local safety-net backup (distinct from
   /// user-triggered exports, which get a timestamped name).
   static const String autoBackupFileName = 'skip_autobackup.json';
-
-  /// SharedPreferences key tracking the `exportedAt` of the auto-backup
-  /// snapshot last restored via [ItemsProvider.restoreFromAutoBackup], so a
-  /// repeat tap on "Restore last automatic backup" doesn't re-import the
-  /// same items and duplicate them.
-  static const String _lastRestoredAutoBackupKey =
-      'skip_last_restored_auto_backup_exported_at';
 
   /// SharedPreferences key holding when [writeAutoBackup] last ran, so its
   /// throttle survives app restarts instead of rewriting on every launch.
@@ -129,21 +122,6 @@ class BackupService {
     return file.readAsStringSync();
   }
 
-  /// Whether [exportedAt] (the `exportedAt` field of an auto-backup
-  /// snapshot) was already restored via [markAutoBackupRestored].
-  Future<bool> isAutoBackupAlreadyRestored(String exportedAt) async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_lastRestoredAutoBackupKey) == exportedAt;
-  }
-
-  /// Records [exportedAt] as the auto-backup snapshot most recently
-  /// restored, so a later restore of the same snapshot can be recognized
-  /// and skipped instead of duplicating items.
-  Future<void> markAutoBackupRestored(String exportedAt) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_lastRestoredAutoBackupKey, exportedAt);
-  }
-
   Future<String> buildJsonBackup() async {
     final items = await _db.getAllItems();
     final payload = {
@@ -152,22 +130,6 @@ class BackupService {
       'items': items.map((item) => item.toMap()).toList(),
     };
     return const JsonEncoder.withIndent('  ').convert(payload);
-  }
-
-  /// Reads the `exportedAt` field out of a SKIP JSON backup written by
-  /// [buildJsonBackup]/[writeAutoBackup], or `null` if [content] isn't
-  /// shaped like one.
-  String? readExportedAt(String content) {
-    final Object? decoded;
-    try {
-      decoded = jsonDecode(content);
-    } on FormatException {
-      // Left to [parseJsonBackup], which reports it as a BackupFormatException.
-      return null;
-    }
-    if (decoded is! Map) return null;
-    final exportedAt = decoded['exportedAt'];
-    return exportedAt is String ? exportedAt : null;
   }
 
   /// Parses [content] as a SKIP JSON backup, returning the items it

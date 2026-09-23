@@ -1,9 +1,11 @@
 package com.skip.finance
 
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.PowerManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -53,17 +55,17 @@ class MainActivity : FlutterActivity() {
         isShowingOwnActivity = false
     }
 
-    /// Home/Recents, but also fires when the app starts its own activities,
-    /// hence the isShowingOwnActivity check.
-    override fun onUserLeaveHint() {
-        super.onUserLeaveHint()
-        if (!isShowingOwnActivity) applyPendingLauncherIcon()
-    }
-
-    /// Backing out of the app skips onUserLeaveHint.
-    override fun onDestroy() {
-        if (isFinishing) applyPendingLauncherIcon()
-        super.onDestroy()
+    /// Covers every way of leaving: Home/Recents, and back, which on
+    /// Android 12+ only moves the task to the background (neither
+    /// onUserLeaveHint nor onDestroy runs then). Skipped while one of the
+    /// app's own activities is on top, and when the screen merely turned
+    /// off with the app open, where closing it would lose the user's place.
+    override fun onStop() {
+        super.onStop()
+        if (isShowingOwnActivity || isChangingConfigurations) return
+        val power = getSystemService(Context.POWER_SERVICE) as PowerManager
+        if (!power.isInteractive) return
+        applyPendingLauncherIcon()
     }
 
     private fun applyPendingLauncherIcon() {

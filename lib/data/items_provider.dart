@@ -79,22 +79,21 @@ class ItemsProvider extends ChangeNotifier {
   }
 
   /// Restores from the local safety-net backup (see [BackupService.
-  /// writeAutoBackup]) — additive, existing data is kept. Guards against
-  /// re-importing the same snapshot twice (e.g. a double tap on the restore
-  /// button), which would otherwise duplicate every item.
+  /// writeAutoBackup]) — additive, existing data is kept. Items already in
+  /// the database are skipped by [BackupService.importItems], so restoring
+  /// the same snapshot twice never duplicates anything, and a snapshot whose
+  /// items are all still present reports [AutoBackupAlreadyRestored]. Nothing
+  /// is persisted about past restores: a restore tapped while the data was
+  /// intact must not block recovering that same snapshot after a later loss.
   Future<AutoBackupRestoreResult> restoreFromAutoBackup() async {
     final content = await _backupService.readAutoBackup();
     if (content == null) return const AutoBackupRestoreResult.notFound();
 
-    final exportedAt = _backupService.readExportedAt(content);
-    if (exportedAt != null &&
-        await _backupService.isAutoBackupAlreadyRestored(exportedAt)) {
+    final items = _backupService.parseJsonBackup(content);
+    final count = await _backupService.importItems(items);
+    await load();
+    if (count == 0 && items.isNotEmpty) {
       return const AutoBackupRestoreResult.alreadyRestored();
-    }
-
-    final count = await importJsonBackup(content);
-    if (exportedAt != null) {
-      await _backupService.markAutoBackupRestored(exportedAt);
     }
     return AutoBackupRestoreResult.restored(count);
   }
