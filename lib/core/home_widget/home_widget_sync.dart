@@ -55,6 +55,14 @@ class _HomeWidgetSyncState extends State<HomeWidgetSync>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      // iOS may kill a backgrounded app before the debounced auto-backup
+      // timer fires, so write it now rather than lose the latest changes.
+      _items.flushAutoBackup().catchError(
+        (Object e) => debugPrint('Auto-backup failed: $e'),
+      );
+      return;
+    }
     if (state != AppLifecycleState.resumed) return;
     // Timers don't fire while suspended, so re-check and re-arm on resume.
     _items.checkMonthRollover();

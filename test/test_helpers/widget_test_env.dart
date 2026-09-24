@@ -26,9 +26,12 @@ Future<Directory> setUpWidgetTestEnvironment() async {
 }
 
 /// A fresh, isolated [ItemsProvider] backed by an in-memory database —
-/// safe to use per-test without leaking state between tests.
+/// safe to use per-test without leaking state between tests. Its auto-backup
+/// debounce timer is off, since the fake test clock fails a test that ends
+/// with a timer still pending.
 ItemsProvider buildTestItemsProvider() {
   return ItemsProvider(
     databaseHelper: DatabaseHelper(testDbPath: inMemoryDatabasePath),
+    autoBackupDebounce: null,
   );
 }

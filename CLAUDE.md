@@ -127,7 +127,7 @@ flutter test
 - **Coin Flip** — standalone decision tool (3D-flip animation, confetti, haptics); does **not** read/write `ItemsProvider` or the database.
 - **Settings** — aesthetic switcher, language (EN/IT/FR/DE), currency (USD/EUR), hourly-wage editor, sound toggle, stat tiles, backup section (restore last automatic backup), link to Trash, and a static PayPal support page.
 - **Trash** — lists soft-deleted items with per-item restore; never purges itself. Permanent purging (`purgeExpiredTrash`, which also deletes orphaned image files) is triggered once, from `HomeScreen.initState`.
-- **Backup/Restore** — fully local (no HTTP). An automatic safety-net backup (`ItemsProvider.load()` throttles writes to once per 10 minutes) restorable via `ItemsProvider.restoreFromAutoBackup()`. Backups don't include photos, only records.
+- **Backup/Restore** — fully local (no HTTP). An automatic safety-net backup (`ItemsProvider.load()` debounces writes by 3 s; `flushAutoBackup()` writes immediately when the app is backgrounded) restorable via `ItemsProvider.restoreFromAutoBackup()`, which only adds items missing entirely — matched by `created_at`, so edited items are never duplicated. Backups don't include photos, only records.
 - **Theming** — `SkipThemeExtension` carries app-specific tokens (`savedColor`/`spentColor`/`ponderingColor`, `cardRadius`, `accentGradient`, `logoText`, etc.) alongside the two full `ThemeData` objects in `AppThemes` (`minimal`, `y2k`). Switching aesthetics also swaps the iOS home-screen app icon via a native `MethodChannel`.
 
 Full functional detail and reusable building blocks are documented in [docs/NEW_FEATURE_GUIDE.md](docs/NEW_FEATURE_GUIDE.md#whats-already-implemented).

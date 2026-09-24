@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/utils/file_helper.dart';
 import 'database_helper.dart';
@@ -77,10 +76,6 @@ class BackupService {
   /// user-triggered exports, which get a timestamped name).
   static const String autoBackupFileName = 'skip_autobackup.json';
 
-  /// SharedPreferences key holding when [writeAutoBackup] last ran, so its
-  /// throttle survives app restarts instead of rewriting on every launch.
-  static const String _lastAutoBackupAtKey = 'skip_last_auto_backup_at';
-
   final DatabaseHelper _db;
   final FileHelper _fileHelper;
 
@@ -92,25 +87,9 @@ class BackupService {
   /// 100% offline — written to Application Documents via [FileHelper], never
   /// sent anywhere. Not a substitute for a user-triggered export: this is
   /// only meant to recover from an unexplained empty/corrupt database.
-  Future<void> writeAutoBackup({DateTime? now}) async {
+  Future<void> writeAutoBackup() async {
     final content = await buildJsonBackup();
     await _fileHelper.writeExportFile(autoBackupFileName, content);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      _lastAutoBackupAtKey,
-      (now ?? DateTime.now()).toIso8601String(),
-    );
-  }
-
-  /// Whether at least [interval] has passed since [writeAutoBackup] last
-  /// ran, in this launch or an earlier one. A recorded time in the future
-  /// (the clock was set back) also counts as due, so backups can't stall.
-  Future<bool> isAutoBackupDue(Duration interval, {DateTime? now}) async {
-    final prefs = await SharedPreferences.getInstance();
-    final last = DateTime.tryParse(prefs.getString(_lastAutoBackupAtKey) ?? '');
-    if (last == null) return true;
-    final current = now ?? DateTime.now();
-    return last.isAfter(current) || current.difference(last) >= interval;
   }
 
   /// Reads the local safety-net backup written by [writeAutoBackup], or
@@ -174,39 +153,31 @@ class BackupService {
   }
 
   /// Inserts [items] as new rows. Import is additive: existing data is
-  /// never cleared or overwritten. Items that already match an existing
-  /// item — trashed or not — on every field but [ItemModel.id] (which is
-  /// reassigned on insert and so can't be used to recognize a re-import)
-  /// are skipped so re-importing the same backup doesn't duplicate rows.
-  /// Matching against trashed items too matters: without it, restoring a
-  /// backup snapshot taken before you deleted an item would resurrect it
-  /// as a brand-new live row alongside the one still sitting in Trash.
-  /// Returns the number of items actually inserted.
+  /// never cleared or overwritten. An item is recognized as already present
+  /// — trashed or not — by its [ItemModel.createdAt], which is set once, to
+  /// the microsecond, when the item is logged and is kept by every edit, so
+  /// it identifies an item across backups the way the reassigned-on-insert
+  /// [ItemModel.id] can't. Matching on identity rather than on every field
+  /// matters: an item edited after the backup was taken must not come back
+  /// as a second, stale copy, and matching against trashed items keeps a
+  /// restore from resurrecting a deleted item as a new live row alongside
+  /// the one still sitting in Trash. Returns the number of items actually
+  /// inserted.
   Future<int> importItems(List<ItemModel> items) async {
-    final existingSignatures = (await _db.getAllItemsIncludingTrashed())
-        .map(_dedupeSignature)
+    final existingKeys = (await _db.getAllItemsIncludingTrashed())
+        .map(_identityKey)
         .toSet();
     var imported = 0;
     for (final item in items) {
-      final signature = _dedupeSignature(item);
-      if (existingSignatures.contains(signature)) continue;
+      if (!existingKeys.add(_identityKey(item))) continue;
       await _db.insertItem(item);
-      existingSignatures.add(signature);
       imported++;
     }
     return imported;
   }
 
   /// A key identifying [item] independent of its (reassigned-on-insert)
-  /// `id`, used by [importItems] to recognize items already present.
-  String _dedupeSignature(ItemModel item) => [
-    item.title,
-    item.price,
-    item.quantity,
-    item.imagePath,
-    item.isSaved,
-    item.category,
-    item.createdAt.toIso8601String(),
-    item.purchaseUrl,
-  ].join('\u0000');
+  /// `id` and of any later edits, used by [importItems] to recognize items
+  /// already present.
+  String _identityKey(ItemModel item) => item.createdAt.toIso8601String();
 }

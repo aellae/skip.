@@ -39,6 +39,9 @@ void main() {
         fileHelper: mockFileHelper,
       ),
     );
+    // Cancels a still-pending debounced auto-backup so it can't fire after
+    // this test's database is gone.
+    addTearDown(provider.dispose);
   });
 
   test('starts empty with zero totals and not loading', () {
@@ -335,8 +338,29 @@ void main() {
       },
     );
 
-    test('load() writes the auto-backup when the database has items', () async {
+    test(
+      'load() defers the auto-backup until changes settle, then writes once',
+      () async {
+        await provider.addItem(price: 10, imagePath: 'a.jpg', isSaved: true);
+        await provider.addItem(price: 20, imagePath: 'b.jpg', isSaved: false);
+
+        verifyNever(() => mockFileHelper.writeExportFile(any(), any()));
+
+        await provider.flushAutoBackup();
+
+        verify(
+          () => mockFileHelper.writeExportFile(
+            BackupService.autoBackupFileName,
+            any(),
+          ),
+        ).called(1);
+      },
+    );
+
+    test('flushAutoBackup does nothing when no change is pending', () async {
       await provider.addItem(price: 10, imagePath: 'a.jpg', isSaved: true);
+      await provider.flushAutoBackup();
+      await provider.flushAutoBackup();
 
       verify(
         () => mockFileHelper.writeExportFile(
@@ -346,12 +370,20 @@ void main() {
       ).called(1);
     });
 
-    test('the auto-backup throttle survives an app restart', () async {
-      await provider.addItem(price: 10, imagePath: 'a.jpg', isSaved: true);
-
-      // A fresh provider over the same data stands in for a cold start.
-      final restarted = ItemsProvider(databaseHelper: databaseHelper);
-      await restarted.load();
+    test('the debounce timer writes the auto-backup on its own', () async {
+      final quick = ItemsProvider(
+        databaseHelper: databaseHelper,
+        backupService: BackupService(
+          databaseHelper: databaseHelper,
+          fileHelper: mockFileHelper,
+        ),
+        autoBackupDebounce: const Duration(milliseconds: 200),
+      );
+      addTearDown(quick.dispose);
+      await quick.addItem(price: 10, imagePath: 'a.jpg', isSaved: true);
+      await quick.updateDetails(quick.items.single.id!, title: 'x', price: 12);
+      verifyNever(() => mockFileHelper.writeExportFile(any(), any()));
+      await Future<void>.delayed(const Duration(milliseconds: 400));
 
       verify(
         () => mockFileHelper.writeExportFile(
@@ -359,6 +391,41 @@ void main() {
           any(),
         ),
       ).called(1);
+    });
+
+    test('restoring an auto-backup taken before an edit does not duplicate the '
+        'edited item', () async {
+      final exportsDir = await Directory.systemTemp.createTemp('skip_backup');
+      addTearDown(() => exportsDir.delete(recursive: true));
+      when(
+        () => mockFileHelper.exportsDirectory(),
+      ).thenAnswer((_) async => exportsDir);
+
+      await provider.addItem(
+        title: 'Leather bag',
+        price: 12.5,
+        quantity: 2,
+        imagePath: 'a.jpg',
+        isSaved: true,
+      );
+      File(
+        '${exportsDir.path}/${BackupService.autoBackupFileName}',
+      ).writeAsStringSync(
+        await BackupService(
+          databaseHelper: databaseHelper,
+          fileHelper: mockFileHelper,
+        ).buildJsonBackup(),
+      );
+      final id = provider.items.single.id!;
+      await provider.updateDetails(id, title: 'Leather tote', price: 15);
+
+      expect(
+        await provider.restoreFromAutoBackup(),
+        isA<AutoBackupAlreadyRestored>(),
+      );
+      expect(provider.items, hasLength(1));
+      expect(provider.items.single.title, 'Leather tote');
+      expect(provider.totalSaved, 30);
     });
 
     test(

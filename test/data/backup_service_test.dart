@@ -201,6 +201,47 @@ void main() {
       expect(all.map((i) => i.imagePath), containsAll(['a.jpg', 'b.jpg']));
     });
 
+    test('skips an older version of an item edited since the backup, rather '
+        'than inserting it as a second copy', () async {
+      final id = await db.insertItem(
+        ItemModel(
+          title: 'Leather bag',
+          price: 12.5,
+          quantity: 2,
+          imagePath: 'a.jpg',
+          isSaved: true,
+          createdAt: DateTime.utc(2026, 1, 1),
+        ),
+      );
+      final edited = ItemModel(
+        id: id,
+        title: 'Leather tote',
+        price: 15,
+        quantity: 2,
+        imagePath: 'a.jpg',
+        isSaved: false,
+        createdAt: DateTime.utc(2026, 1, 1),
+      );
+      await db.updateItem(edited);
+
+      final count = await backup.importItems([
+        ItemModel(
+          id: 999,
+          title: 'Leather bag',
+          price: 12.5,
+          quantity: 2,
+          imagePath: 'a.jpg',
+          isSaved: true,
+          createdAt: DateTime.utc(2026, 1, 1),
+        ),
+      ]);
+
+      final all = await db.getAllItems();
+      expect(count, 0);
+      expect(all, hasLength(1));
+      expect(all.single.title, 'Leather tote');
+    });
+
     test('skips an item that matches one already sitting in Trash, rather '
         'than resurrecting it as a new live row', () async {
       final id = await db.insertItem(

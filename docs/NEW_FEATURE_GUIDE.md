@@ -96,7 +96,7 @@ Key methods: `insertItem`, `updateItem`, `getItemById`, `getAllItems({isSaved, p
 
 ### Backup/restore (`lib/data/backup_service.dart`)
 
-All local, no HTTP. The only backup feature is the **automatic safety-net backup**: `ItemsProvider.load()` throttles `writeAutoBackup()` to once per 10 minutes, writing `skip_autobackup.json`. Restoring it goes through `ItemsProvider.restoreFromAutoBackup()`, which returns a sealed result (`AutoBackupRestored`/`AutoBackupAlreadyRestored`/`AutoBackupNotFound`) tracked via a `SharedPreferences` flag so the same snapshot can't be imported twice. Backups don't include photos — only records — so a restored item can show a blank image tile.
+All local, no HTTP. The only backup feature is the **automatic safety-net backup**: `ItemsProvider.load()` debounces `writeAutoBackup()` by 3 seconds, writing `skip_autobackup.json`, and `HomeWidgetSync` calls `ItemsProvider.flushAutoBackup()` when the app is backgrounded so a pending write isn't lost if iOS kills the app. Restoring it goes through `ItemsProvider.restoreFromAutoBackup()`, which returns a sealed result (`AutoBackupRestored`/`AutoBackupAlreadyRestored`/`AutoBackupNotFound`). `BackupService.importItems` recognizes items already present — live or trashed — by `created_at` (set once at creation, kept by every edit), so a restore only adds items that are missing entirely: it never duplicates an item or brings back an older version of it. Backups don't include photos — only records — so a restored item can show a blank image tile.
 
 ### Features (`lib/features/`)
 

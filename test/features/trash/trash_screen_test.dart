@@ -29,6 +29,8 @@ void main() {
         fileHelper: mockFileHelper,
         testDbPath: inMemoryDatabasePath,
       ),
+      // No debounce timer: the fake test clock fails on a pending one.
+      autoBackupDebounce: null,
     );
   });
 

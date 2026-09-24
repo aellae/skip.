@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import 'backup_service.dart';
@@ -16,8 +18,11 @@ class ItemsProvider extends ChangeNotifier {
   final DatabaseHelper _db;
   late final BackupService _backupService;
 
-  ItemsProvider({DatabaseHelper? databaseHelper, BackupService? backupService})
-    : _db = databaseHelper ?? DatabaseHelper.instance {
+  ItemsProvider({
+    DatabaseHelper? databaseHelper,
+    BackupService? backupService,
+    this.autoBackupDebounce = const Duration(seconds: 3),
+  }) : _db = databaseHelper ?? DatabaseHelper.instance {
     _backupService = backupService ?? BackupService(databaseHelper: _db);
   }
 
@@ -32,12 +37,16 @@ class ItemsProvider extends ChangeNotifier {
   // (see [checkMonthRollover]).
   DateTime _currentMonth = _monthOf(DateTime.now());
 
-  // Throttles the local safety-net backup so it writes at most this often,
-  // rather than after every single load() call. Persisted by BackupService
-  // so a cold start doesn't reset it; the in-memory copy just stops
-  // overlapping load() calls from both deciding to write.
-  static const Duration _autoBackupInterval = Duration(minutes: 10);
-  DateTime? _lastAutoBackupAt;
+  /// How long load() waits for changes to settle before rewriting the local
+  /// safety-net backup, so a burst of edits costs one write while the
+  /// backup still trails the data by seconds, not minutes. `null` disables
+  /// the timer, leaving writes to [flushAutoBackup] — for widget tests,
+  /// whose fake clock fails a test that ends with a timer still pending.
+  final Duration? autoBackupDebounce;
+  Timer? _autoBackupTimer;
+  bool _autoBackupPending = false;
+  // Serializes writes so an older snapshot can never land after a newer one.
+  Future<void> _autoBackupWrite = Future.value();
 
   List<ItemModel> get items => List.unmodifiable(_items);
   List<ItemModel> get trashedItems => List.unmodifiable(_trashedItems);
@@ -67,15 +76,40 @@ class ItemsProvider extends ChangeNotifier {
     // Never overwrite the safety-net backup with an empty snapshot: an empty
     // database at launch is exactly the case the backup exists to recover.
     final hasData = _items.isNotEmpty || _trashedItems.isNotEmpty;
-    final now = DateTime.now();
-    if (hasData &&
-        (_lastAutoBackupAt == null ||
-            now.difference(_lastAutoBackupAt!) >= _autoBackupInterval)) {
-      _lastAutoBackupAt = now;
-      if (await _backupService.isAutoBackupDue(_autoBackupInterval, now: now)) {
-        await _backupService.writeAutoBackup(now: now);
-      }
+    final debounce = autoBackupDebounce;
+    if (hasData) _autoBackupPending = true;
+    if (hasData && debounce != null) {
+      _autoBackupTimer?.cancel();
+      _autoBackupTimer = Timer(debounce, () {
+        // Nobody awaits a timer, so a failed write is only logged; the next
+        // change schedules another attempt.
+        flushAutoBackup().catchError(
+          (Object e) => debugPrint('Auto-backup failed: $e'),
+        );
+      });
     }
+  }
+
+  /// Writes the local safety-net backup now if load() has one pending,
+  /// instead of waiting out [autoBackupDebounce]. Called when the app goes
+  /// to the background, where iOS may kill it before the timer fires.
+  Future<void> flushAutoBackup() {
+    _autoBackupTimer?.cancel();
+    _autoBackupTimer = null;
+    if (!_autoBackupPending) return _autoBackupWrite;
+    _autoBackupPending = false;
+    final write = _autoBackupWrite.then(
+      (_) => _backupService.writeAutoBackup(),
+    );
+    // One failed write mustn't wedge every later one queued behind it.
+    _autoBackupWrite = write.catchError((_) {});
+    return write;
+  }
+
+  @override
+  void dispose() {
+    _autoBackupTimer?.cancel();
+    super.dispose();
   }
 
   /// Restores from the local safety-net backup (see [BackupService.
